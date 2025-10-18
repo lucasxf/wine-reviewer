@@ -1,0 +1,23 @@
+name: CI - App Flutter
+on:
+  push:
+    paths:
+      - "apps/mobile/**"
+      - ".github/workflows/ci-app.yml"
+  pull_request:
+    paths:
+      - "apps/mobile/**"
+jobs:
+  flutter-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+      - name: Pub get & Analyze & Test
+        run: |
+          cd apps/mobile
+          flutter pub get
+          flutter analyze
+          flutter test --coverage

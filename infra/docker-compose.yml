@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: adv-postgres
+    environment:
+      POSTGRES_DB: advdb
+      POSTGRES_USER: advuser
+      POSTGRES_PASSWORD: advpass
+    ports:
+      - "5432:5432"
+    volumes:
+      - adv_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U advuser -d advdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ../services/api
+      dockerfile: Dockerfile
+    container_name: adv-api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/advdb
+      SPRING_DATASOURCE_USERNAME: advuser
+      SPRING_DATASOURCE_PASSWORD: advpass
+    ports:
+      - "8080:8080"
+
+volumes:
+  adv_pgdata:
