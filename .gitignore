@@ -7,14 +7,35 @@
 *.swp
 *.swo
 *~
+.project
+.classpath
+.settings/
+.factorypath
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Environment
 .env
 .env.local
+.env.*.local
 
 # Logs
 *.log
+logs/
+
+# Build outputs
+dist/
+build/
+out/
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# Database
+*.db
+*.sqlite

@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/README.md)",
+      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/src/main/java/exercicio_e/subscriptions_billing/domain/account/AccountAggregate.java)",
+      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/src/main/java/exercicio_e/subscriptions_billing/application/api/AccountController.java)",
+      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/src/main/java/exercicio_e/subscriptions_billing/application/commands/handlers/impl/CreateAccountHandler.java)",
+      "Bash(mvn clean compile)",
+      "Bash(java -version)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

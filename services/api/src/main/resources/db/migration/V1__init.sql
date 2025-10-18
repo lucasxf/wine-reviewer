@@ -9,7 +9,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE app_user (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     display_name VARCHAR(120) NOT NULL,
-    email VARCHAR(180) NOT NULL UNIQUE,
+    email VARCHAR(180) NOT NULL UNIQUE CHECK (email = LOWER(email)),
     avatar_url TEXT,
     google_id VARCHAR(255) UNIQUE,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -43,7 +43,7 @@ CREATE TABLE review (
     wine_id UUID NOT NULL REFERENCES wine(id) ON DELETE CASCADE,
     rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
     notes TEXT,
-    photo_url TEXT,
+    image_url TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -57,7 +57,7 @@ CREATE TABLE comment (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     review_id UUID NOT NULL REFERENCES review(id) ON DELETE CASCADE,
     author_id UUID NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
-    text TEXT NOT NULL CHECK (length(text) > 0),
+    content TEXT NOT NULL CHECK (length(content) > 0),
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
