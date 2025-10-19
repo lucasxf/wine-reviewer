@@ -85,6 +85,17 @@ public class ReviewServiceImpl implements ReviewService {
         return toReviewResponse(review, userSummary, wineSummary);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ReviewResponse getReviewById(UUID reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Review not found: " + reviewId));
+
+        var wineSummary = toWineSummary(review.getWine());
+        var userSummary = toUserSummary(review.getUser());
+        return toReviewResponse(review, userSummary, wineSummary);
+    }
+
     // Private helper methods (ordered by invocation flow)
 
     private Review toReview(CreateReviewRequest request, User user, Wine wine) {

@@ -36,4 +36,6 @@ public interface ReviewService {
      */
     ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request, UUID userId);
 
+    ReviewResponse getReviewById(UUID reviewId);
+
 }

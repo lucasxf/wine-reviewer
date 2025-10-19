@@ -73,8 +73,8 @@ public class ReviewController {
     @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewResponse> getReview(@PathVariable UUID reviewId) {
         log.info("Recebida requisição para buscar review: {}", reviewId);
-        // TODO: implementar no service
-        throw new UnsupportedOperationException("Endpoint não implementado");
+        final var review = service.getReviewById(reviewId);
+        return ResponseEntity.ok(review);
     }
 
     /**
