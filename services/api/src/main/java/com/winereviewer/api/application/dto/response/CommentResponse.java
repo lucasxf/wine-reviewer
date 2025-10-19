@@ -9,10 +9,10 @@ import java.time.LocalDateTime;
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CommentResponse(
-    String id,
-    String text,
-    LocalDateTime createdAt,
-    LocalDateTime updatedAt,
-    UserSummaryResponse author
+        String id,
+        String text,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        UserSummaryResponse author
 ) {
 }

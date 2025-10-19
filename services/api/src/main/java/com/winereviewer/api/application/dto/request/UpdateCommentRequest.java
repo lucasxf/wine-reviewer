@@ -8,8 +8,8 @@ import jakarta.validation.constraints.Size;
  */
 public record UpdateCommentRequest(
 
-    @NotBlank(message = "{comment.text.blank}")
-    @Size(min = 1, max = 500, message = "{comment.text.size}")
-    String text
+        @NotBlank(message = "{comment.text.blank}")
+        @Size(min = 1, max = 500, message = "{comment.text.size}")
+        String text
 ) {
 }

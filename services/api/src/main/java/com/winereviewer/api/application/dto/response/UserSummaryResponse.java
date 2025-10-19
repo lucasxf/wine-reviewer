@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Summary DTO for a user.
- *
+ * <p>
  * Contains minimal user information for embedding in other responses
  * (e.g., review author, comment author).
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UserSummaryResponse(
-    String id,
-    String displayName,
-    String avatarUrl
+        String id,
+        String displayName,
+        String avatarUrl
 ) {
 }
