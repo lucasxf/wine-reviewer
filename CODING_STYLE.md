@@ -389,6 +389,67 @@ log.info("Account {} created successfully for username: {}", accountId, command.
 
 ---
 
+## 📦 Maven / Gerenciamento de Dependências
+
+### Versões de Dependências em Properties
+
+**Regra:** Sempre declarar versões de dependências em `<properties>` e referenciar via placeholders.
+
+**Por quê:**
+- Centraliza versões em um único lugar
+- Facilita upgrades (atualiza em um lugar só)
+- Evita inconsistências de versões entre módulos
+- Melhora legibilidade do pom.xml
+
+**Exemplo:**
+```xml
+<properties>
+    <!-- Java -->
+    <java.version>21</java.version>
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
+
+    <!-- Spring -->
+    <spring-boot.version>3.2.0</spring-boot.version>
+
+    <!-- Security -->
+    <jwt.version>0.12.3</jwt.version>
+
+    <!-- Database -->
+    <postgresql.version>42.7.1</postgresql.version>
+    <flyway.version>10.4.1</flyway.version>
+
+    <!-- Testing -->
+    <testcontainers.version>1.19.3</testcontainers.version>
+
+    <!-- Utilities -->
+    <lombok.version>1.18.30</lombok.version>
+</properties>
+
+<dependencies>
+    <!-- JWT -->
+    <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${jwt.version}</version>  <!-- ← Placeholder -->
+    </dependency>
+
+    <!-- PostgreSQL -->
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>${postgresql.version}</version>  <!-- ← Placeholder -->
+    </dependency>
+</dependencies>
+```
+
+**Nomenclatura de propriedades:**
+- Usar kebab-case ou dot notation: `jwt.version` ou `jwt-version`
+- Preferir sufixo `.version` para clareza
+- Agrupar por categoria (Spring, Database, Security, etc.)
+
+---
+
 ## 🚫 Anti-Padrões a Evitar
 
 - ❌ `@Autowired` em fields (usar injeção via construtor)
@@ -397,6 +458,7 @@ log.info("Account {} created successfully for username: {}", accountId, command.
 - ❌ Exceptions genéricas (`throw new Exception()`)
 - ❌ Magic numbers/strings (usar constantes)
 - ❌ Null checks excessivos (usar `Optional` ou validação antecipada)
+- ❌ **Versões hardcoded em dependencies** (usar `<properties>`)
 
 ---
 
@@ -412,6 +474,8 @@ log.info("Account {} created successfully for username: {}", accountId, command.
 - [ ] Testes cobrindo casos de sucesso e falha
 - [ ] Validações com mensagens claras
 - [ ] Sem magic numbers ou strings hardcoded
+- [ ] **Versões de dependências em `<properties>` com placeholders**
+- [ ] **Métodos ordenados: public → private (invocation flow)**
 
 ---
 
