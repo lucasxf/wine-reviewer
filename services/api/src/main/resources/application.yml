@@ -1,36 +1,47 @@
+# =============================================================================
+# COMMON CONFIGURATION - Shared across all environments
+# =============================================================================
+# Profile-specific settings are in:
+# - application-dev.yml (development)
+# - application-prod.yml (production)
+#
+# To activate a profile, set environment variable or use command line:
+# - SPRING_PROFILES_ACTIVE=dev
+# - java -jar app.jar --spring.profiles.active=prod
+# =============================================================================
+
 spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
   application:
     name: wine-reviewer-api
 
+  # Database connection (same for all environments, credentials via env vars)
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/advdb}
-    username: ${SPRING_DATASOURCE_USERNAME:advuser}
-    password: ${SPRING_DATASOURCE_PASSWORD:advpass}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/winereviewer}
+    username: ${SPRING_DATASOURCE_USERNAME:wineuser}
+    password: ${SPRING_DATASOURCE_PASSWORD:winepass}
     driver-class-name: org.postgresql.Driver
-    hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
 
+  # JPA/Hibernate - common settings
   jpa:
     hibernate:
-      ddl-auto: validate
-    show-sql: false
+      ddl-auto: validate  # Never auto-create schema, always use Flyway
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: true
         jdbc:
           time_zone: UTC
 
+  # Flyway migrations
   flyway:
     enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
     validate-on-migrate: true
 
+  # OAuth2 Google configuration
   security:
     oauth2:
       client:
@@ -42,14 +53,47 @@ spring:
               - email
               - profile
 
+  # Jackson JSON serialization configuration
+  jackson:
+    default-property-inclusion: non_null  # Don't include null fields in JSON
+    serialization:
+      write-dates-as-timestamps: false    # Use ISO-8601 format for dates
+      indent-output: false                # No pretty-print by default (overridden in dev)
+    deserialization:
+      fail-on-unknown-properties: false   # Don't fail if client sends extra fields
+    time-zone: UTC                        # Always use UTC for dates
+
+  # Spring MVC configuration
+  mvc:
+    async:
+      request-timeout: 30s                # Timeout for async requests (e.g., file uploads)
+
+  # Validation messages configuration
+  messages:
+    basename: messages                    # Load messages.properties for i18n
+    encoding: UTF-8
+    fallback-to-system-locale: false
+    always-use-message-format: false
+
+# Server configuration
 server:
   port: ${PORT:8080}
   compression:
     enabled: true
-  error:
-    include-message: always
-    include-binding-errors: always
+  # Tomcat-specific timeout settings
+  tomcat:
+    connection-timeout: 20s                   # Max time to establish TCP connection
+    max-http-form-post-size: 10MB            # Max size for POST form data
+    max-swallow-size: 10MB                   # Max size of request body to swallow
+    threads:
+      max: 200                                # Max worker threads
+      min-spare: 10                           # Min idle threads
+  # HTTP request timeout
+  servlet:
+    session:
+      timeout: 30m                            # Session timeout (30 minutes)
 
+# Actuator endpoints (health checks, metrics)
 management:
   endpoints:
     web:
@@ -59,12 +103,8 @@ management:
   endpoint:
     health:
       show-details: when-authorized
-  metrics:
-    export:
-      prometheus:
-        enabled: true
 
-# OpenAPI/Swagger Configuration
+# OpenAPI/Swagger documentation
 springdoc:
   api-docs:
     path: /api-docs
@@ -73,23 +113,37 @@ springdoc:
     operations-sorter: method
     tags-sorter: alpha
 
-# Application-specific configuration
+# =============================================================================
+# APPLICATION-SPECIFIC CONFIGURATION
+# =============================================================================
 app:
+  # JWT tokens configuration
   jwt:
     secret: ${JWT_SECRET:changeme-this-is-a-temporary-secret-key-for-development-only-min-256-bits}
-    access-token-expiration-ms: 900000  # 15 minutes
+    access-token-expiration-ms: 900000      # 15 minutes
     refresh-token-expiration-ms: 604800000  # 7 days
+
+  # CORS (will be overridden by profiles)
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
-  storage:
-    presigned-url-expiration-minutes: ${STORAGE_PRESIGNED_URL_EXPIRATION:15}
 
-logging:
-  level:
-    root: INFO
-    com.winereviewer.api: DEBUG
-    org.springframework.web: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+  # Storage configuration (S3 or Supabase)
+  storage:
+    type: ${STORAGE_TYPE:s3}
+    presigned-url-expiration-minutes: ${STORAGE_PRESIGNED_URL_EXPIRATION:15}
+    max-file-size-mb: ${STORAGE_MAX_FILE_SIZE_MB:10}
+    allowed-mime-types: ${STORAGE_ALLOWED_MIME_TYPES:image/jpeg,image/png,image/webp}
+    s3:
+      bucket-name: ${AWS_S3_BUCKET:wine-reviewer-images}
+      region: ${AWS_REGION:us-east-1}
+      access-key: ${AWS_ACCESS_KEY:}
+      secret-key: ${AWS_SECRET_KEY:}
+    supabase:
+      url: ${SUPABASE_URL:}
+      key: ${SUPABASE_KEY:}
+      bucket-name: ${SUPABASE_BUCKET:wine-images}
+
+  # Google OAuth configuration
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:your-client-id}
+    client-secret: ${GOOGLE_CLIENT_SECRET:your-client-secret}

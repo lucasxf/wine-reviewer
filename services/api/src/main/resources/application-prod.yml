@@ -1,0 +1,83 @@
+# =============================================================================
+# PRODUCTION PROFILE
+# =============================================================================
+# Optimized for production with security, performance, and observability
+# Activate with: SPRING_PROFILES_ACTIVE=prod
+# =============================================================================
+
+spring:
+  # Database connection pool - optimized for production load
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:20}
+      minimum-idle: ${DB_POOL_MIN_IDLE:5}
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000  # Detect connection leaks
+
+  # JPA/Hibernate - minimal logging for performance
+  jpa:
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        use_sql_comments: false
+        # Performance optimizations
+        jdbc:
+          batch_size: 20
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+
+# Server settings - security-focused
+server:
+  error:
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
+  shutdown: graceful  # Graceful shutdown for zero-downtime deployments
+
+# Graceful shutdown timeout
+spring.lifecycle.timeout-per-shutdown-phase: 30s
+
+# Actuator - restricted endpoints for security
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized  # Only show details if authenticated
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+    tags:
+      application: ${spring.application.name}
+      environment: production
+
+# Logging configuration - structured JSON for log aggregation
+logging:
+  level:
+    root: WARN
+    com.winereviewer.api: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate.SQL: WARN
+    org.springframework.jdbc.core: WARN
+    org.flywaydb: INFO
+  pattern:
+    console: '{"timestamp":"%d{yyyy-MM-dd''T''HH:mm:ss.SSSXXX}","level":"%level","logger":"%logger{36}","thread":"%thread","message":"%replace(%msg){''"'',''\\"''}","exception":"%replace(%ex){''"'',''\\"''}","application":"${spring.application.name}","environment":"production"}'
+
+# Application-specific production settings
+app:
+  # CORS - restrictive, only specific origins
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://winereviewer.app,https://www.winereviewer.app}

@@ -1,0 +1,76 @@
+# =============================================================================
+# DEVELOPMENT PROFILE
+# =============================================================================
+# Optimized for local development with verbose logging and helpful debugging
+# Activated automatically (see application.yml default profile)
+# =============================================================================
+
+spring:
+  # Jackson - pretty-print JSON for easier debugging
+  jackson:
+    serialization:
+      indent-output: true  # Pretty-print JSON responses in dev
+  # Database connection pool - smaller for local dev
+  datasource:
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  # JPA/Hibernate - verbose for debugging
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        highlight_sql: true
+
+# Server settings
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+    include-exception: true
+
+# Actuator - expose all endpoints for local debugging
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+# Logging configuration - verbose for development
+logging:
+  level:
+    root: INFO
+    com.winereviewer.api: DEBUG
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.jdbc.core: DEBUG
+    org.flywaydb: DEBUG
+  pattern:
+    console: '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5p) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n%wEx'
+
+# Application-specific dev settings
+app:
+  # CORS - permissive for local development
+  cors:
+    allowed-origins:
+      - http://localhost:3000
+      - http://localhost:8080
+      - http://localhost:5173  # Vite dev server
+      - http://127.0.0.1:3000
+      - http://127.0.0.1:8080
