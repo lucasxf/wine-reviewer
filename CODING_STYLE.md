@@ -140,6 +140,93 @@ public class CreateAccountHandler implements CommandHandler<CreateAccount> {
 - **Constantes:** UPPER_SNAKE_CASE - `EMAIL_PATTERN`, `MAX_RETRY_ATTEMPTS`
 - **Pacotes:** lowercase - `subscriptions_billing`, `domain.account`
 
+### Ordenação de Métodos em Classes
+
+**Regra:** Métodos devem ser ordenados de **público para privado**, do **topo para baixo**.
+
+**Princípios:**
+1. **Visibilidade decrescente:** public → protected → package-private → private
+2. **Nenhum método privado pode aparecer acima de um método público**
+3. **Métodos privados são ordenados pela ordem de invocação:**
+   - Métodos privados chamados primeiro pelos públicos aparecem primeiro
+   - Métodos privados chamados depois aparecem depois
+   - Isso cria um "fluxo de leitura" natural: top-down
+
+**Exemplo correto:**
+```java
+@Service
+public class ReviewServiceImpl implements ReviewService {
+
+    // 1. Campos (private final)
+    private final ReviewRepository reviewRepository;
+    private final UserRepository userRepository;
+    private final WineRepository wineRepository;
+
+    // 2. Construtor
+    public ReviewServiceImpl(ReviewRepository reviewRepository, ...) {
+        this.reviewRepository = reviewRepository;
+        // ...
+    }
+
+    // 3. Métodos públicos (interface implementation)
+    @Override
+    public ReviewResponse createReview(CreateReviewRequest request, UUID userId) {
+        var user = userRepository.findById(userId).orElseThrow(...);
+        var wine = wineRepository.findById(wineId).orElseThrow(...);
+        var review = toReview(request, user, wine);  // ← chama privado
+        reviewRepository.save(review);
+        return toReviewResponse(review, ...);  // ← chama privado
+    }
+
+    @Override
+    public ReviewResponse updateReview(UUID reviewId, ...) {
+        // ...
+    }
+
+    // 4. Métodos privados (ordenados pela ordem de chamada acima)
+    private Review toReview(CreateReviewRequest request, User user, Wine wine) {
+        // Chamado primeiro no createReview
+    }
+
+    private ReviewResponse toReviewResponse(Review review, ...) {
+        // Chamado depois no createReview
+    }
+
+    private UserSummaryResponse toUserSummary(User user) {
+        // Chamado por toReviewResponse
+    }
+
+    private WineSummaryResponse toWineSummary(Wine wine) {
+        // Chamado por toReviewResponse
+    }
+}
+```
+
+**Exemplo incorreto (❌):**
+```java
+public class ReviewServiceImpl {
+
+    // ❌ ERRADO: método privado acima do público
+    private Review toReview(...) { }
+
+    @Override
+    public ReviewResponse createReview(...) { }
+
+    @Override
+    public ReviewResponse updateReview(...) { }
+
+    // ❌ ERRADO: toReviewResponse deveria vir antes de toUserSummary
+    //           pois é chamado primeiro
+    private UserSummaryResponse toUserSummary(...) { }
+    private ReviewResponse toReviewResponse(...) { }
+}
+```
+
+**Benefícios:**
+- Leitura natural top-down (public API → implementação)
+- Facilita navegação no código
+- Entendimento progressivo: vê-se primeiro "o que" a classe faz, depois "como"
+
 ### Java Moderno (Java 21)
 - ✅ **`var`** para inferência de tipo (quando o tipo é óbvio)
 - ✅ **Records** para DTOs e Commands/Events imutáveis
@@ -332,4 +419,4 @@ log.info("Account {} created successfully for username: {}", accountId, command.
 
 Este documento será atualizado continuamente à medida que novos padrões e preferências forem identificados.
 
-**Última atualização:** 2025-01-18 (gerado automaticamente por Claude Code)
+**Última atualização:** 2025-10-19 (atualizado por Claude Code)

@@ -51,53 +51,6 @@ public class ReviewServiceImpl implements ReviewService {
         return toReviewResponse(review, userSummary, wineSummary);
     }
 
-    private UserSummaryResponse toUserSummary(User user) {
-        return new UserSummaryResponse(
-                user.getId().toString(),
-                user.getDisplayName(),
-                user.getAvatarUrl());
-    }
-
-    private WineSummaryResponse toWineSummary(Wine wine) {
-        return new WineSummaryResponse(
-                wine.getId().toString(),
-                wine.getName(),
-                wine.getWinery(),
-                wine.getCountry(),
-                wine.getYear(),
-                wine.getImageUrl());
-    }
-
-    private ReviewResponse toReviewResponse(
-            Review review,
-            UserSummaryResponse author,
-            WineSummaryResponse wine) {
-        return new ReviewResponse(
-                review.getId().toString(),
-                review.getRating(),
-                review.getNotes(),
-                review.getImageUrl(),
-                LocalDateTime.ofInstant(review.getCreatedAt(), ZoneOffset.UTC),
-                LocalDateTime.ofInstant(review.getUpdatedAt(), ZoneOffset.UTC),
-                author,
-                wine,
-                // TODO commentCount
-                0);
-    }
-
-    private Review toReview(CreateReviewRequest request, User user, Wine wine) {
-        Review review = new Review();
-        review.setId(UUID.randomUUID());
-        review.setRating(request.rating());
-        review.setNotes(request.notes());
-        review.setImageUrl(request.imageUrl());
-        review.setUser(user);
-        review.setWine(wine);
-        review.setCreatedAt(Instant.now());
-        review.setUpdatedAt(Instant.now());
-        return review;
-    }
-
     @Override
     @Transactional
     public ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request, UUID userId) {
@@ -130,6 +83,55 @@ public class ReviewServiceImpl implements ReviewService {
         var wineSummary = toWineSummary(review.getWine());
         var userSummary = toUserSummary(review.getUser());
         return toReviewResponse(review, userSummary, wineSummary);
+    }
+
+    // Private helper methods (ordered by invocation flow)
+
+    private Review toReview(CreateReviewRequest request, User user, Wine wine) {
+        Review review = new Review();
+        review.setId(UUID.randomUUID());
+        review.setRating(request.rating());
+        review.setNotes(request.notes());
+        review.setImageUrl(request.imageUrl());
+        review.setUser(user);
+        review.setWine(wine);
+        review.setCreatedAt(Instant.now());
+        review.setUpdatedAt(Instant.now());
+        return review;
+    }
+
+    private WineSummaryResponse toWineSummary(Wine wine) {
+        return new WineSummaryResponse(
+                wine.getId().toString(),
+                wine.getName(),
+                wine.getWinery(),
+                wine.getCountry(),
+                wine.getYear(),
+                wine.getImageUrl());
+    }
+
+    private UserSummaryResponse toUserSummary(User user) {
+        return new UserSummaryResponse(
+                user.getId().toString(),
+                user.getDisplayName(),
+                user.getAvatarUrl());
+    }
+
+    private ReviewResponse toReviewResponse(
+            Review review,
+            UserSummaryResponse author,
+            WineSummaryResponse wine) {
+        return new ReviewResponse(
+                review.getId().toString(),
+                review.getRating(),
+                review.getNotes(),
+                review.getImageUrl(),
+                LocalDateTime.ofInstant(review.getCreatedAt(), ZoneOffset.UTC),
+                LocalDateTime.ofInstant(review.getUpdatedAt(), ZoneOffset.UTC),
+                author,
+                wine,
+                // TODO commentCount
+                0);
     }
 
 }
