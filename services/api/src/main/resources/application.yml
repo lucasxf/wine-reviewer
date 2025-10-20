@@ -116,12 +116,17 @@ springdoc:
 # =============================================================================
 # APPLICATION-SPECIFIC CONFIGURATION
 # =============================================================================
+
+# JWT tokens configuration
+jwt:
+  secret: ${JWT_SECRET:changeme-this-is-a-temporary-secret-key-for-development-only-min-256-bits}
+  expiration: 3_600_000  # 1 hour (dev only, prod should use 15 min + refresh token)
+
 app:
-  # JWT tokens configuration
-  jwt:
-    secret: ${JWT_SECRET:changeme-this-is-a-temporary-secret-key-for-development-only-min-256-bits}
-    access-token-expiration-ms: 900000      # 15 minutes
-    refresh-token-expiration-ms: 604800000  # 7 days
+  # FUTURE: Access/refresh token separation (quando implementarmos refresh tokens)
+  #  jwt:
+  #    access-token-expiration-ms: 900_000      # 15 minutes
+  #    refresh-token-expiration-ms: 604_800_000  # 7 days
 
   # CORS (will be overridden by profiles)
   cors:

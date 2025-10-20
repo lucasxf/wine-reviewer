@@ -48,9 +48,14 @@ com.winereviewer.api/
 ├── domain/               # Entities
 ├── dto/                  # Data Transfer Objects
 ├── exception/            # Custom exceptions
-├── config/               # Configuration classes
-└── security/             # Security configs
+├── config/               # Configuration classes (@Configuration, @ConfigurationProperties)
+└── security/             # Security filters, utils (não configs)
 ```
+
+**Regra importante - Organização de configs:**
+- Classes `@Configuration` e `@ConfigurationProperties` → `/config`
+- Classes de segurança (filters, utils) → `/security`
+- Exemplo: `JwtProperties` fica em `/config`, `JwtUtil` fica em `/security`
 
 ---
 
@@ -139,6 +144,20 @@ public class CreateAccountHandler implements CommandHandler<CreateAccount> {
 - **Variáveis:** camelCase - `correlationId`, `accountStream`
 - **Constantes:** UPPER_SNAKE_CASE - `EMAIL_PATTERN`, `MAX_RETRY_ATTEMPTS`
 - **Pacotes:** lowercase - `subscriptions_billing`, `domain.account`
+- **Números grandes:** SEMPRE usar underscore para separar milhares - `3_600_000` (não `3600000`)
+
+**Exemplo de números com agrupamento:**
+```java
+// ✅ CORRETO - Legível
+private static final long ONE_HOUR_MS = 3_600_000L;
+private static final long ONE_DAY_MS = 86_400_000L;
+private static final int MAX_FILE_SIZE = 10_000_000;  // 10 MB
+
+// ❌ INCORRETO - Difícil de ler
+private static final long ONE_HOUR_MS = 3600000L;
+private static final long ONE_DAY_MS = 86400000L;
+private static final int MAX_FILE_SIZE = 10000000;
+```
 
 ### Ordenação de Métodos em Classes
 
@@ -450,9 +469,92 @@ log.info("Account {} created successfully for username: {}", accountId, command.
 
 ---
 
+## 🔧 Injeção de Dependências e Configurações
+
+### Injeção de Propriedades (Configuration Properties)
+
+**Regra:** NUNCA usar `@Value` ou field injection. SEMPRE usar `@ConfigurationProperties` com POJOs dedicados e injeção via construtor.
+
+**Por quê:**
+- Type-safe: validação em tempo de compilação
+- Testável: fácil criar instâncias para testes
+- Centralizado: todas as configs de um módulo em uma classe
+- Imutável: usar `final` nos campos para segurança
+- Sem reflexão: injeção via construtor é explícita
+
+**Exemplo CORRETO (✅):**
+```java
+// 1. POJO de configuração
+@ConfigurationProperties(prefix = "jwt")
+public class JwtProperties {
+    private final String secret;
+    private final Long expiration;
+
+    public JwtProperties(String secret, Long expiration) {
+        this.secret = secret;
+        this.expiration = expiration;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public Long getExpiration() {
+        return expiration;
+    }
+}
+
+// 2. Habilitar no config
+@Configuration
+@EnableConfigurationProperties(JwtProperties.class)
+public class SecurityConfig {
+    // ...
+}
+
+// 3. Usar via constructor injection
+@Component
+public class JwtUtil {
+    private final String secret;
+    private final Long expirationMs;
+
+    public JwtUtil(JwtProperties properties) {
+        this.secret = properties.getSecret();
+        this.expirationMs = properties.getExpiration();
+    }
+
+    public String generateToken(UUID userId) {
+        // Usa this.secret e this.expirationMs
+    }
+}
+```
+
+**Exemplo INCORRETO (❌):**
+```java
+// ❌ NUNCA FAZER ISSO
+@Component
+public class JwtUtil {
+    @Value("${jwt.secret}")  // ← Field injection!
+    private String secret;
+
+    @Value("${jwt.expiration}")
+    private Long expirationMs;
+}
+```
+
+**application.yml correspondente:**
+```yaml
+jwt:
+  secret: your-secret-key-min-256-bits-32chars
+  expiration: 3600000  # 1 hora em milissegundos
+```
+
+---
+
 ## 🚫 Anti-Padrões a Evitar
 
 - ❌ `@Autowired` em fields (usar injeção via construtor)
+- ❌ **`@Value` para propriedades** (usar `@ConfigurationProperties` com POJOs)
+- ❌ **Field injection** (sempre usar constructor injection)
 - ❌ Getters/setters desnecessários (usar Lombok seletivamente)
 - ❌ Lógica de negócio em controllers
 - ❌ Exceptions genéricas (`throw new Exception()`)
@@ -465,7 +567,8 @@ log.info("Account {} created successfully for username: {}", accountId, command.
 ## ✅ Checklist de Code Review
 
 - [ ] Código em inglês, comentários podem ser em português
-- [ ] Injeção de dependências via construtor
+- [ ] Injeção de dependências via construtor (NUNCA field injection)
+- [ ] **Propriedades via `@ConfigurationProperties` (NUNCA `@Value`)**
 - [ ] Exceptions específicas do domínio
 - [ ] Logs informativos nos pontos-chave
 - [ ] Javadoc em classes públicas com @author e @date

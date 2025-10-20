@@ -1,5 +1,7 @@
 package com.winereviewer.api.config;
 
+import com.winereviewer.api.security.JwtAuthenticationFilter;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -7,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -14,31 +17,112 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 /**
- * Security configuration for the API.
- * Currently permissive for initial setup - will be locked down in later phases.
+ * Configuração de segurança da API.
+ * <p>
+ * Responsável por:
+ * - Habilitar JwtProperties (@EnableConfigurationProperties)
+ * - Configurar Spring Security (CORS, CSRF, session management)
+ * - Adicionar JwtAuthenticationFilter na cadeia de filtros
+ * - Definir endpoints públicos vs protegidos
+ * <p>
+ * <strong>Ordem dos filtros:</strong>
+ * <pre>
+ * Request → JwtAuthenticationFilter → UsernamePasswordAuthenticationFilter → ... → Controller
+ * </pre>
+ *
+ * @author lucas
+ * @date 20/10/2025
  */
 @Configuration
 @EnableWebSecurity
+@EnableConfigurationProperties(JwtProperties.class)
 public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    /**
+     * Construtor com injeção de JwtAuthenticationFilter.
+     *
+     * @param jwtAuthenticationFilter filtro customizado para validar JWT
+     */
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
+
+    /**
+     * Configura a cadeia de filtros de segurança.
+     * <p>
+     * <strong>O que este método faz:</strong>
+     * <ol>
+     *   <li>Desabilita CSRF (não necessário para APIs stateless com JWT)</li>
+     *   <li>Configura CORS (permite requests do frontend)</li>
+     *   <li>Define session management como STATELESS (não cria sessões HTTP)</li>
+     *   <li>Adiciona JwtAuthenticationFilter ANTES do UsernamePasswordAuthenticationFilter</li>
+     *   <li>Define endpoints públicos (não precisam autenticação)</li>
+     *   <li>Define que todos os outros endpoints precisam autenticação</li>
+     * </ol>
+     * <p>
+     * <strong>Por que CSRF desabilitado:</strong>
+     * - CSRF protection é necessário para apps com sessões (cookies)
+     * - Nossa API é stateless (usa JWT no header, não cookies)
+     * - CSRF não protege contra ataques via header Authorization
+     * - Por isso é seguro desabilitar CSRF em APIs JWT
+     * <p>
+     * <strong>Por que STATELESS:</strong>
+     * - Não queremos que Spring Security crie sessões HTTP (jsessionid)
+     * - JWT é stateless: todas as informações estão no token
+     * - Servidor não guarda estado de autenticação em memória
+     * - Cada request é independente (precisa enviar JWT)
+     * <p>
+     * <strong>Por que addFilterBefore:</strong>
+     * - JwtAuthenticationFilter precisa executar ANTES dos filtros padrão
+     * - UsernamePasswordAuthenticationFilter é um filtro padrão do Spring Security
+     * - Queremos validar JWT antes que Spring Security tente validar username/password
+     * - addFilterBefore garante a ordem correta de execução
+     * <p>
+     * <strong>Endpoints públicos (não precisam JWT):</strong>
+     * - /actuator/** (health checks, metrics)
+     * - /api-docs/** (OpenAPI/Swagger docs)
+     * - /swagger-ui/** (Swagger UI)
+     * - /auth/login (endpoint de login para gerar JWT - será criado)
+     * <p>
+     * <strong>Endpoints protegidos (precisam JWT):</strong>
+     * - Todos os outros (.anyRequest().authenticated())
+     * - Exemplos: POST /reviews, PUT /reviews/{id}, DELETE /reviews/{id}
+     *
+     * @param http objeto HttpSecurity do Spring Security
+     * @return SecurityFilterChain configurado
+     * @throws Exception se erro na configuração
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                // 1. Desabilita CSRF (não necessário para APIs stateless)
                 .csrf(AbstractHttpConfigurer::disable)
+
+                // 2. Configura CORS (permite requests do frontend)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // 3. Session management STATELESS (não cria sessões HTTP)
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 4. Adiciona JwtAuthenticationFilter ANTES do UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // 5. Define regras de autorização
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // Endpoints públicos (não precisam autenticação)
                         .requestMatchers(
-                                "/api/v1/health",
-                                "/actuator/**",
-                                "/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/actuator/**",      // Health checks, metrics
+                                "/api-docs/**",      // OpenAPI docs
+                                "/swagger-ui/**",    // Swagger UI
+                                "/swagger-ui.html",  // Swagger UI HTML
+                                "/auth/**"           // Login endpoint (será criado)
                         ).permitAll()
-                        // All other endpoints require authentication (will be implemented in F1)
-                        .anyRequest().permitAll()
+
+                        // Todos os outros endpoints precisam autenticação
+                        .anyRequest().authenticated()
                 );
 
         return http.build();
