@@ -72,7 +72,13 @@ cd services/api
 ./mvnw verify
 
 # Run tests only
-./mvnw -q -DskipTests=false verify
+./mvnw test
+
+# Clean build
+./mvnw clean install
+
+# Run with specific profile
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 
 # Access OpenAPI docs when running
 # http://localhost:8080/swagger-ui.html
@@ -166,18 +172,46 @@ The project follows a phased approach:
 
 ### General
 - All source code in English
+- Comments and logs can be in Portuguese (Brazilian developer)
 - Quality over speed—take time to design and test properly
 - Avoid overengineering; implement MVP features first
 - Never commit secrets, API keys, or credentials
 - Use free tools and assets with proper licenses only
 
 ### Java/Spring Boot
-- Package structure follows domain/feature separation
-- DTOs for API contracts with validation annotations
-- Service layer for business logic
-- Repository pattern with Spring Data JPA
-- Comprehensive Javadoc for public APIs
-- Integration tests with Testcontainers
+
+**Package Structure (CRUD-style for current implementation):**
+```
+com.winereviewer.api/
+├── application/dto/      # Request/Response DTOs
+├── config/               # @Configuration, @ConfigurationProperties
+├── controller/           # REST endpoints
+├── domain/               # Entities
+├── exception/            # Custom exceptions and @ControllerAdvice
+├── repository/           # Spring Data JPA repositories
+├── security/             # Security filters and utilities (not @Configuration)
+├── service/              # Business logic interfaces and implementations
+```
+
+**Important Coding Standards:**
+- **Constructor injection only** - Never use `@Autowired` on fields
+- **ConfigurationProperties over @Value** - Always use `@ConfigurationProperties` with POJOs for type-safety and testability
+- **Maven dependency versions in `<properties>`** - Centralize versions, use placeholders like `${jwt.version}`
+- **Large numbers with underscores** - Always: `3_600_000` (not `3600000`)
+- **Method ordering: public → private** - Public methods first, then private methods ordered by invocation flow (top-down reading)
+- **Java 21 features encouraged** - Use `var`, records, sealed classes, pattern matching, text blocks
+- **Lombok selectively** - `@Slf4j` for logging, `@Getter` selectively, avoid `@Data` on domain entities
+- **Javadoc required** - Include `@author` and `@date` on public classes
+
+**Exception Handling:**
+- Custom domain exceptions extending base `DomainException`
+- Clear messages (can be in Portuguese)
+- GlobalExceptionHandler with `@ControllerAdvice` for REST error responses
+
+**Logging:**
+- Use `@Slf4j` from Lombok
+- Log messages can be in Portuguese for context
+- Include relevant IDs and context (e.g., `log.info("Review criada com sucesso. ID: {}", review.id())`)
 
 ### Flutter/Dart
 - Feature-based folder structure: `lib/features/`, `lib/core/`, `lib/common/widgets/`
@@ -217,8 +251,46 @@ The project follows a phased approach:
 4. **Mobile-First:** Primary target is Android (Galaxy S24 Ultra); iOS support is future work
 5. **Scalability Awareness:** Design for moderate scale but avoid premature optimization
 
+## Current Implementation Status
+
+### ✅ Implemented (as of latest commit)
+- **Backend API (Spring Boot):**
+  - Complete Review CRUD endpoints (`ReviewController`, `ReviewService`)
+  - Comment endpoints (`CommentController`)
+  - JWT authentication structure (`JwtUtil`, `JwtProperties`)
+  - Global exception handling (`GlobalExceptionHandler`)
+  - Database entities: User, Wine, Review, Comment
+  - Flyway migrations setup
+  - OpenAPI/Swagger documentation
+  - Application configuration with profiles (dev/prod)
+  - Docker support (Dockerfile + docker-compose)
+
+- **Infrastructure:**
+  - Docker Compose with PostgreSQL 16 and API service
+  - Health checks and dependencies configured
+
+- **CI/CD:**
+  - GitHub Actions for API (`ci-api.yml`) with path filters
+  - GitHub Actions for Mobile (`ci-app.yml`) with path filters
+  - Release workflow (`release.yml`)
+
+### 🚧 In Progress / TODO
+- Mobile app (Flutter) - not yet initialized
+- Google OAuth integration (backend structure ready, needs implementation)
+- Image upload with pre-signed URLs
+- Integration tests with Testcontainers
+- Observability (metrics, tracing)
+
+### 📍 Key Entry Points for Development
+- **API Main Application:** `services/api/src/main/java/com/winereviewer/api/WineReviewerApiApplication.java`
+- **Review Endpoints:** `services/api/src/main/java/com/winereviewer/api/controller/ReviewController.java`
+- **Database Migrations:** `services/api/src/main/resources/db/migration/`
+- **Configuration:** `services/api/src/main/resources/application.yml`
+- **Docker Setup:** `infra/docker-compose.yml`
+
 ## Useful References
 
+- **Coding Style Guide:** See `CODING_STYLE.md` for detailed Java/Spring Boot conventions
 - **Main Prompt Pack:** See `prompts/PACK.md` for comprehensive AI guidance and agent schemas
 - **README Files:** Each subdirectory (apps/mobile, services/api, infra) has specific setup instructions
 - **GitHub Actions:** Workflows use path filters for monorepo efficiency
