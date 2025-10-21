@@ -36,15 +36,18 @@
         <testcontainers.version>1.20.4</testcontainers.version>
 
         <!-- Security Override Versions -->
+        <!-- Logback: Fix CVE-2025-11226 (ACE in conditional configuration) -->
         <!-- Tomcat: Fix CVE-2024-52316, CVE-2025-24813, CVE-2024-56337 -->
         <!-- Commons Compress: Fix CVE-2024-25710, CVE-2024-26308 -->
         <!-- Commons Lang3: Fix CVE-2025-48924 (StackOverflowError) -->
         <!-- Spring Framework: Fix CVE-2025-41242 (Path Traversal) -->
-        <logback.version>1.5.17</logback.version>
+        <!-- XMLUnit: Fix CVE-2024-31573 (XSLT arbitrary code execution) -->
+        <logback.version>1.5.19</logback.version>
         <tomcat.version>10.1.35</tomcat.version>
         <spring-framework.version>6.2.10</spring-framework.version>
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
+        <xmlunit.version>2.10.0</xmlunit.version>
     </properties>
 
     <dependencyManagement>
@@ -108,6 +111,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${commons-lang3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.xmlunit</groupId>
+                <artifactId>xmlunit-core</artifactId>
+                <version>${xmlunit.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
