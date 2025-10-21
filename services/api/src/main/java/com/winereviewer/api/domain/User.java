@@ -68,7 +68,8 @@ public class User {
             avatarUrl = avatarUrl.trim();
         }
 
-        // Valida
+        // Valida integridade da entidade (não são regras de negócio, são pré-condições)
+        // IllegalArgumentException é apropriado aqui pois indica erro de programação
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("Email é obrigatório");
         }

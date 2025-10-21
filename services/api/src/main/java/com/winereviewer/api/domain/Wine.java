@@ -1,5 +1,6 @@
 package com.winereviewer.api.domain;
 
+import com.winereviewer.api.exception.BusinessRuleViolationException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -82,9 +83,11 @@ public class Wine {
             imageUrl = imageUrl.trim();
         }
 
-        // Valida
+        // Valida ano do vinho (regra de negócio)
         if (year != null && (year < 1900 || year > 2100)) {
-            throw new IllegalArgumentException("Ano deve estar entre 1900 e 2100");
+            throw new BusinessRuleViolationException(
+                    String.format("Ano do vinho inválido: %d. Permitido: 1900-2100", year)
+            );
         }
     }
 

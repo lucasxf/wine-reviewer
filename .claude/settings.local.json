@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:spring.io)",
-      "Bash(./mvnw test -Dtest=ReviewServiceTest)"
+      "Bash(./mvnw test -Dtest=ReviewServiceTest)",
+      "Bash(./mvnw test:*)",
+      "Bash(./mvnw clean:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []

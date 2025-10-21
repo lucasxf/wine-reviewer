@@ -5,6 +5,8 @@ import com.winereviewer.api.application.dto.request.UpdateReviewRequest;
 import com.winereviewer.api.domain.Review;
 import com.winereviewer.api.domain.User;
 import com.winereviewer.api.domain.Wine;
+import com.winereviewer.api.exception.ResourceNotFoundException;
+import com.winereviewer.api.exception.UnauthorizedAccessException;
 import com.winereviewer.api.repository.ReviewRepository;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.repository.WineRepository;
@@ -93,13 +95,14 @@ class ReviewServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // when & then
-        final var exception = assertThrows(IllegalArgumentException.class, () ->
+        final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.createReview(
                         new CreateReviewRequest(wineId.toString(), 5, "Great wine!", null),
                         userId)
         );
 
-        assertEquals("User not found", exception.getMessage());
+        assertTrue(exception.getMessage().contains("User"));
+        assertTrue(exception.getMessage().contains(userId.toString()));
         verify(userRepository, times(1)).findById(userId);
         verify(wineRepository, never()).findById(any());
         verify(reviewRepository, never()).save(any());
@@ -112,13 +115,14 @@ class ReviewServiceTest {
         when(wineRepository.findById(wineId)).thenReturn(Optional.empty());
 
         // when & then
-        final var exception = assertThrows(IllegalArgumentException.class, () ->
+        final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.createReview(
                         new CreateReviewRequest(wineId.toString(), 5, "Great wine!", null),
                         userId)
         );
 
-        assertEquals("Wine not found", exception.getMessage());
+        assertTrue(exception.getMessage().contains("Wine"));
+        assertTrue(exception.getMessage().contains(wineId.toString()));
         verify(userRepository, times(1)).findById(userId);
         verify(wineRepository, times(1)).findById(wineId);
         verify(reviewRepository, never()).save(any());
@@ -213,33 +217,35 @@ class ReviewServiceTest {
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
         // when & then
-        final var exception = assertThrows(IllegalArgumentException.class, () ->
+        final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.updateReview(
                         reviewId,
                         new UpdateReviewRequest(4, "Updated", null),
                         userId)
         );
 
-        assertTrue(exception.getMessage().contains("Review not found"));
+        assertTrue(exception.getMessage().contains("Review"));
+        assertTrue(exception.getMessage().contains(reviewId.toString()));
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, never()).save(any());
     }
 
     @Test
-    void givenUserNotOwner_WhenUpdateReview_ThenThrowSecurityException() {
+    void givenUserNotOwner_WhenUpdateReview_ThenThrowUnauthorizedAccessException() {
         // given
         final var differentUserId = UUID.randomUUID();
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
         // when & then
-        final var exception = assertThrows(SecurityException.class, () ->
+        final var exception = assertThrows(UnauthorizedAccessException.class, () ->
                 reviewService.updateReview(
                         reviewId,
                         new UpdateReviewRequest(4, "Updated", null),
                         differentUserId)
         );
 
-        assertEquals("User is not the owner of this review", exception.getMessage());
+        assertTrue(exception.getMessage().contains(differentUserId.toString()));
+        assertTrue(exception.getMessage().contains("não tem permissão"));
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, never()).save(any());
     }
@@ -268,11 +274,12 @@ class ReviewServiceTest {
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
         // when & then
-        final var exception = assertThrows(IllegalArgumentException.class, () ->
+        final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.getReviewById(reviewId)
         );
 
-        assertTrue(exception.getMessage().contains("Review not found"));
+        assertTrue(exception.getMessage().contains("Review"));
+        assertTrue(exception.getMessage().contains(reviewId.toString()));
         verify(reviewRepository, times(1)).findById(reviewId);
     }
 

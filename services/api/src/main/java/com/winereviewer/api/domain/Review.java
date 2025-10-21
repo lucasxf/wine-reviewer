@@ -1,5 +1,6 @@
 package com.winereviewer.api.domain;
 
+import com.winereviewer.api.exception.InvalidRatingException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -72,10 +73,14 @@ public class Review {
             imageUrl = imageUrl.trim();
         }
 
-        // Valida
+        // Valida rating usando exceção de domínio
         if (rating == null || rating < 1 || rating > 5) {
-            throw new IllegalArgumentException("Rating deve estar entre 1 e 5");
+            throw new InvalidRatingException(rating != null ? rating : 0);
         }
+
+        // Valida obrigatoriedade de user e wine
+        // Nota: Estas validações são de integridade da entidade, não de domínio de negócio
+        // IllegalArgumentException é apropriado aqui pois indica erro de programação
         if (user == null) {
             throw new IllegalArgumentException("Usuário é obrigatório");
         }

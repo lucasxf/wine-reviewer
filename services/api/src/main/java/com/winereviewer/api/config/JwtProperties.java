@@ -1,5 +1,6 @@
 package com.winereviewer.api.config;
 
+import lombok.Getter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -17,6 +18,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @author lucas
  * @date 20/10/2025
  */
+@Getter
 @ConfigurationProperties(prefix = "jwt")
 public class JwtProperties {
 
@@ -62,14 +64,6 @@ public class JwtProperties {
     public JwtProperties(String secret, Long expiration) {
         this.secret = secret;
         this.expiration = expiration;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public Long getExpiration() {
-        return expiration;
     }
 
 }

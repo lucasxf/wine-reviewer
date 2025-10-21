@@ -11,7 +11,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -73,8 +72,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /**
      * Construtor com injeção de dependências.
      *
-     * @param jwtUtil             utilitário para validar e extrair dados do JWT
-     * @param userDetailsService  serviço para carregar User do banco (CustomUserDetailsService)
+     * @param jwtUtil            utilitário para validar e extrair dados do JWT
+     * @param userDetailsService serviço para carregar User do banco (CustomUserDetailsService)
      */
     public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
         this.jwtUtil = jwtUtil;

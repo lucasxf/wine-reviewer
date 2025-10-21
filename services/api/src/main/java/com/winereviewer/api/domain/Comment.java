@@ -63,7 +63,8 @@ public class Comment {
             content = content.trim();
         }
 
-        // Valida
+        // Valida integridade da entidade (não são regras de negócio, são pré-condições)
+        // IllegalArgumentException é apropriado aqui pois indica erro de programação
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Conteúdo do comentário é obrigatório");
         }

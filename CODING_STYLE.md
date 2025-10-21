@@ -287,18 +287,121 @@ final var accountAggregate = AccountAggregate.from(...);
 - ✅ `@Getter` - Getters seletivos (não usar `@Data` indiscriminadamente)
 - ❌ Evitar `@Data` em entidades de domínio (preferir imutabilidade)
 
+### Formatação de Classes
+
+**REGRA CRÍTICA - Linha em Branco Antes do Closing Bracket:**
+
+Sempre deixar **uma linha em branco** antes do closing bracket (`}`) de **qualquer classe**.
+
+**Exceção:** Records **não** precisam da linha em branco (são estruturas compactas).
+
+**Exemplos:**
+
+```java
+// ✅ CORRETO - Classe regular com linha em branco
+@Service
+public class ReviewServiceImpl implements ReviewService {
+    private final ReviewRepository repository;
+
+    public ReviewServiceImpl(ReviewRepository repository) {
+        this.repository = repository;
+    }
+
+    public Review createReview(CreateReviewRequest request) {
+        // implementação
+    }
+
+}  // ← Linha em branco antes do closing bracket
+
+// ✅ CORRETO - Record sem linha em branco (exceção)
+public record ReviewResponse(
+    String id,
+    Integer rating,
+    String notes
+) {}  // ← SEM linha em branco (records são compactos)
+
+// ✅ CORRETO - Exception com linha em branco
+public class ResourceNotFoundException extends DomainException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
+
+    @Override
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.NOT_FOUND;
+    }
+
+}  // ← Linha em branco antes do closing bracket
+
+// ✅ CORRETO - Controller com linha em branco
+@RestController
+@RequestMapping("/reviews")
+public class ReviewController {
+    private final ReviewService service;
+
+    @PostMapping
+    public ResponseEntity<ReviewResponse> create(@RequestBody CreateReviewRequest request) {
+        return ResponseEntity.ok(service.create(request));
+    }
+
+}  // ← Linha em branco antes do closing bracket
+
+// ❌ INCORRETO - Faltando linha em branco
+public class ReviewService {
+    public void doSomething() {
+        // ...
+    }
+}  // ← SEM linha em branco (errado!)
+```
+
+**Justificativa:**
+- Melhora legibilidade visual do código
+- Facilita navegação em arquivos grandes
+- Consistência no codebase
+- Preferência pessoal do desenvolvedor
+
+---
+
 ### Tratamento de Exceções
+
+**Regras:**
 - **Domain exceptions** específicas por tipo de erro
 - Hierarquia de exceções: `DomainException` → exceções específicas
 - Validações com mensagens claras em português
 
+**Hierarquia padrão de exceções de domínio:**
+```java
+DomainException (abstrata)
+├── ResourceNotFoundException (404 NOT FOUND)
+├── InvalidRatingException (400 BAD REQUEST)
+├── UnauthorizedAccessException (403 FORBIDDEN)
+└── BusinessRuleViolationException (422 UNPROCESSABLE ENTITY)
+```
+
 **Exemplo:**
 ```java
-public class DomainException extends RuntimeException { }
-public class InvalidAccountException extends DomainException { }
-public class AccountCreationException extends DomainException { }
+public abstract class DomainException extends RuntimeException {
+    protected DomainException(String message) {
+        super(message);
+    }
 
-// Uso
+    public abstract HttpStatus getHttpStatus();
+
+}  // ← Linha em branco antes do closing bracket
+
+public class InvalidAccountException extends DomainException {
+    public InvalidAccountException(String message) {
+        super(message);
+    }
+
+    @Override
+    public HttpStatus getHttpStatus() {
+        return HttpStatus.BAD_REQUEST;
+    }
+
+}  // ← Linha em branco antes do closing bracket
+
+// Uso em serviços
 if (status != AccountStatus.NEW) {
     throw new AccountCreationException(
         "Uma conta já com este nome de usuário já foi criada " +
@@ -307,49 +410,120 @@ if (status != AccountStatus.NEW) {
 }
 ```
 
+**GlobalExceptionHandler:**
+- Handler unificado para `DomainException` usando polimorfismo
+- Status HTTP determinado por `getHttpStatus()` de cada exceção
+- Handlers legados (`IllegalArgumentException`, `SecurityException`) marcados como `@Deprecated`
+
 ---
 
 ## 🎨 Estilo de Controllers
 
 ### REST Controllers
+
+**REGRA CRÍTICA - Documentação OpenAPI Obrigatória:**
+
+**SEMPRE** adicionar anotações OpenAPI/Swagger ao criar **novos endpoints REST**.
+
+**Anotações obrigatórias:**
+- `@Tag` - No nível da classe para agrupar endpoints
+- `@Operation` - Em cada método endpoint (summary + description)
+- `@ApiResponses` - Documentar todos os status HTTP possíveis
+- `@Parameter` - Para path variables e query params
+
+**Convenções:**
 - Anotação `@RestController` + `@RequestMapping`
 - Injeção via construtor (não `@Autowired` em fields)
 - Validação no controller, business logic no handler/service
 - Headers opcionais: `X-Correlation-Id` para rastreamento
 - Logs informativos em português
+- **Documentação OpenAPI completa**
 
-**Exemplo:**
+**Exemplo completo:**
 ```java
 @Slf4j
 @RestController
-@RequestMapping("/accounts")
-public class AccountController {
+@RequestMapping("/reviews")
+@Tag(name = "Reviews", description = "API de gerenciamento de avaliações de vinhos")
+public class ReviewController {
 
-    private final AccountCommandHandler commandHandler;
+    private final ReviewService service;
 
-    public AccountController(AccountCommandHandler commandHandler) {
-        this.commandHandler = commandHandler;
+    public ReviewController(ReviewService service) {
+        this.service = service;
     }
 
-    public ResponseEntity<AccountResponse> create(
-            @PathVariable String username,
-            @RequestHeader(value = "X-Correlation-Id", required = false) String corr) {
-
-        var correlationId = getCorrelationId(corr);
-        var causationId = UUID.randomUUID();
-
-        try (var scope = ContextScope.open(correlationId, causationId)) {
-            log.info("Received request to create account for username: {}", username);
-
-            var command = createAccountCommand(...);
-            commandHandler.handle(correlationId, command);
-
-            log.info("Account creation command processed for username: {}", username);
-            return ResponseEntity.accepted().build();
-        }
+    @Operation(
+        summary = "Criar avaliação de vinho",
+        description = "Cria uma nova avaliação para um vinho específico. Requer autenticação (JWT)."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "201",
+            description = "Avaliação criada com sucesso",
+            content = @Content(schema = @Schema(implementation = ReviewResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Dados inválidos (rating fora do range 1-5)"
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Vinho ou usuário não encontrado"
+        )
+    })
+    @PostMapping
+    public ResponseEntity<ReviewResponse> create(
+            @RequestBody @Valid CreateReviewRequest request) {
+        log.info("Recebida requisição para criar review do vinho: {}", request.wineId());
+        var review = service.createReview(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(review);
     }
-}
+
+    @Operation(
+        summary = "Buscar avaliação por ID",
+        description = "Retorna os detalhes de uma avaliação específica pelo seu ID"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Avaliação encontrada",
+            content = @Content(schema = @Schema(implementation = ReviewResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Avaliação não encontrada"
+        )
+    })
+    @GetMapping("/{reviewId}")
+    public ResponseEntity<ReviewResponse> getById(
+            @Parameter(description = "ID da avaliação", required = true)
+            @PathVariable UUID reviewId) {
+        log.info("Recebida requisição para buscar review: {}", reviewId);
+        var review = service.getReviewById(reviewId);
+        return ResponseEntity.ok(review);
+    }
+
+}  // ← Linha em branco antes do closing bracket
 ```
+
+**Workflow ao criar novos endpoints:**
+1. Implementar método do controller
+2. Adicionar `@Operation` com summary e description
+3. Adicionar `@ApiResponses` para **todos** os status HTTP possíveis
+4. Adicionar `@Parameter` para path/query params
+5. Testar endpoint no Swagger UI (`/swagger-ui.html`)
+6. Atualizar README.md com novo endpoint
+
+**Status HTTP a documentar:**
+- `200 OK` - GET/PUT bem-sucedido
+- `201 Created` - POST bem-sucedido
+- `204 No Content` - DELETE bem-sucedido
+- `400 Bad Request` - Validação falhou
+- `403 Forbidden` - Sem permissão (ownership)
+- `404 Not Found` - Recurso não encontrado
+- `422 Unprocessable Entity` - Regra de negócio violada
+- `501 Not Implemented` - Endpoint planejado mas não implementado
 
 ---
 
@@ -745,8 +919,44 @@ public class SecurityConfig {
 
 ---
 
-## 🔄 Atualizações
+---
 
-Este documento será atualizado continuamente à medida que novos padrões e preferências forem identificados.
+## 📚 Documentação Viva
 
-**Última atualização:** 2025-10-20 (atualizado por Claude Code - Adicionadas regras de JPA callbacks e Spring Security filters)
+### Princípio de Documentação Contínua
+
+**REGRA:** A documentação deve ser atualizada ao final de cada sessão de desenvolvimento.
+
+**Arquivos a atualizar após mudanças significativas:**
+1. **`CLAUDE.md`** - Sempre atualizar com novas diretrizes, decisões arquiteturais e aprendizados
+   - **CRITICAL:** Atualizar seção "Next Steps (Roadmap)" - mover itens completos para "Implemented", adicionar novos próximos passos
+2. **`CODING_STYLE.md`** - Sempre atualizar com novos padrões de código identificados
+3. **`README.md`** - Atualizar quando o estado da aplicação mudar (novas features, endpoints, configurações)
+4. **OpenAPI/Swagger** - Atualizar anotações nos controllers sempre que criar/modificar endpoints REST
+
+**O que caracteriza mudança significativa:**
+- Novas features implementadas
+- Novos endpoints REST criados/modificados
+- Mudanças arquiteturais (novos padrões, exceções, estruturas)
+- Novas convenções de código identificadas
+- Atualizações de dependências importantes
+
+**Formato de atualização:**
+- Sempre incluir data da atualização
+- Descrever brevemente o que foi adicionado/modificado
+- Manter histórico de mudanças relevantes
+- **Atualizar "Next Steps (Roadmap)" em CLAUDE.md:**
+  - Mover tasks completadas para "Current Implementation Status"
+  - Adicionar novos próximos passos baseados no progresso
+  - Manter priorização clara (1, 2, 3, 4...)
+  - Ajuda na carga de contexto ao início de cada nova sessão
+
+---
+
+## 🔄 Histórico de Atualizações
+
+- **2025-10-21 (v3)** - Adicionada diretriz de "Next Steps (Roadmap)" no CLAUDE.md para tracking de próximos passos e carga de contexto entre sessões
+- **2025-10-21 (v2)** - Corrigida regra de formatação: linha em branco antes de closing bracket para **todas as classes** (exceto records). Adicionada regra obrigatória de documentação OpenAPI/Swagger para novos endpoints REST
+- **2025-10-21 (v1)** - Adicionadas regras de exceções de domínio e formatação inicial
+- **2025-10-20** - Adicionadas regras de JPA callbacks e Spring Security filters
+- **Versão inicial** - Estabelecidos padrões base do projeto

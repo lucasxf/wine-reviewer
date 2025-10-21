@@ -177,6 +177,7 @@ The project follows a phased approach:
 - Avoid overengineering; implement MVP features first
 - Never commit secrets, API keys, or credentials
 - Use free tools and assets with proper licenses only
+- **ALWAYS add blank line before closing bracket of classes (except records)**
 
 ### Java/Spring Boot
 
@@ -207,11 +208,22 @@ com.winereviewer.api/
 - Custom domain exceptions extending base `DomainException`
 - Clear messages (can be in Portuguese)
 - GlobalExceptionHandler with `@ControllerAdvice` for REST error responses
+- Never use generic RuntimeExceptions for business logic errors
 
 **Logging:**
 - Use `@Slf4j` from Lombok
 - Log messages can be in Portuguese for context
 - Include relevant IDs and context (e.g., `log.info("Review criada com sucesso. ID: {}", review.id())`)
+
+**REST Controllers & OpenAPI Documentation:**
+- **CRITICAL:** ALWAYS add OpenAPI/Swagger annotations when creating new REST endpoints
+- Required annotations:
+  - `@Tag` - Class level (group endpoints)
+  - `@Operation` - Method level (summary + description)
+  - `@ApiResponses` - Document ALL possible HTTP status codes
+  - `@Parameter` - For path variables and query params
+- Workflow: Implement → Document → Test in Swagger UI → Update README.md
+- Verify documentation at `/swagger-ui.html` after changes
 
 ### Flutter/Dart
 - Feature-based folder structure: `lib/features/`, `lib/core/`, `lib/common/widgets/`
@@ -232,16 +244,68 @@ com.winereviewer.api/
 
 ## Testing Strategy
 
+**CRITICAL RULE: Test-After-Implementation**
+- **Always create tests immediately after implementing testable classes**
+- Testable classes include: Services, Repositories, Controllers, Utilities, Business Logic
+- Non-testable classes (skip tests): Configuration classes, DTOs, Entities (unless complex logic)
+- **Workflow:** Implement class → Write tests → Verify tests pass → Move to next task
+- Never defer test writing to "later" - tests are part of the implementation
+
 ### Backend (Pyramid Approach)
 - **Unit Tests:** Business logic in services, utilities
 - **Integration Tests:** API endpoints with Testcontainers (real Postgres)
 - Focus on critical paths: authentication, review creation, pagination, comments
+- **Naming Convention:** `ClassNameTest` for unit tests, `ClassNameIT` for integration tests
+- **Location:** `src/test/java/` mirroring the same package structure as `src/main/java/`
 
 ### Mobile (Pyramid Approach)
 - **Unit Tests:** Business logic, state management
 - **Widget Tests:** Individual widgets and screens
 - **Golden Tests:** Visual regression testing for key UI components
 - Focus on: authentication flow, form validation, image upload, feed rendering
+
+## Documentation Strategy
+
+**CRITICAL RULE: Living Documentation**
+
+Documentation must be updated **at the end of each development session** to reflect the current state of the application.
+
+### Files to Update After Significant Changes
+
+1. **`CLAUDE.md`** (this file)
+   - Update when: New architectural decisions, directives, or patterns are adopted
+   - Include: Context about why decisions were made, tradeoffs considered
+
+2. **`CODING_STYLE.md`**
+   - Update when: New code patterns or conventions are identified
+   - Include: Examples of correct/incorrect usage, rationale
+
+3. **`README.md`** (main project README)
+   - Update when: Application state changes (new features, endpoints, configuration)
+   - Include: Current implementation status, setup instructions, API overview
+   - Keep accurate: What's implemented vs. what's planned
+
+4. **OpenAPI/Swagger Documentation**
+   - **CRITICAL:** Update **immediately** when creating/modifying REST API endpoints
+   - How: Add/update `@Tag`, `@Operation`, `@ApiResponses`, `@Parameter` annotations in controllers
+   - Required for: **Every new endpoint** (no exceptions)
+   - Verify: Check Swagger UI at `/swagger-ui.html` after updates
+   - Document: All possible HTTP status codes (200, 201, 400, 403, 404, 422, 500, 501)
+
+### What Constitutes "Significant Changes"
+- ✅ New features implemented (services, controllers, domain logic)
+- ✅ New REST endpoints created or existing ones modified
+- ✅ Architectural changes (new exception hierarchy, security patterns)
+- ✅ New coding conventions identified
+- ✅ Important dependency updates
+- ❌ Minor bug fixes or refactorings (unless they establish new patterns)
+
+### Update Format
+- Always include **date** of update
+- Briefly describe **what changed** and **why**
+- Update **Current Implementation Status** section with latest features
+- Maintain clear distinction between ✅ Implemented, 🚧 In Progress, 📍 Planned
+- **Update "Next Steps (Roadmap)" section** - Move completed items to "Implemented", add new next steps based on progress
 
 ## Important Constraints
 
@@ -251,19 +315,68 @@ com.winereviewer.api/
 4. **Mobile-First:** Primary target is Android (Galaxy S24 Ultra); iOS support is future work
 5. **Scalability Awareness:** Design for moderate scale but avoid premature optimization
 
+## 🎯 Next Steps (Roadmap)
+
+**IMPORTANT:** This section should be updated at the **end of each development session** to track what's next.
+
+**Last updated:** 2025-10-21
+
+### Immediate Next Steps (Priority Order)
+
+1. **Implement missing Review endpoints**
+   - `GET /reviews` - List reviews with pagination and filters (wineId, userId)
+   - `DELETE /reviews/{id}` - Delete review with ownership validation
+   - Add OpenAPI documentation for both endpoints
+   - Create tests for new endpoints
+
+2. **Implement Google OAuth integration**
+   - Backend: OAuth token validation with Google
+   - Create/update user on successful authentication
+   - Issue JWT tokens after Google login
+   - Test authentication flow end-to-end
+
+3. **Add Integration Tests with Testcontainers**
+   - Setup Testcontainers for PostgreSQL
+   - Create integration tests for Review endpoints
+   - Test exception handling in real scenarios
+   - Test database constraints and validations
+
+4. **Implement Image Upload with Pre-signed URLs**
+   - Choose storage provider (S3 Free Tier or Supabase Storage)
+   - Implement pre-signed URL generation endpoint
+   - Add image upload validation (size, MIME type)
+   - Update Review entity to store image URLs
+
+### Future Backlog (Post-MVP)
+
+- **Observability:** Metrics, distributed tracing, structured logging
+- **Comment System:** Full CRUD for comments on reviews
+- **User Follow System:** Follow/unfollow users
+- **Wine Recommendations:** Recommendation algorithm
+- **Internationalization:** i18n support for multiple languages
+- **Mobile App:** Flutter implementation (F2 phase)
+
+### Blocked/Waiting
+
+- None currently
+
+---
+
 ## Current Implementation Status
 
-### ✅ Implemented (as of latest commit)
+### ✅ Implemented (as of 2025-10-21)
 - **Backend API (Spring Boot):**
   - Complete Review CRUD endpoints (`ReviewController`, `ReviewService`)
   - Comment endpoints (`CommentController`)
-  - JWT authentication structure (`JwtUtil`, `JwtProperties`)
-  - Global exception handling (`GlobalExceptionHandler`)
-  - Database entities: User, Wine, Review, Comment
+  - JWT authentication structure (`JwtUtil`, `JwtProperties`) - updated to JJWT 0.12.x
+  - **Domain exception hierarchy** (`DomainException` base, `ResourceNotFoundException`, `InvalidRatingException`, `UnauthorizedAccessException`, `BusinessRuleViolationException`)
+  - Global exception handling (`GlobalExceptionHandler`) with domain exception support
+  - Database entities: User, Wine, Review, Comment (with domain exception validation)
   - Flyway migrations setup
   - OpenAPI/Swagger documentation
   - Application configuration with profiles (dev/prod)
   - Docker support (Dockerfile + docker-compose)
+  - **Complete test suite** (27 tests: ReviewControllerTest, ReviewServiceTest, DomainExceptionTest)
 
 - **Infrastructure:**
   - Docker Compose with PostgreSQL 16 and API service

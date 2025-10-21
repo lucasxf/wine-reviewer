@@ -5,6 +5,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecureDigestAlgorithm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -99,10 +100,10 @@ public class JwtUtil {
 
         // 3. Constrói o token usando builder do jjwt
         return Jwts.builder()
-                .setSubject(userId.toString())           // ← Payload: userId no campo 'sub'
-                .setIssuedAt(now)                        // ← Payload: timestamp de criação
-                .setExpiration(expirationDate)           // ← Payload: timestamp de expiração
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)  // ← Assina com chave secreta (HS256 = HMAC-SHA256)
+                .subject(userId.toString())           // ← Payload: userId no campo 'sub'
+                .issuedAt(now)                        // ← Payload: timestamp de criação
+                .expiration(expirationDate)           // ← Payload: timestamp de expiração
+                .signWith(getSigningKey())  // ← Assina com chave secreta (HS256 = HMAC-SHA256)
                 .compact();                               // ← Gera string final (header.payload.signature)
     }
 

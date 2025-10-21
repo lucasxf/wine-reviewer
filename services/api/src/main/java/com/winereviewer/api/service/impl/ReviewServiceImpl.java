@@ -8,6 +8,8 @@ import com.winereviewer.api.application.dto.response.WineSummaryResponse;
 import com.winereviewer.api.domain.Review;
 import com.winereviewer.api.domain.User;
 import com.winereviewer.api.domain.Wine;
+import com.winereviewer.api.exception.ResourceNotFoundException;
+import com.winereviewer.api.exception.UnauthorizedAccessException;
 import com.winereviewer.api.repository.ReviewRepository;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.repository.WineRepository;
@@ -39,13 +41,20 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     public ReviewResponse createReview(CreateReviewRequest request, UUID userId) {
         final UUID wineId = UUID.fromString(request.wineId());
+
+        // Busca usuário e lança exceção de domínio se não encontrado
         final var user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+
+        // Busca vinho e lança exceção de domínio se não encontrado
         final var wine = wineRepository.findById(wineId)
-                .orElseThrow(() -> new IllegalArgumentException("Wine not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Wine", wineId));
+
         final var review = toReview(request, user, wine);
         reviewRepository.save(review);
-        log.info("Review created successfully");
+
+        log.info("Review criada com sucesso. ID: {}", review.getId());
+
         final var wineSummary = toWineSummary(wine);
         final var userSummary = toUserSummary(user);
         return toReviewResponse(review, userSummary, wineSummary);
@@ -54,16 +63,16 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request, UUID userId) {
-        // Find existing review
+        // Busca review existente ou lança exceção de domínio
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found: " + reviewId));
+                .orElseThrow(() -> new ResourceNotFoundException("Review", reviewId));
 
-        // Validate ownership (security)
+        // Valida ownership (apenas o dono pode editar)
         if (!review.getUser().getId().equals(userId)) {
-            throw new SecurityException("User is not the owner of this review");
+            throw new UnauthorizedAccessException(userId, "Review");
         }
 
-        // Update fields (only if provided in request)
+        // Atualiza campos (apenas se fornecidos no request)
         if (request.rating() != null) {
             review.setRating(request.rating());
         }
@@ -77,9 +86,9 @@ public class ReviewServiceImpl implements ReviewService {
         review.setUpdatedAt(Instant.now());
         reviewRepository.save(review);
 
-        log.info("Review updated successfully: {}", reviewId);
+        log.info("Review atualizada com sucesso. ID: {}", reviewId);
 
-        // Convert to response
+        // Converte para response
         var wineSummary = toWineSummary(review.getWine());
         var userSummary = toUserSummary(review.getUser());
         return toReviewResponse(review, userSummary, wineSummary);
@@ -89,7 +98,9 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional(readOnly = true)
     public ReviewResponse getReviewById(UUID reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new IllegalArgumentException("Review not found: " + reviewId));
+                .orElseThrow(() -> new ResourceNotFoundException("Review", reviewId));
+
+        log.debug("Review encontrada. ID: {}", reviewId);
 
         var wineSummary = toWineSummary(review.getWine());
         var userSummary = toUserSummary(review.getUser());

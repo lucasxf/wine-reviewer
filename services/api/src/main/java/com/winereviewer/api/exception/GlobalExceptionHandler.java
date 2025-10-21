@@ -16,6 +16,14 @@ import java.util.Map;
  * Global exception handler para toda a aplicação.
  * <p>
  * Captura exceptions e converte em respostas JSON padronizadas.
+ * <p>
+ * <strong>Hierarquia de tratamento:</strong>
+ * <ol>
+ *   <li>Exceções de domínio específicas (ResourceNotFoundException, InvalidRatingException, etc.)</li>
+ *   <li>Exceções de validação (MethodArgumentNotValidException)</li>
+ *   <li>Exceções de runtime legadas (IllegalArgumentException, SecurityException) - deprecadas</li>
+ *   <li>Exceção genérica (fallback para erros inesperados)</li>
+ * </ol>
  *
  * @author lucas
  * @date 19/10/2025
@@ -23,6 +31,36 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    /**
+     * Trata todas as exceções de domínio (DomainException e subclasses).
+     * <p>
+     * Este handler captura:
+     * - ResourceNotFoundException → 404
+     * - InvalidRatingException → 400
+     * - UnauthorizedAccessException → 403
+     * - BusinessRuleViolationException → 422
+     * <p>
+     * O status HTTP é determinado pelo método getHttpStatus() de cada exceção.
+     *
+     * @param ex exceção de domínio
+     * @return erro padronizado com status específico da exceção
+     */
+    @ExceptionHandler(DomainException.class)
+    public ResponseEntity<ErrorResponse> handleDomainException(DomainException ex) {
+        final HttpStatus status = ex.getHttpStatus();
+
+        log.warn("Exceção de domínio [{}]: {}", ex.getClass().getSimpleName(), ex.getMessage());
+
+        var errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
+                ex.getMessage()
+        );
+
+        return ResponseEntity.status(status).body(errorResponse);
+    }
 
     /**
      * Trata erros de validação de Bean Validation (@Valid).
@@ -53,13 +91,18 @@ public class GlobalExceptionHandler {
 
     /**
      * Trata IllegalArgumentException (entidade não encontrada, parâmetros inválidos).
+     * <p>
+     * <strong>DEPRECADO:</strong> Use {@link ResourceNotFoundException} ao invés desta exceção.
+     * Este handler existe apenas para manter compatibilidade com código legado.
      *
      * @param ex exception de argumento inválido
      * @return erro padronizado com status 404 Not Found
+     * @deprecated Use ResourceNotFoundException para recursos não encontrados
      */
+    @Deprecated(since = "0.1.0", forRemoval = true)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        log.warn("Argumento inválido: {}", ex.getMessage());
+        log.warn("[DEPRECADO] IllegalArgumentException: {}. Use ResourceNotFoundException.", ex.getMessage());
 
         var errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
@@ -73,13 +116,18 @@ public class GlobalExceptionHandler {
 
     /**
      * Trata SecurityException (validação de ownership, permissões).
+     * <p>
+     * <strong>DEPRECADO:</strong> Use {@link UnauthorizedAccessException} ao invés desta exceção.
+     * Este handler existe apenas para manter compatibilidade com código legado.
      *
      * @param ex exception de segurança
      * @return erro padronizado com status 403 Forbidden
+     * @deprecated Use UnauthorizedAccessException para violações de acesso
      */
+    @Deprecated(since = "0.1.0", forRemoval = true)
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<ErrorResponse> handleSecurityException(SecurityException ex) {
-        log.warn("Violação de segurança: {}", ex.getMessage());
+        log.warn("[DEPRECADO] SecurityException: {}. Use UnauthorizedAccessException.", ex.getMessage());
 
         var errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
@@ -141,4 +189,5 @@ public class GlobalExceptionHandler {
             String message
     ) {
     }
+
 }
