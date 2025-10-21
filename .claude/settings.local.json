@@ -1,20 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/README.md)",
-      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/src/main/java/exercicio_e/subscriptions_billing/domain/account/AccountAggregate.java)",
-      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/src/main/java/exercicio_e/subscriptions_billing/application/api/AccountController.java)",
-      "Bash(curl -s https://raw.githubusercontent.com/lucasxf/estudos/develop/src/main/java/exercicio_e/subscriptions_billing/application/commands/handlers/impl/CreateAccountHandler.java)",
-      "Bash(mvn clean compile)",
-      "Bash(java -version)",
-      "Bash(cat:*)",
-      "WebSearch",
-      "Bash(./mvnw clean compile:*)",
-      "Bash(./mvnw test:*)",
-      "Bash(./mvnw dependency:tree:*)",
-      "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nsecurity: Update dependencies to fix critical CVEs\n\nUpdate Spring Boot and all vulnerable dependencies to address security issues:\n\n- Spring Boot: 3.2.1 → 3.3.11\n- Spring Framework: 6.1.x → 6.2.10 (CVE-2025-41242)\n- Tomcat: 10.1.x → 10.1.35 (CVE-2024-52316, CVE-2025-24813, CVE-2024-56337)\n- Commons Compress: 1.24.0 → 1.27.1 (CVE-2024-25710, CVE-2024-26308)\n- Commons Lang3: 3.14.0 → 3.18.0 (CVE-2025-48924)\n- Logback: 1.4.x → 1.5.17\n- springdoc-openapi: 2.3.0 → 2.8.6\n- JJWT: 0.12.3 → 0.12.6\n- Google API Client: 2.2.0 → 2.7.2\n- Flyway: 10.4.1 → 11.1.0\n- Testcontainers: 1.19.3 → 1.20.4\n\nAll versions centralized in <properties> section following project conventions.\nBuild and compilation verified successfully.\n\nAlso updated CLAUDE.md with:\n- Enhanced Java/Spring Boot coding standards\n- Current implementation status section\n- Additional development commands\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(./mvnw clean test:*)"
+      "WebFetch(domain:spring.io)",
+      "Bash(./mvnw test -Dtest=ReviewServiceTest)"
     ],
     "deny": [],
     "ask": []
