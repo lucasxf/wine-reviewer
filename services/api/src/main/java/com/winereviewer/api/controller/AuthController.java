@@ -2,6 +2,13 @@ package com.winereviewer.api.controller;
 
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.security.JwtUtil;
+import com.winereviewer.api.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -50,13 +57,71 @@ import org.springframework.web.bind.annotation.RestController;
 @AllArgsConstructor
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Authentication", description = "API de autenticação e gerenciamento de tokens JWT")
 public class AuthController {
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final AuthService authService;
+
+    /**
+     * Autentica usuário com Google OAuth.
+     * <p>
+     * <strong>Fluxo de autenticação:</strong>
+     * <ol>
+     *   <li>Valida Google ID token enviado pelo app</li>
+     *   <li>Cria ou atualiza usuário no banco de dados</li>
+     *   <li>Gera JWT token para sessão</li>
+     *   <li>Retorna JWT + informações do usuário</li>
+     * </ol>
+     *
+     * @param request Google ID token
+     * @return JWT token + informações do usuário
+     */
+    @Operation(
+            summary = "Autenticar com Google OAuth",
+            description = """
+                    Autentica um usuário usando Google OAuth.
+
+                    Fluxo:
+                    1. App mobile faz login com Google (google_sign_in package)
+                    2. App recebe Google ID token
+                    3. App envia token para este endpoint
+                    4. Backend valida token com Google
+                    5. Backend cria/atualiza usuário
+                    6. Backend retorna JWT para uso em requisições subsequentes
+
+                    Use o JWT retornado no header Authorization: Bearer {token}
+                    """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Autenticação realizada com sucesso",
+                    content = @Content(schema = @Schema(implementation = AuthService.AuthResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Token do Google inválido ou expirado"
+            )
+    })
+    @PostMapping("/google")
+    public ResponseEntity<AuthService.AuthResponse> authenticateWithGoogle(
+            @RequestBody @Valid GoogleAuthRequest request) {
+        log.info("Recebida requisição de autenticação Google");
+
+        final var response = authService.authenticateWithGoogle(request.googleIdToken());
+
+        log.info("Autenticação Google concluída com sucesso para usuário: {}", response.email());
+
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * Endpoint de login simplificado (mock para MVP).
+     * <p>
+     * <strong>DEPRECATED:</strong> Use /auth/google para produção.
+     * Este endpoint é apenas para testes de desenvolvimento local.
      * <p>
      * <strong>O que este endpoint faz:</strong>
      * <ol>
@@ -65,41 +130,6 @@ public class AuthController {
      *   <li>Se encontrar, gera JWT</li>
      *   <li>Retorna JWT para cliente</li>
      * </ol>
-     * <p>
-     * <strong>ATENÇÃO - Implementação simplificada:</strong>
-     * - Não valida senha (não temos senha, é OAuth)
-     * - Apenas para testes de desenvolvimento
-     * - PRODUÇÃO: substituir por Google OAuth
-     * <p>
-     * <strong>Como testar (Postman/curl):</strong>
-     * <pre>
-     * POST http://localhost:8080/auth/login
-     * Content-Type: application/json
-     *
-     * {
-     *   "email": "user@example.com"
-     * }
-     *
-     * Response 200 OK:
-     * {
-     *   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-     *   "userId": "123e4567-e89b-12d3-a456-426614174000",
-     *   "email": "user@example.com"
-     * }
-     * </pre>
-     * <p>
-     * <strong>Usar o token em outras requisições:</strong>
-     * <pre>
-     * POST http://localhost:8080/reviews
-     * Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-     * Content-Type: application/json
-     *
-     * {
-     *   "wineId": "...",
-     *   "rating": 5,
-     *   "notes": "Excelente!"
-     * }
-     * </pre>
      *
      * @param request dados de login (email)
      * @return JWT token + informações do usuário
@@ -132,7 +162,24 @@ public class AuthController {
     // DTOs (inner records)
 
     /**
+     * DTO de requisição para autenticação Google.
+     * <p>
+     * <strong>Campo:</strong>
+     * - googleIdToken: Token ID obtido após login com Google
+     * <p>
+     * <strong>Validação:</strong>
+     * - @NotBlank: não pode ser null, vazio ou apenas espaços
+     */
+    public record GoogleAuthRequest(
+            @NotBlank(message = "Google ID token é obrigatório")
+            String googleIdToken
+    ) {
+    }
+
+    /**
      * DTO de requisição para login.
+     * <p>
+     * <strong>DEPRECATED:</strong> Use GoogleAuthRequest para produção.
      * <p>
      * <strong>Campos:</strong>
      * - email: Email do usuário (obrigatório, deve ser válido)
