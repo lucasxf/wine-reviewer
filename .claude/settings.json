@@ -1,0 +1,33 @@
+{
+  "modelId": "claude-sonnet-4-5-20250929",
+  "instructions": "Always run tests in quiet mode (./mvnw test -q). Always use Portuguese for log messages. Follow CODING_STYLE.md conventions strictly.",
+  "tools": {
+    "bash": {
+      "autoApprove": [
+        "./mvnw test -q",
+        "./mvnw test -q -Dtest=*",
+        "./mvnw clean install -q",
+        "./mvnw clean verify -q",
+        "./mvnw spring-boot:run",
+        "git status",
+        "git log --oneline -10",
+        "git diff --stat",
+        "docker compose ps",
+        "docker compose logs --tail=50"
+      ]
+    }
+  },
+  "preferences": {
+    "maven": {
+      "defaultTestCommand": "./mvnw test -q",
+      "defaultBuildCommand": "./mvnw clean install -q",
+      "defaultVerifyCommand": "./mvnw clean verify -q"
+    },
+    "git": {
+      "defaultLogFormat": "--oneline -10"
+    },
+    "docker": {
+      "defaultLogsLimit": "--tail=50"
+    }
+  }
+}
