@@ -82,7 +82,7 @@ public class AuthController {
             summary = "Autenticar com Google OAuth",
             description = """
                     Autentica um usuário usando Google OAuth.
-
+                    
                     Fluxo:
                     1. App mobile faz login com Google (google_sign_in package)
                     2. App recebe Google ID token
@@ -90,7 +90,7 @@ public class AuthController {
                     4. Backend valida token com Google
                     5. Backend cria/atualiza usuário
                     6. Backend retorna JWT para uso em requisições subsequentes
-
+                    
                     Use o JWT retornado no header Authorization: Bearer {token}
                     """
     )
@@ -155,8 +155,7 @@ public class AuthController {
                 token,
                 user.getId().toString(),
                 user.getEmail(),
-                user.getDisplayName()
-        ));
+                user.getDisplayName()));
     }
 
     // DTOs (inner records)
@@ -172,8 +171,7 @@ public class AuthController {
      */
     public record GoogleAuthRequest(
             @NotBlank(message = "Google ID token é obrigatório")
-            String googleIdToken
-    ) {
+            String googleIdToken) {
     }
 
     /**
@@ -191,8 +189,7 @@ public class AuthController {
     public record LoginRequest(
             @NotBlank(message = "Email é obrigatório")
             @Email(message = "Email inválido")
-            String email
-    ) {
+            String email) {
     }
 
     /**
@@ -213,8 +210,7 @@ public class AuthController {
             String token,
             String userId,
             String email,
-            String displayName
-    ) {
+            String displayName) {
     }
 
 }

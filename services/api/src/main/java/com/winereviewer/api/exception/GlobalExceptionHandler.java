@@ -56,8 +56,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 status.value(),
                 status.getReasonPhrase(),
-                ex.getMessage()
-        );
+                ex.getMessage());
 
         return ResponseEntity.status(status).body(errorResponse);
     }
@@ -83,8 +82,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Erro de validação",
-                errors.toString()
-        );
+                errors.toString());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
@@ -108,8 +106,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 "Recurso não encontrado",
-                ex.getMessage()
-        );
+                ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
@@ -133,8 +130,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.FORBIDDEN.value(),
                 "Acesso negado",
-                ex.getMessage()
-        );
+                ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
@@ -153,8 +149,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.NOT_IMPLEMENTED.value(),
                 "Funcionalidade não implementada",
-                ex.getMessage()
-        );
+                ex.getMessage());
 
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(errorResponse);
     }
@@ -173,8 +168,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 "Erro interno do servidor",
-                "Ocorreu um erro inesperado. Por favor, tente novamente."
-        );
+                "Ocorreu um erro inesperado. Por favor, tente novamente.");
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
@@ -186,8 +180,7 @@ public class GlobalExceptionHandler {
             LocalDateTime timestamp,
             int status,
             String error,
-            String message
-    ) {
+            String message) {
     }
 
 }

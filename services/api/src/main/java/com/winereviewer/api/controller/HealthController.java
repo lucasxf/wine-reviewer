@@ -24,8 +24,7 @@ public class HealthController {
         return ResponseEntity.ok(Map.of(
                 "status", "UP",
                 "timestamp", Instant.now().toString(),
-                "service", "wine-reviewer-api"
-        ));
+                "service", "wine-reviewer-api"));
     }
 
 }

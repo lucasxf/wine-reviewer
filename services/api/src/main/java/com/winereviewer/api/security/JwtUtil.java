@@ -103,8 +103,8 @@ public class JwtUtil {
                 .subject(userId.toString())           // ← Payload: userId no campo 'sub'
                 .issuedAt(now)                        // ← Payload: timestamp de criação
                 .expiration(expirationDate)           // ← Payload: timestamp de expiração
-                .signWith(getSigningKey())  // ← Assina com chave secreta (HS256 = HMAC-SHA256)
-                .compact();                               // ← Gera string final (header.payload.signature)
+                .signWith(getSigningKey())            // ← Assina com chave secreta (HS256 = HMAC-SHA256)
+                .compact();                           // ← Gera string final (header.payload.signature)
     }
 
     /**

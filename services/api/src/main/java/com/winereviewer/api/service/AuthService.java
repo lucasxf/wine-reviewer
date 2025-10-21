@@ -49,8 +49,7 @@ public interface AuthService {
             String userId,
             String email,
             String displayName,
-            String avatarUrl
-    ) {
+            String avatarUrl) {
     }
 
 }

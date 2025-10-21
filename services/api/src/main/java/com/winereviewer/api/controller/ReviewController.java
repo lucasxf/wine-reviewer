@@ -27,7 +27,7 @@ import java.util.UUID;
 /**
  * Controller para gerenciamento de avaliações de vinhos.
  * <p>
- * Fornece endpoints REST para criar, atualizar, buscar e deletar reviews.
+ * Fornece endpoints REST para criar, atualizar, buscar e excluir avaliações.
  *
  * @author lucas
  * @date 19/10/2025 09:13
@@ -70,10 +70,10 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<ReviewResponse> createReview(
             @RequestBody @Valid CreateReviewRequest request) {
-        log.info("Recebida requisição para criar review do vinho: {}", request.wineId());
+        log.info("Recebida requisição para criar avaliação do vinho: {}", request.wineId());
         // TODO capture authenticated user ID via JWT
         final var review = service.createReview(request, UUID.randomUUID());
-        log.info("Review criada com sucesso. ID: {}", review.id());
+        log.info("Avaliação criada com sucesso. ID: {}", review.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(review);
     }
 
@@ -112,10 +112,10 @@ public class ReviewController {
             @Parameter(description = "ID da avaliação", required = true)
             @PathVariable UUID reviewId,
             @RequestBody @Valid UpdateReviewRequest request) {
-        log.info("Recebida requisição para atualizar review: {}", reviewId);
+        log.info("Recebida requisição para atualizar avaliação: {}", reviewId);
         // TODO capture authenticated user ID via JWT
         final var review = service.updateReview(reviewId, request, UUID.randomUUID());
-        log.info("Review atualizada com sucesso: {}", reviewId);
+        log.info("Avaliação atualizada com sucesso: {}", reviewId);
         return ResponseEntity.ok(review);
     }
 
@@ -144,7 +144,7 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> getReview(
             @Parameter(description = "ID da avaliação", required = true)
             @PathVariable UUID reviewId) {
-        log.info("Recebida requisição para buscar review: {}", reviewId);
+        log.info("Recebida requisição para buscar avaliação: {}", reviewId);
         final var review = service.getReviewById(reviewId);
         return ResponseEntity.ok(review);
     }
@@ -191,7 +191,7 @@ public class ReviewController {
             @RequestParam(required = false) UUID userId,
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
-        log.info("Recebida requisição para listar reviews. Filtros - wineId: {}, userId: {}", wineId, userId);
+        log.info("Recebida requisição para listar avaliações. Filtros - wineId: {}, userId: {}", wineId, userId);
         final var reviews = service.listReviews(wineId, userId, pageable);
         return ResponseEntity.ok(reviews);
     }
@@ -226,10 +226,10 @@ public class ReviewController {
     public ResponseEntity<Void> deleteReview(
             @Parameter(description = "ID da avaliação", required = true)
             @PathVariable UUID reviewId) {
-        log.info("Recebida requisição para deletar review: {}", reviewId);
+        log.info("Recebida requisição para excluir avaliação: {}", reviewId);
         // TODO capture authenticated user ID via JWT
         service.deleteReview(reviewId, UUID.randomUUID());
-        log.info("Review deletada com sucesso: {}", reviewId);
+        log.info("Avaliação excluída com sucesso: {}", reviewId);
         return ResponseEntity.noContent().build();
     }
 
