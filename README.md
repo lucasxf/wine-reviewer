@@ -6,18 +6,11 @@
 [![Mobile CI/CD](https://github.com/username/wine-reviewer/actions/workflows/ci-app.yml/badge.svg)](https://github.com/username/wine-reviewer/actions/workflows/ci-app.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 📋 Table of Contents
+---
 
-- [Overview](#overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Getting Started](#getting-started)
-- [Development](#development)
-- [Testing](#testing)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
+# 📋 PART 1: GENERAL (Project Overview)
+
+> **This section:** Cross-stack information, project structure, features, tech stack overview.
 
 ## 🎯 Overview
 
@@ -38,11 +31,12 @@
 - ✅ Complete Review CRUD API endpoints
 - ✅ Comment system for reviews
 - ✅ JWT authentication structure (JJWT 0.12.6)
+- ✅ **Google OAuth authentication** (AuthService, GoogleTokenValidator)
 - ✅ **Domain exception hierarchy** with proper HTTP status mapping
 - ✅ PostgreSQL with Flyway migrations
 - ✅ OpenAPI/Swagger documentation
 - ✅ Docker Compose setup for local development
-- ✅ **Comprehensive test suite** (27 tests, 100% passing)
+- ✅ **Comprehensive test suite** (46 tests, 100% passing)
 
 ### Exception Handling System
 - ✅ `DomainException` abstract base class with `getHttpStatus()` method
@@ -50,11 +44,11 @@
 - ✅ `InvalidRatingException` (400) - Rating validation (1-5 glasses)
 - ✅ `UnauthorizedAccessException` (403) - Ownership violations
 - ✅ `BusinessRuleViolationException` (422) - Business rule violations
+- ✅ `InvalidTokenException` (401) - Invalid/expired authentication tokens
 - ✅ `GlobalExceptionHandler` with unified domain exception handling
 
 ### In Progress
 - 🚧 Flutter mobile app
-- 🚧 Google OAuth integration
 - 🚧 Image upload with pre-signed URLs
 - 🚧 Integration tests with Testcontainers
 
@@ -64,7 +58,7 @@
 - 📍 Wine recommendations
 - 📍 Internationalization (i18n)
 
-## 🛠 Tech Stack
+## 🛠 Tech Stack Overview
 
 ### Mobile App (`apps/mobile/`)
 - **Framework:** Flutter 3.x
@@ -79,7 +73,7 @@
 - **Language:** Java 21
 - **Database:** PostgreSQL 16
 - **Migrations:** Flyway
-- **Testing:** Testcontainers
+- **Testing:** JUnit 5, Testcontainers
 - **API Docs:** springdoc-openapi (Swagger)
 - **Auth:** Google OAuth/OpenID + JWT
 
@@ -116,13 +110,13 @@ wine-reviewer/
 └── .github/workflows/          # CI/CD pipelines
 ```
 
-## 🚀 Getting Started
+## 🚀 Getting Started (Quick Start)
 
 ### Prerequisites
 
 - **Java 21** (JDK)
 - **Maven 3.8+** (or use `./mvnw`)
-- **Flutter 3.x**
+- **Flutter 3.x** (for mobile app)
 - **Docker** and **Docker Compose**
 - **Git**
 
@@ -151,95 +145,7 @@ wine-reviewer/
    - User: `winereviewer`
    - Password: `winereviewer_dev_pass`
 
-### Manual Backend Setup
-
-```bash
-cd services/api
-
-# Run with Maven wrapper
-./mvnw spring-boot:run
-
-# Or run with specific profile
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
-```
-
-### Mobile App Setup
-
-```bash
-cd apps/mobile
-
-# Install dependencies
-flutter pub get
-
-# Run app (select device)
-flutter run
-
-# Build for Android
-flutter build apk
-```
-
-## 💻 Development
-
-### Backend API
-
-```bash
-cd services/api
-
-# Run all tests
-./mvnw test
-
-# Run with coverage
-./mvnw verify
-
-# Clean build
-./mvnw clean install
-
-# Format code (if using Spotless)
-./mvnw spotless:apply
-```
-
-**Key API Endpoints:**
-- `POST /api/reviews` - Create review (201 Created)
-- `GET /api/reviews` - List reviews - ⚠️ Not implemented yet (501)
-- `GET /api/reviews/{id}` - Get review details (200 OK, 404 Not Found)
-- `PUT /api/reviews/{id}` - Update review (200 OK, 404 Not Found, 403 Forbidden)
-- `DELETE /api/reviews/{id}` - Delete review - ⚠️ Not implemented yet (501)
-- `POST /api/reviews/{id}/comments` - Add comment - ⚠️ Not implemented yet
-- `GET /api/reviews/{id}/comments` - List comments - ⚠️ Not implemented yet
-
-**HTTP Status Codes:**
-- `200 OK` - Successful GET/PUT
-- `201 Created` - Successful POST
-- `204 No Content` - Successful DELETE
-- `400 Bad Request` - Invalid input (validation errors, invalid rating)
-- `403 Forbidden` - Ownership violation (trying to modify another user's resource)
-- `404 Not Found` - Resource not found (review, wine, user)
-- `422 Unprocessable Entity` - Business rule violation (e.g., invalid wine year)
-- `500 Internal Server Error` - Unexpected errors
-- `501 Not Implemented` - Endpoint planned but not implemented yet
-
-### Mobile App
-
-```bash
-cd apps/mobile
-
-# Analyze code
-flutter analyze
-
-# Format code
-dart format .
-
-# Run tests
-flutter test
-
-# Run tests with coverage
-flutter test --coverage
-
-# Generate freezed models
-flutter pub run build_runner build --delete-conflicting-outputs
-```
-
-### Docker Commands
+### Docker Commands (General)
 
 ```bash
 cd infra
@@ -260,38 +166,7 @@ docker compose down -v
 docker compose up -d --build api
 ```
 
-## 🧪 Testing
-
-### Backend Testing Strategy (Test Pyramid)
-
-- **Unit Tests:** Business logic, services, utilities
-- **Integration Tests:** API endpoints with Testcontainers (real PostgreSQL)
-- **Focus Areas:** Authentication, review CRUD, pagination, comments
-
-```bash
-# Run only unit tests
-./mvnw test -Dtest="*Test"
-
-# Run only integration tests
-./mvnw test -Dtest="*IT"
-
-# Run specific test class
-./mvnw test -Dtest=ReviewServiceTest
-```
-
-### Mobile Testing Strategy
-
-- **Unit Tests:** Business logic, state management
-- **Widget Tests:** Individual widgets and screens
-- **Golden Tests:** Visual regression testing
-
-```bash
-flutter test                    # All tests
-flutter test test/unit/         # Unit tests only
-flutter test test/widget/       # Widget tests only
-```
-
-## 🚀 Deployment
+## 🚀 Deployment (General)
 
 ### MVP Hosting (100% Free Tier)
 
@@ -316,9 +191,128 @@ GitHub Actions workflows with path-based triggers:
   - Manual workflow dispatch
   - Semantic versioning (major.minor.patch)
 
-## 🤝 Contributing
+## 📚 Documentation
 
-### Code Conventions
+- **`CLAUDE.md`** - Comprehensive project guide for AI assistants (organized by General/Backend/Frontend)
+- **`CODING_STYLE.md`** - Coding standards and conventions (organized by General/Backend/Frontend)
+- **`prompts/PACK.md`** - AI prompt pack and agent schemas
+- **`services/api/README.md`** - Backend setup and API details
+- **`apps/mobile/README.md`** - Mobile app setup and architecture
+- **`ADRs/`** - Architecture decision records (future)
+
+---
+
+# ⚙️ PART 2: BACKEND (Java/Spring Boot)
+
+> **This section:** Backend-specific setup, development, testing, and API documentation.
+
+## Backend Development Setup
+
+### Manual Backend Setup
+
+```bash
+cd services/api
+
+# Run with Maven wrapper
+./mvnw spring-boot:run
+
+# Or run with specific profile
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+### Backend Development Commands
+
+```bash
+cd services/api
+
+# Run all tests
+./mvnw test
+
+# Run with coverage
+./mvnw verify
+
+# Clean build
+./mvnw clean install
+
+# Format code (if using Spotless)
+./mvnw spotless:apply
+```
+
+## API Endpoints
+
+### Authentication
+- `POST /api/auth/google` - Authenticate with Google OAuth (201 Created)
+  - Request: `{ "googleIdToken": "..." }`
+  - Response: `{ "token": "...", "userId": "...", "email": "...", "displayName": "..." }`
+
+### Reviews
+- `POST /api/reviews` - Create review (201 Created)
+- `GET /api/reviews` - List reviews with pagination (200 OK)
+  - Query params: `wineId`, `userId`, `page`, `size`, `sort`
+- `GET /api/reviews/{id}` - Get review details (200 OK, 404 Not Found)
+- `PUT /api/reviews/{id}` - Update review (200 OK, 404 Not Found, 403 Forbidden)
+- `DELETE /api/reviews/{id}` - Delete review (204 No Content, 404 Not Found, 403 Forbidden)
+
+### Comments
+- `POST /api/reviews/{id}/comments` - Add comment - ⚠️ Not fully implemented yet
+- `GET /api/reviews/{id}/comments` - List comments - ⚠️ Not fully implemented yet
+
+### Health & Monitoring
+- `GET /health` - Health check (200 OK)
+- `GET /actuator/health` - Spring Actuator health endpoint
+
+## HTTP Status Codes
+
+- `200 OK` - Successful GET/PUT
+- `201 Created` - Successful POST
+- `204 No Content` - Successful DELETE
+- `400 Bad Request` - Invalid input (validation errors, invalid rating)
+- `401 Unauthorized` - Invalid/expired authentication token
+- `403 Forbidden` - Ownership violation (trying to modify another user's resource)
+- `404 Not Found` - Resource not found (review, wine, user)
+- `422 Unprocessable Entity` - Business rule violation (e.g., invalid wine year)
+- `500 Internal Server Error` - Unexpected errors
+- `501 Not Implemented` - Endpoint planned but not implemented yet
+
+## Backend Testing
+
+### Testing Strategy (Test Pyramid)
+
+- **Unit Tests:** Business logic, services, utilities
+- **Integration Tests:** API endpoints with Testcontainers (real PostgreSQL)
+- **Focus Areas:** Authentication, review CRUD, pagination, comments
+
+### Running Tests
+
+```bash
+cd services/api
+
+# Run all tests
+./mvnw test
+
+# Run only unit tests
+./mvnw test -Dtest="*Test"
+
+# Run only integration tests
+./mvnw test -Dtest="*IT"
+
+# Run specific test class
+./mvnw test -Dtest=ReviewServiceTest
+
+# Run with coverage
+./mvnw verify
+```
+
+### Current Test Coverage
+
+- **46 tests, 100% passing**
+- `ReviewControllerTest` - 4 tests (REST endpoint validation)
+- `ReviewServiceTest` - 20 tests (business logic)
+- `AuthServiceTest` - 5 tests (Google OAuth authentication)
+- `GoogleTokenValidatorTest` - 5 tests (token validation)
+- `DomainExceptionTest` - 12 tests (exception hierarchy)
+
+## Backend Code Conventions
 
 **Java/Spring Boot:**
 - Constructor injection only (no `@Autowired` on fields)
@@ -327,32 +321,127 @@ GitHub Actions workflows with path-based triggers:
 - Use underscores for large numbers: `3_600_000`
 - Method order: public methods first, then private (top-down)
 - Include `@author` and `@date` in Javadoc
+- Always add OpenAPI/Swagger annotations to REST endpoints
+
+See `CODING_STYLE.md` → **PART 2: BACKEND STANDARDS** for detailed conventions.
+
+---
+
+# 📱 PART 3: FRONTEND (Flutter/Dart)
+
+> **This section:** Mobile app setup, development, testing, and conventions.
+
+## Mobile App Setup
+
+```bash
+cd apps/mobile
+
+# Install dependencies
+flutter pub get
+
+# Run app (select device)
+flutter run
+
+# Build for Android
+flutter build apk
+
+# Build for iOS (macOS only)
+flutter build ios
+```
+
+## Frontend Development Commands
+
+```bash
+cd apps/mobile
+
+# Analyze code
+flutter analyze
+
+# Format code
+dart format .
+
+# Run tests
+flutter test
+
+# Run tests with coverage
+flutter test --coverage
+
+# Generate freezed models
+flutter pub run build_runner build --delete-conflicting-outputs
+```
+
+## Frontend Testing
+
+### Testing Strategy
+
+- **Unit Tests:** Business logic, state management
+- **Widget Tests:** Individual widgets and screens
+- **Golden Tests:** Visual regression testing
+
+### Running Tests
+
+```bash
+# All tests
+flutter test
+
+# Unit tests only
+flutter test test/unit/
+
+# Widget tests only
+flutter test test/widget/
+
+# With coverage
+flutter test --coverage
+```
+
+## Frontend Code Conventions
 
 **Flutter/Dart:**
-- Feature-based folder structure
-- Use freezed for models
+- Feature-based folder structure (`lib/features/`, `lib/core/`, `lib/common/`)
+- Use freezed for immutable models
+- Use Riverpod for state management
 - Follow Effective Dart style guide
 - Widget tests for all screens
+- Use `const` constructors for performance
 
-See `CLAUDE.md` for detailed conventions.
+See `CODING_STYLE.md` → **PART 3: FRONTEND STANDARDS** for detailed conventions.
 
-### Development Phases
+---
+
+# 🤝 Contributing
+
+## Development Phases
 
 - **F0 (Setup):** ✅ Monorepo, Docker, CI/CD
-- **F1 (Domain & API):** ✅ Entities, CRUD, migrations
+- **F1 (Domain & API):** ✅ Entities, CRUD, migrations, Google OAuth
 - **F2 (Flutter MVP):** 🚧 Login, feed, review screens
 - **F3 (Observability):** 📍 Logs, metrics, tracing
 - **F4 (CI/CD):** 📍 Full pipelines, deployment
 - **F5 (Play Store):** 📍 App signing, release
 - **F6+ (Evolution):** 📍 Advanced features
 
-## 📚 Documentation
+## Code Review Checklist
 
-- **`CLAUDE.md`** - Comprehensive project guide for AI assistants
-- **`prompts/PACK.md`** - AI prompt pack and agent schemas
-- **`services/api/README.md`** - Backend setup and API details
-- **`apps/mobile/README.md`** - Mobile app setup and architecture
-- **`ADRs/`** - Architecture decision records (future)
+### General
+- [ ] Code in English, comments can be in Portuguese
+- [ ] Quality over speed
+- [ ] Tests included for new features
+- [ ] Documentation updated (README, CLAUDE.md, OpenAPI)
+
+### Backend
+- [ ] Constructor injection (no field injection)
+- [ ] `@ConfigurationProperties` for configs (no `@Value`)
+- [ ] OpenAPI/Swagger annotations on REST endpoints
+- [ ] Domain exceptions with proper HTTP status
+- [ ] Tests passing (unit + integration)
+
+### Frontend
+- [ ] Freezed models for DTOs
+- [ ] Riverpod for state management
+- [ ] Widget tests for screens
+- [ ] No warnings in `flutter analyze`
+
+---
 
 ## 📄 License
 

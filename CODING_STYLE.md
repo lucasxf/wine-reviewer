@@ -2,18 +2,99 @@
 
 > Este documento define o estilo de programação do desenvolvedor para manter consistência em todos os projetos.
 > Baseado na análise do repositório: https://github.com/lucasxf/estudos
+>
+> **Organizado em 3 partes:** GENERAL (cross-stack), BACKEND (Java/Spring Boot), FRONTEND (Flutter/Dart)
 
 ---
+
+# 🌍 PART 1: GENERAL STANDARDS (Cross-stack)
+
+> **Use this section for:** Universal coding standards applicable to any language/framework.
+> **Reusable in:** All projects (backend, frontend, fullstack).
 
 ## 🎯 Princípios Gerais
 
 - **Qualidade sobre velocidade** - Tomar o tempo necessário para fazer certo
 - **Código em inglês** - Nomes de classes, métodos, variáveis sempre em inglês
-- **Comentários e logs podem ser em português** - Documentação Javadoc e mensagens de log
-- **DDD e Event Sourcing** - Forte influência de Domain-Driven Design
+- **Comentários e logs podem ser em português** - Documentação e mensagens de log
 - **Separation of Concerns** - Clara divisão entre camadas
+- **Test-After-Implementation** - Sempre criar testes imediatamente após implementar classe testável
+
+## 📋 Nomenclatura Universal
+
+- **Classes:** PascalCase - `AccountAggregate`, `CreateAccountHandler`, `ReviewService`
+- **Métodos:** camelCase - `createAccount()`, `validateCommand()`, `getUserById()`
+- **Variáveis:** camelCase - `correlationId`, `accountStream`, `userId`
+- **Constantes:** UPPER_SNAKE_CASE - `EMAIL_PATTERN`, `MAX_RETRY_ATTEMPTS`, `ONE_HOUR_MS`
+- **Pacotes (Java) / Módulos (Dart):** lowercase - `subscriptions_billing`, `domain.account`, `features/auth`
+- **Números grandes:** SEMPRE usar underscore para separar milhares - `3_600_000` (não `3600000`)
+
+### Exemplo de Números com Agrupamento
+
+```java
+// ✅ CORRETO - Legível
+private static final long ONE_HOUR_MS = 3_600_000L;
+private static final long ONE_DAY_MS = 86_400_000L;
+private static final int MAX_FILE_SIZE = 10_000_000;  // 10 MB
+
+// ❌ INCORRETO - Difícil de ler
+private static final long ONE_HOUR_MS = 3600000L;
+private static final long ONE_DAY_MS = 86400000L;
+private static final int MAX_FILE_SIZE = 10000000;
+```
+
+## 📚 Documentação Viva
+
+### Princípio de Documentação Contínua
+
+**REGRA:** A documentação deve ser atualizada ao final de cada sessão de desenvolvimento.
+
+**REGRA CRÍTICA: Organização de Documentação (Estrutura 3 Partes)**
+
+Todos os arquivos principais de documentação (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **devem** ser organizados em 3 partes:
+1. **PART 1: GENERAL** - Guidelines cross-stack, visão geral, regras universais
+2. **PART 2: BACKEND** - Específico de backend (Java/Spring Boot): setup, convenções, testes
+3. **PART 3: FRONTEND** - Específico de frontend (Flutter/Dart): setup, convenções, testes
+
+**Benefícios:**
+- ✅ **Reutilizável**: Copiar apenas seções relevantes para novos projetos (backend-only, frontend-only, fullstack)
+- ✅ **Organizado**: Sem mistura de guidelines de stacks diferentes
+- ✅ **Escalável**: Fácil adicionar novas seções (PART 4: BFF, PART 5: Infraestrutura, etc.)
+- ✅ **Claro**: Cada seção tem delimitadores claros e instruções de uso
+
+**Arquivos a atualizar após mudanças significativas:**
+1. **`CLAUDE.md`** - Sempre atualizar com novas diretrizes, decisões arquiteturais e aprendizados
+   - **CRITICAL:** Atualizar seção "Next Steps (Roadmap)" - mover itens completos para "Implemented", adicionar novos próximos passos
+   - **Estrutura:** 3 partes (General/Backend/Frontend)
+2. **`CODING_STYLE.md`** (este arquivo) - Sempre atualizar com novos padrões de código identificados
+   - **Estrutura:** 3 partes (General/Backend/Frontend)
+3. **`README.md`** - Atualizar quando o estado da aplicação mudar (novas features, endpoints, configurações)
+   - **Estrutura:** 3 partes (General/Backend/Frontend)
+4. **OpenAPI/Swagger (Backend)** - Atualizar anotações nos controllers sempre que criar/modificar endpoints REST
+
+**O que caracteriza mudança significativa:**
+- Novas features implementadas
+- Novos endpoints REST criados/modificados
+- Mudanças arquiteturais (novos padrões, exceções, estruturas)
+- Novas convenções de código identificadas
+- Atualizações de dependências importantes
+
+**Formato de atualização:**
+- Sempre incluir data da atualização
+- Descrever brevemente o que foi adicionado/modificado
+- Manter histórico de mudanças relevantes
+- **Atualizar "Next Steps (Roadmap)" em CLAUDE.md:**
+  - Mover tasks completadas para "Current Implementation Status"
+  - Adicionar novos próximos passos baseados no progresso
+  - Manter priorização clara (1, 2, 3, 4...)
+  - Ajuda na carga de contexto ao início de cada nova sessão
 
 ---
+
+# ☕ PART 2: BACKEND STANDARDS (Java/Spring Boot)
+
+> **Use this section for:** Backend-only projects, Spring Boot microservices, REST APIs.
+> **Copy from here when creating:** Java backend projects, Spring Boot applications.
 
 ## 📦 Estrutura de Pacotes
 
@@ -46,7 +127,7 @@ com.winereviewer.api/
 ├── service/              # Business logic
 ├── repository/           # Data access
 ├── domain/               # Entities
-├── dto/                  # Data Transfer Objects
+├── application/dto/      # Data Transfer Objects
 ├── exception/            # Custom exceptions
 ├── config/               # Configuration classes (@Configuration, @ConfigurationProperties)
 └── security/             # Security filters, utils (não configs)
@@ -57,11 +138,10 @@ com.winereviewer.api/
 - Classes de segurança (filters, utils) → `/security`
 - Exemplo: `JwtProperties` fica em `/config`, `JwtUtil` fica em `/security`
 
----
-
-## 🏗️ Padrões Arquiteturais
+## 🏗️ Padrões Arquiteturais (Backend)
 
 ### 1. Event Sourcing / CQRS (quando aplicável)
+
 **Aggregates:**
 - Imutáveis com estado reconstruído a partir de eventos
 - Método `decide()` para comandos → retorna eventos
@@ -97,10 +177,12 @@ public class AccountAggregate {
             }
         }
     }
+
 }
 ```
 
 ### 2. Command Handlers
+
 - Interface `CommandHandler<T extends Command>`
 - Implementações separadas por comando
 - Fluxo: Load → Decide → Append → Publish
@@ -131,33 +213,11 @@ public class CreateAccountHandler implements CommandHandler<CreateAccount> {
             eventBus.publishAll(events, correlationId, commandId);
         }
     }
+
 }
 ```
 
----
-
-## 📝 Convenções de Código
-
-### Nomenclatura
-- **Classes:** PascalCase - `AccountAggregate`, `CreateAccountHandler`
-- **Métodos:** camelCase - `createAccount()`, `validateCommand()`
-- **Variáveis:** camelCase - `correlationId`, `accountStream`
-- **Constantes:** UPPER_SNAKE_CASE - `EMAIL_PATTERN`, `MAX_RETRY_ATTEMPTS`
-- **Pacotes:** lowercase - `subscriptions_billing`, `domain.account`
-- **Números grandes:** SEMPRE usar underscore para separar milhares - `3_600_000` (não `3600000`)
-
-**Exemplo de números com agrupamento:**
-```java
-// ✅ CORRETO - Legível
-private static final long ONE_HOUR_MS = 3_600_000L;
-private static final long ONE_DAY_MS = 86_400_000L;
-private static final int MAX_FILE_SIZE = 10_000_000;  // 10 MB
-
-// ❌ INCORRETO - Difícil de ler
-private static final long ONE_HOUR_MS = 3600000L;
-private static final long ONE_DAY_MS = 86400000L;
-private static final int MAX_FILE_SIZE = 10000000;
-```
+## 📝 Convenções de Código (Backend)
 
 ### Ordenação de Métodos em Classes
 
@@ -218,26 +278,7 @@ public class ReviewServiceImpl implements ReviewService {
     private WineSummaryResponse toWineSummary(Wine wine) {
         // Chamado por toReviewResponse
     }
-}
-```
 
-**Exemplo incorreto (❌):**
-```java
-public class ReviewServiceImpl {
-
-    // ❌ ERRADO: método privado acima do público
-    private Review toReview(...) { }
-
-    @Override
-    public ReviewResponse createReview(...) { }
-
-    @Override
-    public ReviewResponse updateReview(...) { }
-
-    // ❌ ERRADO: toReviewResponse deveria vir antes de toUserSummary
-    //           pois é chamado primeiro
-    private UserSummaryResponse toUserSummary(...) { }
-    private ReviewResponse toReviewResponse(...) { }
 }
 ```
 
@@ -247,6 +288,7 @@ public class ReviewServiceImpl {
 - Entendimento progressivo: vê-se primeiro "o que" a classe faz, depois "como"
 
 ### Java Moderno (Java 21)
+
 - ✅ **`var`** para inferência de tipo (quando o tipo é óbvio)
 - ✅ **Records** para DTOs e Commands/Events imutáveis
 - ✅ **Sealed classes** para hierarquias fechadas (Commands, Events)
@@ -283,6 +325,7 @@ final var accountAggregate = AccountAggregate.from(...);
 ```
 
 ### Anotações Lombok
+
 - ✅ `@Slf4j` - Logging automático
 - ✅ `@Getter` - Getters seletivos (não usar `@Data` indiscriminadamente)
 - ❌ Evitar `@Data` em entidades de domínio (preferir imutabilidade)
@@ -333,19 +376,6 @@ public class ResourceNotFoundException extends DomainException {
 
 }  // ← Linha em branco antes do closing bracket
 
-// ✅ CORRETO - Controller com linha em branco
-@RestController
-@RequestMapping("/reviews")
-public class ReviewController {
-    private final ReviewService service;
-
-    @PostMapping
-    public ResponseEntity<ReviewResponse> create(@RequestBody CreateReviewRequest request) {
-        return ResponseEntity.ok(service.create(request));
-    }
-
-}  // ← Linha em branco antes do closing bracket
-
 // ❌ INCORRETO - Faltando linha em branco
 public class ReviewService {
     public void doSomething() {
@@ -360,8 +390,6 @@ public class ReviewService {
 - Consistência no codebase
 - Preferência pessoal do desenvolvedor
 
----
-
 ### Tratamento de Exceções
 
 **Regras:**
@@ -375,7 +403,8 @@ DomainException (abstrata)
 ├── ResourceNotFoundException (404 NOT FOUND)
 ├── InvalidRatingException (400 BAD REQUEST)
 ├── UnauthorizedAccessException (403 FORBIDDEN)
-└── BusinessRuleViolationException (422 UNPROCESSABLE ENTITY)
+├── BusinessRuleViolationException (422 UNPROCESSABLE ENTITY)
+└── InvalidTokenException (401 UNAUTHORIZED)
 ```
 
 **Exemplo:**
@@ -387,7 +416,7 @@ public abstract class DomainException extends RuntimeException {
 
     public abstract HttpStatus getHttpStatus();
 
-}  // ← Linha em branco antes do closing bracket
+}
 
 public class InvalidAccountException extends DomainException {
     public InvalidAccountException(String message) {
@@ -399,7 +428,7 @@ public class InvalidAccountException extends DomainException {
         return HttpStatus.BAD_REQUEST;
     }
 
-}  // ← Linha em branco antes do closing bracket
+}
 
 // Uso em serviços
 if (status != AccountStatus.NEW) {
@@ -414,8 +443,6 @@ if (status != AccountStatus.NEW) {
 - Handler unificado para `DomainException` usando polimorfismo
 - Status HTTP determinado por `getHttpStatus()` de cada exceção
 - Handlers legados (`IllegalArgumentException`, `SecurityException`) marcados como `@Deprecated`
-
----
 
 ## 🎨 Estilo de Controllers
 
@@ -504,7 +531,7 @@ public class ReviewController {
         return ResponseEntity.ok(review);
     }
 
-}  // ← Linha em branco antes do closing bracket
+}
 ```
 
 **Workflow ao criar novos endpoints:**
@@ -520,16 +547,16 @@ public class ReviewController {
 - `201 Created` - POST bem-sucedido
 - `204 No Content` - DELETE bem-sucedido
 - `400 Bad Request` - Validação falhou
+- `401 Unauthorized` - Token inválido/expirado
 - `403 Forbidden` - Sem permissão (ownership)
 - `404 Not Found` - Recurso não encontrado
 - `422 Unprocessable Entity` - Regra de negócio violada
 - `501 Not Implemented` - Endpoint planejado mas não implementado
 
----
-
 ## 📋 Javadoc e Comentários
 
 ### Javadoc
+
 - **Obrigatório** para classes públicas e interfaces
 - Incluir `@author` e `@date`
 - Descrição concisa em português
@@ -543,31 +570,32 @@ public class ReviewController {
  * @date 22/09/2025
  */
 @RestController
-public class AccountController { }
+public class AccountController {
+
+}
 ```
 
 ### Comentários inline
+
 - Usar quando a lógica não é óbvia
 - Preferir código autoexplicativo a comentários excessivos
 - Podem ser em português
 
----
-
-## 🧪 Testes
+## 🧪 Testes (Backend)
 
 ### Estrutura de Testes
+
 - JUnit 5
 - Cobertura de caminhos de sucesso e falha
 - Testes de integração com contexto completo
 - Mock apenas quando necessário (preferir testes reais)
 
 ### Nomenclatura
+
 - `should[ExpectedBehavior]When[StateUnderTest]`
 - Exemplo: `shouldCreateAccountWhenValidCommand()`
 
----
-
-## 🔧 Logging
+## 🔧 Logging (Backend)
 
 - `@Slf4j` do Lombok
 - Mensagens informativas em português
@@ -579,8 +607,6 @@ public class AccountController { }
 log.info("Handling CreateAccount command for username: {}", command.username());
 log.info("Account {} created successfully for username: {}", accountId, command.username());
 ```
-
----
 
 ## 📦 Maven / Gerenciamento de Dependências
 
@@ -606,7 +632,7 @@ log.info("Account {} created successfully for username: {}", accountId, command.
     <spring-boot.version>3.2.0</spring-boot.version>
 
     <!-- Security -->
-    <jwt.version>0.12.3</jwt.version>
+    <jwt.version>0.12.6</jwt.version>
 
     <!-- Database -->
     <postgresql.version>42.7.1</postgresql.version>
@@ -641,8 +667,6 @@ log.info("Account {} created successfully for username: {}", accountId, command.
 - Preferir sufixo `.version` para clareza
 - Agrupar por categoria (Spring, Database, Security, etc.)
 
----
-
 ## 🔧 Injeção de Dependências e Configurações
 
 ### Injeção de Propriedades (Configuration Properties)
@@ -676,6 +700,7 @@ public class JwtProperties {
     public Long getExpiration() {
         return expiration;
     }
+
 }
 
 // 2. Habilitar no config
@@ -683,6 +708,7 @@ public class JwtProperties {
 @EnableConfigurationProperties(JwtProperties.class)
 public class SecurityConfig {
     // ...
+
 }
 
 // 3. Usar via constructor injection
@@ -699,6 +725,7 @@ public class JwtUtil {
     public String generateToken(UUID userId) {
         // Usa this.secret e this.expirationMs
     }
+
 }
 ```
 
@@ -721,40 +748,6 @@ jwt:
   secret: your-secret-key-min-256-bits-32chars
   expiration: 3600000  # 1 hora em milissegundos
 ```
-
----
-
-## 🚫 Anti-Padrões a Evitar
-
-- ❌ `@Autowired` em fields (usar injeção via construtor)
-- ❌ **`@Value` para propriedades** (usar `@ConfigurationProperties` com POJOs)
-- ❌ **Field injection** (sempre usar constructor injection)
-- ❌ Getters/setters desnecessários (usar Lombok seletivamente)
-- ❌ Lógica de negócio em controllers
-- ❌ Exceptions genéricas (`throw new Exception()`)
-- ❌ Magic numbers/strings (usar constantes)
-- ❌ Null checks excessivos (usar `Optional` ou validação antecipada)
-- ❌ **Versões hardcoded em dependencies** (usar `<properties>`)
-
----
-
-## ✅ Checklist de Code Review
-
-- [ ] Código em inglês, comentários podem ser em português
-- [ ] Injeção de dependências via construtor (NUNCA field injection)
-- [ ] **Propriedades via `@ConfigurationProperties` (NUNCA `@Value`)**
-- [ ] Exceptions específicas do domínio
-- [ ] Logs informativos nos pontos-chave
-- [ ] Javadoc em classes públicas com @author e @date
-- [ ] Uso apropriado de Java 21 features (var, records, pattern matching)
-- [ ] Separação clara entre camadas (domain/application/infrastructure)
-- [ ] Testes cobrindo casos de sucesso e falha
-- [ ] Validações com mensagens claras
-- [ ] Sem magic numbers ou strings hardcoded
-- [ ] **Versões de dependências em `<properties>` com placeholders**
-- [ ] **Métodos ordenados: public → private (invocation flow)**
-
----
 
 ## 🗄️ JPA / Hibernate
 
@@ -821,6 +814,7 @@ public class Review {
             throw new IllegalArgumentException("Rating deve estar entre 1 e 5");
         }
     }
+
 }
 ```
 
@@ -849,12 +843,11 @@ public class Wine {
 
     @Column(name = "`order`")  // ✅ Escapado
     private Integer order;
+
 }
 ```
 
 **Nota:** Backticks funcionam na maioria dos bancos. PostgreSQL também aceita aspas duplas (`"year"`), mas backticks são mais portáveis.
-
----
 
 ## 🔒 Spring Security
 
@@ -877,6 +870,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) {
         return http.addFilterBefore(filter, ...).build();
     }
+
 }
 ```
 
@@ -890,6 +884,7 @@ public class SecurityConfig {
 // SEM @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Classe POJO, sem anotações Spring
+
 }
 
 @Configuration
@@ -908,6 +903,7 @@ public class SecurityConfig {
             JwtAuthenticationFilter filter) {  // Injetado como parâmetro
         return http.addFilterBefore(filter, ...).build();
     }
+
 }
 ```
 
@@ -917,46 +913,224 @@ public class SecurityConfig {
 - **Segue padrão Spring Security:** Configurações devem declarar seus beans
 - **Evita registro duplo:** Filtro só é criado quando necessário
 
----
+## 🚫 Anti-Padrões a Evitar (Backend)
+
+- ❌ `@Autowired` em fields (usar injeção via construtor)
+- ❌ **`@Value` para propriedades** (usar `@ConfigurationProperties` com POJOs)
+- ❌ **Field injection** (sempre usar constructor injection)
+- ❌ Getters/setters desnecessários (usar Lombok seletivamente)
+- ❌ Lógica de negócio em controllers
+- ❌ Exceptions genéricas (`throw new Exception()`)
+- ❌ Magic numbers/strings (usar constantes)
+- ❌ Null checks excessivos (usar `Optional` ou validação antecipada)
+- ❌ **Versões hardcoded em dependencies** (usar `<properties>`)
+
+## ✅ Checklist de Code Review (Backend)
+
+- [ ] Código em inglês, comentários podem ser em português
+- [ ] Injeção de dependências via construtor (NUNCA field injection)
+- [ ] **Propriedades via `@ConfigurationProperties` (NUNCA `@Value`)**
+- [ ] Exceptions específicas do domínio
+- [ ] Logs informativos nos pontos-chave
+- [ ] Javadoc em classes públicas com @author e @date
+- [ ] Uso apropriado de Java 21 features (var, records, pattern matching)
+- [ ] Separação clara entre camadas (domain/application/infrastructure)
+- [ ] Testes cobrindo casos de sucesso e falha
+- [ ] Validações com mensagens claras
+- [ ] Sem magic numbers ou strings hardcoded
+- [ ] **Versões de dependências em `<properties>` com placeholders**
+- [ ] **Métodos ordenados: public → private (invocation flow)**
+- [ ] **Linha em branco antes de closing bracket (exceto records)**
+- [ ] **OpenAPI/Swagger annotations em todos os endpoints REST**
 
 ---
 
-## 📚 Documentação Viva
+# 📱 PART 3: FRONTEND STANDARDS (Flutter/Dart)
 
-### Princípio de Documentação Contínua
+> **Use this section for:** Mobile app development, Flutter projects, cross-platform apps.
+> **Copy from here when creating:** Flutter applications, mobile projects.
 
-**REGRA:** A documentação deve ser atualizada ao final de cada sessão de desenvolvimento.
+## 📦 Estrutura de Projeto (Flutter)
 
-**Arquivos a atualizar após mudanças significativas:**
-1. **`CLAUDE.md`** - Sempre atualizar com novas diretrizes, decisões arquiteturais e aprendizados
-   - **CRITICAL:** Atualizar seção "Next Steps (Roadmap)" - mover itens completos para "Implemented", adicionar novos próximos passos
-2. **`CODING_STYLE.md`** - Sempre atualizar com novos padrões de código identificados
-3. **`README.md`** - Atualizar quando o estado da aplicação mudar (novas features, endpoints, configurações)
-4. **OpenAPI/Swagger** - Atualizar anotações nos controllers sempre que criar/modificar endpoints REST
+### Feature-based Folder Structure
+```
+lib/
+├── features/              # Features do app
+│   ├── auth/             # Feature de autenticação
+│   │   ├── data/         # Data sources, repositories
+│   │   ├── domain/       # Entities, use cases
+│   │   └── presentation/ # Screens, widgets, providers
+│   ├── reviews/          # Feature de reviews
+│   └── wines/            # Feature de vinhos
+├── core/                  # Código compartilhado
+│   ├── router/           # Configuração de rotas (go_router)
+│   ├── theme/            # Tema do app
+│   ├── utils/            # Utilitários
+│   └── constants/        # Constantes
+└── common/                # Widgets e código reutilizável
+    ├── widgets/          # Widgets comuns
+    └── models/           # Models compartilhados
+```
 
-**O que caracteriza mudança significativa:**
-- Novas features implementadas
-- Novos endpoints REST criados/modificados
-- Mudanças arquiteturais (novos padrões, exceções, estruturas)
-- Novas convenções de código identificadas
-- Atualizações de dependências importantes
+## 📝 Convenções de Código (Flutter/Dart)
 
-**Formato de atualização:**
-- Sempre incluir data da atualização
-- Descrever brevemente o que foi adicionado/modificado
-- Manter histórico de mudanças relevantes
-- **Atualizar "Next Steps (Roadmap)" em CLAUDE.md:**
-  - Mover tasks completadas para "Current Implementation Status"
-  - Adicionar novos próximos passos baseados no progresso
-  - Manter priorização clara (1, 2, 3, 4...)
-  - Ajuda na carga de contexto ao início de cada nova sessão
+### Nomenclatura
+
+- **Classes:** PascalCase - `ReviewCard`, `AuthProvider`, `WineList`
+- **Arquivos:** snake_case - `review_card.dart`, `auth_provider.dart`, `wine_list.dart`
+- **Variáveis/Métodos:** camelCase - `getUserById`, `isLoading`, `reviewList`
+- **Constantes:** lowerCamelCase (Dart convention) - `maxFileSize`, `apiBaseUrl`
+
+### Models e DTOs
+
+- Usar **freezed** para models imutáveis
+- Usar **json_serializable** para serialização
+- Gerar código com `flutter pub run build_runner build --delete-conflicting-outputs`
+
+**Exemplo:**
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'review.freezed.dart';
+part 'review.g.dart';
+
+@freezed
+class Review with _$Review {
+  const factory Review({
+    required String id,
+    required int rating,
+    required String notes,
+    String? imageUrl,
+  }) = _Review;
+
+  factory Review.fromJson(Map<String, dynamic> json) => _$ReviewFromJson(json);
+}
+```
+
+### State Management (Riverpod)
+
+- Usar Riverpod para state management
+- Providers no mesmo arquivo da feature ou em `providers/`
+- Naming: `reviewProvider`, `authStateProvider`
+
+**Exemplo:**
+```dart
+@riverpod
+class ReviewList extends _$ReviewList {
+  @override
+  Future<List<Review>> build() async {
+    final repository = ref.read(reviewRepositoryProvider);
+    return repository.getReviews();
+  }
+
+  Future<void> addReview(Review review) async {
+    final repository = ref.read(reviewRepositoryProvider);
+    await repository.createReview(review);
+    ref.invalidateSelf();
+  }
+}
+```
+
+### Error Handling
+
+- Usar dio interceptors para retry logic
+- Tratar erros de rede gracefully
+- Mostrar mensagens de erro amigáveis ao usuário
+
+**Exemplo:**
+```dart
+class DioClient {
+  final Dio _dio = Dio()
+    ..interceptors.add(
+      RetryInterceptor(
+        dio: _dio,
+        maxRetries: 3,
+        retryDelays: const [
+          Duration(seconds: 1),
+          Duration(seconds: 2),
+          Duration(seconds: 3),
+        ],
+      ),
+    );
+}
+```
+
+### Widgets
+
+- Preferir StatelessWidget quando possível
+- Extrair widgets complexos em componentes separados
+- Usar `const` constructors sempre que possível para performance
+
+### Formatação
+
+- Usar `dart format .` para formatar código
+- Seguir Effective Dart style guide
+- Limite de 80 caracteres por linha (configurável)
+
+## 🧪 Testes (Flutter)
+
+### Tipos de Testes
+
+1. **Unit Tests:** Lógica de negócio, providers, repositories
+2. **Widget Tests:** Widgets individuais e telas
+3. **Golden Tests:** Testes de regressão visual
+
+### Nomenclatura
+
+- Arquivos de teste: `_test.dart` suffix
+- Exemplo: `review_card_test.dart`, `auth_provider_test.dart`
+
+**Exemplo de Widget Test:**
+```dart
+void main() {
+  testWidgets('ReviewCard displays review information', (tester) async {
+    final review = Review(
+      id: '1',
+      rating: 5,
+      notes: 'Excellent wine!',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ReviewCard(review: review),
+        ),
+      ),
+    );
+
+    expect(find.text('Excellent wine!'), findsOneWidget);
+    expect(find.text('5'), findsOneWidget);
+  });
+}
+```
+
+## 🎨 UI/UX
+
+- Material Design como base
+- Tema customizado em `core/theme/`
+- Responsividade: testar em diferentes tamanhos de tela
+- Acessibilidade: labels para screen readers
+
+## ✅ Checklist de Code Review (Flutter)
+
+- [ ] Código segue Effective Dart guidelines
+- [ ] Models usam freezed + json_serializable
+- [ ] State management com Riverpod
+- [ ] Widgets extraídos quando complexos
+- [ ] Uso de `const` constructors
+- [ ] Error handling apropriado
+- [ ] Testes (unit/widget) para lógica crítica
+- [ ] Formatação com `dart format`
+- [ ] Sem warnings no `flutter analyze`
 
 ---
 
-## 🔄 Histórico de Atualizações
+# 🔄 Histórico de Atualizações
 
-- **2025-10-21 (v3)** - Adicionada diretriz de "Next Steps (Roadmap)" no CLAUDE.md para tracking de próximos passos e carga de contexto entre sessões
-- **2025-10-21 (v2)** - Corrigida regra de formatação: linha em branco antes de closing bracket para **todas as classes** (exceto records). Adicionada regra obrigatória de documentação OpenAPI/Swagger para novos endpoints REST
+- **2025-10-21 (v5)** - Adicionada regra crítica de organização de documentação (estrutura 3 partes: General/Backend/Frontend) para CLAUDE.md, CODING_STYLE.md e README.md
+- **2025-10-21 (v4)** - Reestruturado em 3 partes (GENERAL/BACKEND/FRONTEND) para facilitar reuso em diferentes tipos de projetos
+- **2025-10-21 (v3)** - Adicionada diretriz de "Next Steps (Roadmap)" no CLAUDE.md para tracking de próximos passos
+- **2025-10-21 (v2)** - Corrigida regra de formatação: linha em branco antes de closing bracket para **todas as classes** (exceto records). Adicionada regra obrigatória de documentação OpenAPI/Swagger
 - **2025-10-21 (v1)** - Adicionadas regras de exceções de domínio e formatação inicial
 - **2025-10-20** - Adicionadas regras de JPA callbacks e Spring Security filters
 - **Versão inicial** - Estabelecidos padrões base do projeto
