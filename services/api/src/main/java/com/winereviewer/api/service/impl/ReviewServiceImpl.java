@@ -16,6 +16,8 @@ import com.winereviewer.api.repository.WineRepository;
 import com.winereviewer.api.service.ReviewService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +107,62 @@ public class ReviewServiceImpl implements ReviewService {
         var wineSummary = toWineSummary(review.getWine());
         var userSummary = toUserSummary(review.getUser());
         return toReviewResponse(review, userSummary, wineSummary);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ReviewResponse> listReviews(UUID wineId, UUID userId, Pageable pageable) {
+        log.info("Listando reviews. Filtros - wineId: {}, userId: {}, page: {}, size: {}",
+                wineId, userId, pageable.getPageNumber(), pageable.getPageSize());
+
+        Page<Review> reviews;
+
+        // Determina qual query usar baseado nos filtros
+        if (wineId != null && userId != null) {
+            // Filtrar por wine E user
+            var wine = wineRepository.findById(wineId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Wine", wineId));
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+            reviews = reviewRepository.findByWineAndUser(wine, user, pageable);
+        } else if (wineId != null) {
+            // Filtrar apenas por wine
+            var wine = wineRepository.findById(wineId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Wine", wineId));
+            reviews = reviewRepository.findByWine(wine, pageable);
+        } else if (userId != null) {
+            // Filtrar apenas por user
+            var user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+            reviews = reviewRepository.findByUser(user, pageable);
+        } else {
+            // Sem filtros - retorna todos
+            reviews = reviewRepository.findAll(pageable);
+        }
+
+        log.info("Encontradas {} reviews (total: {})", reviews.getNumberOfElements(), reviews.getTotalElements());
+
+        // Converte Page<Review> para Page<ReviewResponse>
+        return reviews.map(review -> {
+            var wineSummary = toWineSummary(review.getWine());
+            var userSummary = toUserSummary(review.getUser());
+            return toReviewResponse(review, userSummary, wineSummary);
+        });
+    }
+
+    @Override
+    @Transactional
+    public void deleteReview(UUID reviewId, UUID userId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException("Review", reviewId));
+
+        // Valida ownership (apenas o dono pode deletar)
+        if (!review.getUser().getId().equals(userId)) {
+            throw new UnauthorizedAccessException(userId, "Review");
+        }
+
+        reviewRepository.delete(review);
+        log.info("Review deletada com sucesso. ID: {}", reviewId);
     }
 
     // Private helper methods (ordered by invocation flow)

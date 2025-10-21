@@ -17,8 +17,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -98,8 +103,7 @@ class ReviewServiceTest {
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.createReview(
                         new CreateReviewRequest(wineId.toString(), 5, "Great wine!", null),
-                        userId)
-        );
+                        userId));
 
         assertTrue(exception.getMessage().contains("User"));
         assertTrue(exception.getMessage().contains(userId.toString()));
@@ -118,8 +122,7 @@ class ReviewServiceTest {
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.createReview(
                         new CreateReviewRequest(wineId.toString(), 5, "Great wine!", null),
-                        userId)
-        );
+                        userId));
 
         assertTrue(exception.getMessage().contains("Wine"));
         assertTrue(exception.getMessage().contains(wineId.toString()));
@@ -221,8 +224,7 @@ class ReviewServiceTest {
                 reviewService.updateReview(
                         reviewId,
                         new UpdateReviewRequest(4, "Updated", null),
-                        userId)
-        );
+                        userId));
 
         assertTrue(exception.getMessage().contains("Review"));
         assertTrue(exception.getMessage().contains(reviewId.toString()));
@@ -281,6 +283,176 @@ class ReviewServiceTest {
         assertTrue(exception.getMessage().contains("Review"));
         assertTrue(exception.getMessage().contains(reviewId.toString()));
         verify(reviewRepository, times(1)).findById(reviewId);
+    }
+
+    @Test
+    void givenNoFilters_WhenListReviews_ThenReturnAllReviewsPaginated() {
+        // given
+        final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+        final var reviews = List.of(review);
+        final var page = new PageImpl<>(reviews, pageable, reviews.size());
+        when(reviewRepository.findAll(pageable)).thenReturn(page);
+
+        // when
+        final var response = reviewService.listReviews(null, null, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.getTotalElements());
+        assertEquals(1, response.getContent().size());
+        assertEquals(reviewId.toString(), response.getContent().get(0).id());
+        verify(reviewRepository, times(1)).findAll(pageable);
+        verify(reviewRepository, never()).findByWine(any(), any());
+        verify(reviewRepository, never()).findByUser(any(), any());
+        verify(reviewRepository, never()).findByWineAndUser(any(), any(), any());
+    }
+
+    @Test
+    void givenWineIdFilter_WhenListReviews_ThenReturnReviewsForWine() {
+        // given
+        final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+        final var reviews = List.of(review);
+        final var page = new PageImpl<>(reviews, pageable, reviews.size());
+        when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
+        when(reviewRepository.findByWine(wine, pageable)).thenReturn(page);
+
+        // when
+        final var response = reviewService.listReviews(wineId, null, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.getTotalElements());
+        assertEquals(wineId.toString(), response.getContent().get(0).wine().id());
+        verify(wineRepository, times(1)).findById(wineId);
+        verify(reviewRepository, times(1)).findByWine(wine, pageable);
+        verify(reviewRepository, never()).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void givenUserIdFilter_WhenListReviews_ThenReturnReviewsForUser() {
+        // given
+        final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+        final var reviews = List.of(review);
+        final var page = new PageImpl<>(reviews, pageable, reviews.size());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(reviewRepository.findByUser(user, pageable)).thenReturn(page);
+
+        // when
+        final var response = reviewService.listReviews(null, userId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.getTotalElements());
+        assertEquals(userId.toString(), response.getContent().get(0).author().id());
+        verify(userRepository, times(1)).findById(userId);
+        verify(reviewRepository, times(1)).findByUser(user, pageable);
+        verify(reviewRepository, never()).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void givenBothFilters_WhenListReviews_ThenReturnReviewsForWineAndUser() {
+        // given
+        final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
+        final var reviews = List.of(review);
+        final var page = new PageImpl<>(reviews, pageable, reviews.size());
+        when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(reviewRepository.findByWineAndUser(wine, user, pageable)).thenReturn(page);
+
+        // when
+        final var response = reviewService.listReviews(wineId, userId, pageable);
+
+        // then
+        assertNotNull(response);
+        assertEquals(1, response.getTotalElements());
+        assertEquals(wineId.toString(), response.getContent().get(0).wine().id());
+        assertEquals(userId.toString(), response.getContent().get(0).author().id());
+        verify(wineRepository, times(1)).findById(wineId);
+        verify(userRepository, times(1)).findById(userId);
+        verify(reviewRepository, times(1)).findByWineAndUser(wine, user, pageable);
+        verify(reviewRepository, never()).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void givenInvalidWineId_WhenListReviews_ThenThrowException() {
+        // given
+        final var invalidWineId = UUID.randomUUID();
+        final var pageable = PageRequest.of(0, 10);
+        when(wineRepository.findById(invalidWineId)).thenReturn(Optional.empty());
+
+        // when & then
+        final var exception = assertThrows(ResourceNotFoundException.class, () ->
+                reviewService.listReviews(invalidWineId, null, pageable)
+        );
+
+        assertTrue(exception.getMessage().contains("Wine"));
+        assertTrue(exception.getMessage().contains(invalidWineId.toString()));
+        verify(wineRepository, times(1)).findById(invalidWineId);
+        verify(reviewRepository, never()).findByWine(any(), any());
+    }
+
+    @Test
+    void givenInvalidUserId_WhenListReviews_ThenThrowException() {
+        // given
+        final var invalidUserId = UUID.randomUUID();
+        final var pageable = PageRequest.of(0, 10);
+        when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
+
+        // when & then
+        final var exception = assertThrows(ResourceNotFoundException.class, () ->
+                reviewService.listReviews(null, invalidUserId, pageable)
+        );
+
+        assertTrue(exception.getMessage().contains("User"));
+        assertTrue(exception.getMessage().contains(invalidUserId.toString()));
+        verify(userRepository, times(1)).findById(invalidUserId);
+        verify(reviewRepository, never()).findByUser(any(), any());
+    }
+
+    @Test
+    void givenValidReviewIdAndOwner_WhenDeleteReview_ThenDeleteSuccessfully() {
+        // given
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+        // when
+        reviewService.deleteReview(reviewId, userId);
+
+        // then
+        verify(reviewRepository, times(1)).findById(reviewId);
+        verify(reviewRepository, times(1)).delete(review);
+    }
+
+    @Test
+    void givenReviewNotFound_WhenDeleteReview_ThenThrowException() {
+        // given
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+        // when & then
+        final var exception = assertThrows(ResourceNotFoundException.class, () ->
+                reviewService.deleteReview(reviewId, userId)
+        );
+
+        assertTrue(exception.getMessage().contains("Review"));
+        assertTrue(exception.getMessage().contains(reviewId.toString()));
+        verify(reviewRepository, times(1)).findById(reviewId);
+        verify(reviewRepository, never()).delete(any());
+    }
+
+    @Test
+    void givenUserNotOwner_WhenDeleteReview_ThenThrowUnauthorizedAccessException() {
+        // given
+        final var differentUserId = UUID.randomUUID();
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+        // when & then
+        final var exception = assertThrows(UnauthorizedAccessException.class, () ->
+                reviewService.deleteReview(reviewId, differentUserId)
+        );
+
+        assertTrue(exception.getMessage().contains(differentUserId.toString()));
+        assertTrue(exception.getMessage().contains("não tem permissão"));
+        verify(reviewRepository, times(1)).findById(reviewId);
+        verify(reviewRepository, never()).delete(any());
     }
 
     private Review getReview(UUID reviewId, User user, Wine wine) {

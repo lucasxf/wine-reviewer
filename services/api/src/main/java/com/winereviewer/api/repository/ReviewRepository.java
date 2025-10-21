@@ -3,6 +3,8 @@ package com.winereviewer.api.repository;
 import com.winereviewer.api.domain.Review;
 import com.winereviewer.api.domain.User;
 import com.winereviewer.api.domain.Wine;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -20,5 +22,11 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 
     List<Review> findAllByOrderByCreatedAtDesc();
 
+    // Métodos com paginação
+    Page<Review> findByWine(Wine wine, Pageable pageable);
+
+    Page<Review> findByUser(User user, Pageable pageable);
+
+    Page<Review> findByWineAndUser(Wine wine, User user, Pageable pageable);
 
 }

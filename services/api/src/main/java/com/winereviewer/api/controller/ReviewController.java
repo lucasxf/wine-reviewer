@@ -14,11 +14,14 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -147,35 +150,50 @@ public class ReviewController {
     }
 
     /**
-     * Lista avaliações com filtros opcionais.
+     * Lista avaliações com filtros opcionais e paginação.
      *
-     * @param wineId filtro por vinho (opcional)
-     * @param userId filtro por usuário (opcional)
-     * @return lista de avaliações com status 200 OK
+     * @param wineId   filtro por vinho (opcional)
+     * @param userId   filtro por usuário (opcional)
+     * @param pageable parâmetros de paginação (page, size, sort)
+     * @return página de avaliações com status 200 OK
      */
     @Operation(
             summary = "Listar avaliações",
-            description = "Lista todas as avaliações com filtros opcionais por vinho ou usuário. ⚠️ Endpoint não implementado."
+            description = """
+                    Lista todas as avaliações com filtros opcionais e paginação.
+
+                    Parâmetros de paginação aceitos:
+                    - page: número da página (começa em 0, padrão: 0)
+                    - size: tamanho da página (padrão: 20)
+                    - sort: campo de ordenação (ex: createdAt,desc ou rating,asc)
+
+                    Exemplos de uso:
+                    - GET /reviews?page=0&size=10&sort=createdAt,desc
+                    - GET /reviews?wineId=123&page=0&size=5
+                    - GET /reviews?userId=456&sort=rating,desc
+                    """
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Lista de avaliações retornada com sucesso"
+                    description = "Página de avaliações retornada com sucesso"
             ),
             @ApiResponse(
-                    responseCode = "501",
-                    description = "Endpoint não implementado"
+                    responseCode = "404",
+                    description = "Vinho ou usuário não encontrado (quando filtros são fornecidos)"
             )
     })
     @GetMapping
-    public ResponseEntity<List<ReviewResponse>> listReviews(
+    public ResponseEntity<Page<ReviewResponse>> listReviews(
             @Parameter(description = "Filtrar por ID do vinho")
             @RequestParam(required = false) UUID wineId,
             @Parameter(description = "Filtrar por ID do usuário")
-            @RequestParam(required = false) UUID userId) {
+            @RequestParam(required = false) UUID userId,
+            @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
         log.info("Recebida requisição para listar reviews. Filtros - wineId: {}, userId: {}", wineId, userId);
-        // TODO: implementar no service
-        throw new UnsupportedOperationException("Endpoint não implementado");
+        final var reviews = service.listReviews(wineId, userId, pageable);
+        return ResponseEntity.ok(reviews);
     }
 
     /**
@@ -188,7 +206,7 @@ public class ReviewController {
      */
     @Operation(
             summary = "Deletar avaliação",
-            description = "Deleta uma avaliação existente. Apenas o autor pode deletar sua própria avaliação. ⚠️ Endpoint não implementado."
+            description = "Deleta uma avaliação existente. Apenas o autor pode deletar sua própria avaliação."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -202,10 +220,6 @@ public class ReviewController {
             @ApiResponse(
                     responseCode = "404",
                     description = "Avaliação não encontrada"
-            ),
-            @ApiResponse(
-                    responseCode = "501",
-                    description = "Endpoint não implementado"
             )
     })
     @DeleteMapping("/{reviewId}")
@@ -214,8 +228,9 @@ public class ReviewController {
             @PathVariable UUID reviewId) {
         log.info("Recebida requisição para deletar review: {}", reviewId);
         // TODO capture authenticated user ID via JWT
-        // TODO: implementar no service (validar ownership!)
-        throw new UnsupportedOperationException("Endpoint não implementado");
+        service.deleteReview(reviewId, UUID.randomUUID());
+        log.info("Review deletada com sucesso: {}", reviewId);
+        return ResponseEntity.noContent().build();
     }
 
 }

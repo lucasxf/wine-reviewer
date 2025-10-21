@@ -3,6 +3,10 @@ package com.winereviewer.api.service;
 import com.winereviewer.api.application.dto.request.CreateReviewRequest;
 import com.winereviewer.api.application.dto.request.UpdateReviewRequest;
 import com.winereviewer.api.application.dto.response.ReviewResponse;
+import com.winereviewer.api.exception.ResourceNotFoundException;
+import com.winereviewer.api.exception.UnauthorizedAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -36,6 +40,33 @@ public interface ReviewService {
      */
     ReviewResponse updateReview(UUID reviewId, UpdateReviewRequest request, UUID userId);
 
+    /**
+     * Gets a review by its ID.
+     *
+     * @param reviewId the review ID
+     * @return the review
+     * @throws ResourceNotFoundException if review not found
+     */
     ReviewResponse getReviewById(UUID reviewId);
+
+    /**
+     * Lists reviews with optional filters and pagination.
+     *
+     * @param wineId   optional wine ID filter
+     * @param userId   optional user ID filter
+     * @param pageable pagination parameters (page, size, sort)
+     * @return paginated list of reviews
+     */
+    Page<ReviewResponse> listReviews(UUID wineId, UUID userId, Pageable pageable);
+
+    /**
+     * Deletes a review by its ID.
+     *
+     * @param reviewId the review ID to delete
+     * @param userId   the authenticated user ID (must be the review owner)
+     * @throws ResourceNotFoundException if review not found
+     * @throws UnauthorizedAccessException if user is not the review owner
+     */
+    void deleteReview(UUID reviewId, UUID userId);
 
 }
