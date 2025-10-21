@@ -31,7 +31,7 @@ public class ReviewController {
     private final ReviewService service;
 
     /**
-     * Cria uma nova avaliação de vinho.
+     * Cria uma avaliação de vinho.
      *
      * @param request dados da avaliação (wineId, rating, notes, imageUrl)
      * @return avaliação criada com status 201 Created

@@ -582,8 +582,171 @@ jwt:
 
 ---
 
+## 🗄️ JPA / Hibernate
+
+### Callbacks de Entidade
+
+**REGRA CRÍTICA:** Apenas **UM método por tipo de callback** por entidade.
+
+Jakarta Persistence permite apenas um método anotado com cada tipo de callback:
+- `@PrePersist` - UM método apenas
+- `@PreUpdate` - UM método apenas
+- `@PostPersist`, `@PostUpdate`, `@PreRemove`, `@PostRemove`, `@PostLoad` - UM de cada
+
+**❌ INCORRETO - Múltiplos callbacks do mesmo tipo:**
+```java
+@Entity
+public class Review {
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = Instant.now();
+    }
+
+    @PrePersist
+    @PreUpdate  // ❌ ERRO: segundo @PreUpdate
+    protected void validate() {
+        // validações
+    }
+
+    @PrePersist
+    @PreUpdate  // ❌ ERRO: terceiro @PreUpdate
+    protected void normalize() {
+        // normalizações
+    }
+}
+// Resultado: PersistenceException ao inicializar EntityManagerFactory
+```
+
+**✅ CORRETO - Um callback chama método privado:**
+```java
+@Entity
+public class Review {
+
+    @PrePersist
+    protected void onCreate() {
+        validateAndNormalize();
+        createdAt = Instant.now();
+        updatedAt = Instant.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        validateAndNormalize();
+        updatedAt = Instant.now();
+    }
+
+    private void validateAndNormalize() {
+        // Normaliza campos
+        if (notes != null) {
+            notes = notes.trim();
+        }
+
+        // Valida regras de negócio
+        if (rating == null || rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating deve estar entre 1 e 5");
+        }
+    }
+}
+```
+
+**Por que essa limitação?**
+- JPA precisa saber exatamente qual método executar em cada fase do ciclo de vida
+- Múltiplos callbacks causam ambiguidade sobre ordem de execução
+- Especificação Jakarta Persistence proíbe explicitamente
+
+### Palavras Reservadas SQL
+
+**Atenção:** Alguns nomes de colunas são palavras reservadas em bancos de dados.
+
+**Exemplos comuns:**
+- `year`, `month`, `day`, `hour` (temporais)
+- `user`, `group`, `order` (entidades comuns)
+- `key`, `value`, `index` (estruturas)
+
+**Solução:** Escapar com backticks na anotação `@Column`:
+
+```java
+@Entity
+public class Wine {
+
+    @Column(name = "`year`")  // ✅ Escapado - funciona em H2, PostgreSQL, MySQL
+    private Integer year;
+
+    @Column(name = "`order`")  // ✅ Escapado
+    private Integer order;
+}
+```
+
+**Nota:** Backticks funcionam na maioria dos bancos. PostgreSQL também aceita aspas duplas (`"year"`), mas backticks são mais portáveis.
+
+---
+
+## 🔒 Spring Security
+
+### Filtros de Segurança como @Bean
+
+**REGRA:** Filtros customizados devem ser declarados como `@Bean` em classes de configuração, **NÃO** como `@Component`.
+
+**❌ INCORRETO - Filtro como @Component:**
+```java
+@Component  // ❌ Registro implícito, dificulta testes
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    // ...
+}
+
+@Configuration
+public class SecurityConfig {
+    private final JwtAuthenticationFilter filter;  // Injetado
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) {
+        return http.addFilterBefore(filter, ...).build();
+    }
+}
+```
+
+**Problemas:**
+- Filtro é registrado automaticamente pelo Spring
+- Dificulta testes (precisa carregar todo contexto de segurança)
+- Não fica claro que é parte da configuração de segurança
+
+**✅ CORRETO - Filtro como @Bean:**
+```java
+// SEM @Component
+public class JwtAuthenticationFilter extends OncePerRequestFilter {
+    // Classe POJO, sem anotações Spring
+}
+
+@Configuration
+public class SecurityConfig {
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(
+            JwtUtil jwtUtil,
+            UserDetailsService userDetailsService) {
+        return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter filter) {  // Injetado como parâmetro
+        return http.addFilterBefore(filter, ...).build();
+    }
+}
+```
+
+**Vantagens:**
+- **Controle explícito:** Fica claro que filtro é parte da configuração de segurança
+- **Facilita testes:** Pode ser facilmente mockado em `@WebMvcTest` ou `@SpringBootTest`
+- **Segue padrão Spring Security:** Configurações devem declarar seus beans
+- **Evita registro duplo:** Filtro só é criado quando necessário
+
+---
+
 ## 🔄 Atualizações
 
 Este documento será atualizado continuamente à medida que novos padrões e preferências forem identificados.
 
-**Última atualização:** 2025-10-19 (atualizado por Claude Code)
+**Última atualização:** 2025-10-20 (atualizado por Claude Code - Adicionadas regras de JPA callbacks e Spring Security filters)

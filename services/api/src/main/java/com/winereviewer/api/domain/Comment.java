@@ -46,18 +46,24 @@ public class Comment {
 
     @PrePersist
     protected void onCreate() {
+        validateAndNormalize();
         createdAt = Instant.now();
         updatedAt = Instant.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        validateAndNormalize();
         updatedAt = Instant.now();
     }
 
-    @PrePersist
-    @PreUpdate
-    protected void validate() {
+    private void validateAndNormalize() {
+        // Normaliza
+        if (content != null) {
+            content = content.trim();
+        }
+
+        // Valida
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("Conteúdo do comentário é obrigatório");
         }
@@ -66,14 +72,6 @@ public class Comment {
         }
         if (author == null) {
             throw new IllegalArgumentException("Autor é obrigatório");
-        }
-    }
-
-    @PrePersist
-    @PreUpdate
-    protected void normalize() {
-        if (content != null) {
-            content = content.trim();
         }
     }
 

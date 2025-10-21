@@ -39,7 +39,7 @@ public class Wine {
     @Column(name = "grape", length = 80)
     private String grape;
 
-    @Column(name = "year")
+    @Column(name = "`year`")
     private Integer year;
 
     @Column(name = "image_url")
@@ -53,26 +53,19 @@ public class Wine {
 
     @PrePersist
     protected void onCreate() {
+        validateAndNormalize();
         createdAt = Instant.now();
         updatedAt = Instant.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        validateAndNormalize();
         updatedAt = Instant.now();
     }
 
-    @PrePersist
-    @PreUpdate
-    protected void validate() {
-        if (year != null && (year < 1900 || year > 2100)) {
-            throw new IllegalArgumentException("Ano deve estar entre 1900 e 2100");
-        }
-    }
-
-    @PrePersist
-    @PreUpdate
-    protected void normalize() {
+    private void validateAndNormalize() {
+        // Normaliza
         if (name != null) {
             name = name.trim();
         }
@@ -87,6 +80,11 @@ public class Wine {
         }
         if (imageUrl != null) {
             imageUrl = imageUrl.trim();
+        }
+
+        // Valida
+        if (year != null && (year < 1900 || year > 2100)) {
+            throw new IllegalArgumentException("Ano deve estar entre 1900 e 2100");
         }
     }
 

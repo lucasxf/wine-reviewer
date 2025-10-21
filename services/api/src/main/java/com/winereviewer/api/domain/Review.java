@@ -52,18 +52,27 @@ public class Review {
 
     @PrePersist
     protected void onCreate() {
+        validateAndNormalize();
         createdAt = Instant.now();
         updatedAt = Instant.now();
     }
 
     @PreUpdate
     protected void onUpdate() {
+        validateAndNormalize();
         updatedAt = Instant.now();
     }
 
-    @PrePersist
-    @PreUpdate
-    protected void validate() {
+    private void validateAndNormalize() {
+        // Normaliza
+        if (notes != null) {
+            notes = notes.trim();
+        }
+        if (imageUrl != null) {
+            imageUrl = imageUrl.trim();
+        }
+
+        // Valida
         if (rating == null || rating < 1 || rating > 5) {
             throw new IllegalArgumentException("Rating deve estar entre 1 e 5");
         }
@@ -72,17 +81,6 @@ public class Review {
         }
         if (wine == null) {
             throw new IllegalArgumentException("Vinho é obrigatório");
-        }
-    }
-
-    @PrePersist
-    @PreUpdate
-    protected void normalize() {
-        if (notes != null) {
-            notes = notes.trim();
-        }
-        if (imageUrl != null) {
-            imageUrl = imageUrl.trim();
         }
     }
 

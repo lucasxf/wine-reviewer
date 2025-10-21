@@ -65,7 +65,6 @@ import java.util.UUID;
  * @date 20/10/2025
  */
 @Slf4j
-@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;

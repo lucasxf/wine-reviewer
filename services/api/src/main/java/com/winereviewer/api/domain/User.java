@@ -45,30 +45,19 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
+        validateAndNormalize();
         createdAt = Instant.now();
         updatedAt = Instant.now();
-
     }
 
     @PreUpdate
     protected void onUpdate() {
+        validateAndNormalize();
         updatedAt = Instant.now();
     }
 
-    @PrePersist
-    @PreUpdate
-    protected void validate() {
-        if (email == null || email.isBlank()) {
-            throw new IllegalArgumentException("Email é obrigatório");
-        }
-        if (displayName == null || displayName.isBlank()) {
-            throw new IllegalArgumentException("Nome de exibição é obrigatório");
-        }
-    }
-
-    @PrePersist
-    @PreUpdate
-    protected void normalize() {
+    private void validateAndNormalize() {
+        // Normaliza
         if (displayName != null) {
             displayName = displayName.trim();
         }
@@ -77,6 +66,14 @@ public class User {
         }
         if (avatarUrl != null) {
             avatarUrl = avatarUrl.trim();
+        }
+
+        // Valida
+        if (email == null || email.isBlank()) {
+            throw new IllegalArgumentException("Email é obrigatório");
+        }
+        if (displayName == null || displayName.isBlank()) {
+            throw new IllegalArgumentException("Nome de exibição é obrigatório");
         }
     }
 

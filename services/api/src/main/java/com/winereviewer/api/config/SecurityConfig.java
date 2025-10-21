@@ -1,6 +1,7 @@
 package com.winereviewer.api.config;
 
 import com.winereviewer.api.security.JwtAuthenticationFilter;
+import com.winereviewer.api.security.JwtUtil;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -38,15 +40,24 @@ import java.util.List;
 @EnableConfigurationProperties(JwtProperties.class)
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-
     /**
-     * Construtor com injeção de JwtAuthenticationFilter.
+     * Cria o filtro de autenticação JWT como um bean gerenciado pelo Spring.
+     * <p>
+     * <strong>Por que @Bean ao invés de @Component:</strong>
+     * - Controle explícito: fica claro que o filtro é parte da configuração de segurança
+     * - Facilita testes: pode ser facilmente mockado em testes de controllers
+     * - Segue padrão Spring Security: configurações devem declarar seus beans
+     * - Evita registro duplo: filtro só é criado quando necessário
      *
-     * @param jwtAuthenticationFilter filtro customizado para validar JWT
+     * @param jwtUtil utilitário para validação de JWT
+     * @param userDetailsService serviço para carregar usuários do banco
+     * @return filtro de autenticação JWT configurado
      */
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(
+            JwtUtil jwtUtil,
+            UserDetailsService userDetailsService) {
+        return new JwtAuthenticationFilter(jwtUtil, userDetailsService);
     }
 
     /**
@@ -95,7 +106,9 @@ public class SecurityConfig {
      * @throws Exception se erro na configuração
      */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
                 // 1. Desabilita CSRF (não necessário para APIs stateless)
                 .csrf(AbstractHttpConfigurer::disable)
