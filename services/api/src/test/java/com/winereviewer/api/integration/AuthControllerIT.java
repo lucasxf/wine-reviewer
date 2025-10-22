@@ -93,9 +93,9 @@ class AuthControllerIT extends AbstractIntegrationTest {
         // Verify user was created in database
         final var users = userRepository.findAll();
         assertThat(users).hasSize(1);
-        assertThat(users.get(0).getEmail()).isEqualTo("joao.silva@example.com");
-        assertThat(users.get(0).getGoogleId()).isEqualTo("google-id-123");
-        assertThat(users.get(0).getDisplayName()).isEqualTo("João Silva");
+        assertThat(users.getFirst().getEmail()).isEqualTo("joao.silva@example.com");
+        assertThat(users.getFirst().getGoogleId()).isEqualTo("google-id-123");
+        assertThat(users.getFirst().getDisplayName()).isEqualTo("João Silva");
     }
 
     @Test
@@ -125,9 +125,9 @@ class AuthControllerIT extends AbstractIntegrationTest {
         // Verify user was updated (not duplicated)
         final var users = userRepository.findAll();
         assertThat(users).hasSize(1);
-        assertThat(users.get(0).getId()).isEqualTo(existingUser.getId());
-        assertThat(users.get(0).getDisplayName()).isEqualTo("João Silva");  // updated
-        assertThat(users.get(0).getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  // updated
+        assertThat(users.getFirst().getId()).isEqualTo(existingUser.getId());
+        assertThat(users.getFirst().getDisplayName()).isEqualTo("João Silva");  // updated
+        assertThat(users.getFirst().getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  // updated
     }
 
     @Test
@@ -259,17 +259,17 @@ class AuthControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturnInternalServerErrorWhenLoginEmailNotFound() throws Exception {
+    void shouldReturnNotFoundWhenLoginEmailNotFound() throws Exception {
         // Given - user does not exist
         final var request = new AuthController.LoginRequest("notfound@example.com");
 
-        // When & Then - returns 500 with IllegalArgumentException
+        // When & Then - returns 404 NOT FOUND (user doesn't exist)
         mockMvc.perform(post("/auth/login")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isNotFound());
     }
 
     @Test

@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,7 +50,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@org.springframework.test.context.ActiveProfiles("test")
+@ActiveProfiles("test")
 class ReviewControllerTest {
 
     @Autowired
@@ -61,7 +63,6 @@ class ReviewControllerTest {
     private ReviewService service;
 
     @Test
-    @WithMockUser
     void shouldCreateReviewWhenValidRequest() throws Exception {
         // Given
         final var wineId = UUID.randomUUID().toString();
@@ -108,6 +109,7 @@ class ReviewControllerTest {
         // When & Then
         mockMvc.perform(post("/reviews")
                         .with(csrf())
+                        .with(user(userId.toString()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())

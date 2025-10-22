@@ -199,6 +199,29 @@ The project follows a phased approach:
 > **Use this section for:** Backend-only projects, microservices, Spring Boot APIs.
 > **Copy from here when creating:** Backend microservices, REST APIs, Spring Boot projects.
 
+## Command Execution Guidelines
+
+**CRITICAL RULE: Always Use Non-Verbose Mode (Token Efficiency)**
+
+To optimize token usage during Claude Code sessions, **ALWAYS** execute commands in non-verbose/quiet mode unless explicitly requested otherwise by the user.
+
+### Maven Commands
+- ✅ **Correct:** `./mvnw test -q` (quiet mode)
+- ❌ **Incorrect:** `./mvnw test` (verbose, wastes tokens)
+- ✅ **Correct:** `./mvnw verify -q` (quiet mode)
+- ❌ **Incorrect:** `./mvnw verify --batch-mode` (still verbose)
+
+### Docker Commands
+- ✅ **Correct:** `docker compose up -d --build --quiet-pull` (quiet mode)
+- ❌ **Incorrect:** `docker compose up -d --build` (verbose image pulls)
+- ✅ **Correct:** `docker compose down` (already quiet)
+
+### Other Commands
+- ✅ **Correct:** Use `--quiet`, `-q`, `--silent`, or equivalent flags
+- ❌ **Incorrect:** Running commands without quiet flags
+
+**Exception:** Only use verbose mode if the user explicitly asks for it (e.g., "run tests with verbose output").
+
 ## Backend Development Commands
 
 ```bash
@@ -207,14 +230,17 @@ cd services/api
 # Run locally (requires local Postgres or use docker-compose)
 ./mvnw spring-boot:run
 
-# Build and run tests
-./mvnw verify
+# Build and run tests (quiet mode)
+./mvnw verify -q
 
-# Run tests only
-./mvnw test
+# Run tests only (quiet mode)
+./mvnw test -q
 
-# Clean build
-./mvnw clean install
+# Run integration tests only (quiet mode)
+./mvnw test -q -Dtest=*IT
+
+# Clean build (quiet mode)
+./mvnw clean install -q
 
 # Run with specific profile
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
@@ -227,11 +253,11 @@ cd services/api
 ```bash
 cd infra
 
-# Start all services (Postgres + API)
-docker compose up -d --build
+# Start all services (Postgres + API) - quiet mode
+docker compose up -d --build --quiet-pull
 
 # View logs
-docker compose logs -f
+docker compose logs -f --tail=50 api
 
 # Stop services and remove volumes
 docker compose down -v
@@ -282,6 +308,10 @@ Key indexes:
 - **Lombok selectively** - `@Slf4j` for logging, `@Getter` selectively, avoid `@Data` on domain entities
 - **Javadoc required** - Include `@author` and `@date` on public classes
 - **ALWAYS add blank line before closing bracket of classes (except records)**
+- **Always use imports** - Never use full class names (e.g., use `@ActiveProfiles` not `@org.springframework.test.context.ActiveProfiles`)
+- **Use .getFirst() over .get(0)** - For Java 21+ collections, prefer `list.getFirst()` instead of `list.get(0)`
+- **Show git diff before commit** - ALWAYS show consolidated `git diff` output for user review before committing changes
+- **Auto-update directives** - When new directives are added, automatically update CLAUDE.md and other relevant documentation files
 
 ### Exception Handling (Backend)
 - Custom domain exceptions extending base `DomainException`
@@ -625,6 +655,37 @@ src/test/java/com/winereviewer/api/integration/
 **IntelliJ Working Mode:**
 - ⚠️ Running Claude Code inside IntelliJ terminal causes conflicts with auto-formatters
 - **Solution for next session:** Run Claude Code in separate terminal to avoid file modification conflicts
+
+### Session 2025-10-22 (Part 2): Integration Test Fixes & Code Quality Improvements
+
+**Problems Fixed:**
+1. **Cascade Delete Tests Failing** - Hibernate cache wasn't seeing database CASCADE DELETE
+2. **AuthController Test Mismatch** - Expected 500 but got 404 (correct behavior)
+3. **Optional Fields JSON Test** - Expected `.isEmpty()` but Jackson omits null fields
+4. **Unit Test Authentication** - ReviewControllerTest missing proper authentication setup
+
+**Solutions:**
+1. **Cascade Delete:** Added `entityManager.clear()` after `flush()` to force Hibernate to reload from database
+2. **AuthController:** Renamed test and changed expectation from 500 → 404 (user not found is 404, not 500)
+3. **Optional Fields:** Changed `.isEmpty()` → `.doesNotExist()` (Jackson default behavior)
+4. **Unit Test Auth:** Added `.with(user(userId.toString()))` + import `SecurityMockMvcRequestPostProcessors.user`
+
+**New Directives Established:**
+- **Always use imports over full class names** - Improves readability and follows Java conventions
+- **Prefer `.getFirst()` over `.get(0)`** - Java 21+ idiomatic code
+- **Show git diff before commit** - User must review all changes before committing
+- **Auto-update directives** - New directives automatically added to CLAUDE.md
+
+**Test Results:**
+- ✅ **82 tests passing** (46 unit + 36 integration)
+- ✅ All authentication tests working correctly
+- ✅ All cascade delete tests passing
+- ✅ All JSON serialization tests passing
+
+**Token Efficiency Improvements:**
+- Added "Command Execution Guidelines" section to CLAUDE.md
+- Updated all commands to use quiet mode (`-q`, `--quiet-pull`)
+- Documented rationale: Optimize token usage in Claude Code sessions
 
 ---
 

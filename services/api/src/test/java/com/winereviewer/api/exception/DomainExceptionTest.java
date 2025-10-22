@@ -233,4 +233,5 @@ class DomainExceptionTest {
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("Regra violada");
     }
+
 }

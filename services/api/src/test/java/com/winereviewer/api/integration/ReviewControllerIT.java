@@ -53,6 +53,9 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+
     private User testUser;
     private Wine testWine;
 
@@ -82,7 +85,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     // =========================================================================
 
     @Test
-    @WithMockUser
     void shouldCreateReviewWithValidData() throws Exception {
         // Given
         final var request = new CreateReviewRequest(
@@ -114,11 +116,10 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // Verify database persistence
         final var reviews = reviewRepository.findAll();
         assertThat(reviews).hasSize(1);
-        assertThat(reviews.get(0).getRating()).isEqualTo(5);
+        assertThat(reviews.getFirst().getRating()).isEqualTo(5);
     }
 
     @Test
-    @WithMockUser
     void shouldCreateReviewWithoutOptionalFields() throws Exception {
         // Given - notes and imageUrl are optional
         final var request = new CreateReviewRequest(
@@ -136,12 +137,11 @@ class ReviewControllerIT extends AbstractIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.rating").value(4))
-                .andExpect(jsonPath("$.notes").isEmpty())
-                .andExpect(jsonPath("$.imageUrl").isEmpty());
+                .andExpect(jsonPath("$.notes").doesNotExist()) // null fields are omitted from JSON
+                .andExpect(jsonPath("$.imageUrl").doesNotExist()); // null fields are omitted from JSON
     }
 
     @Test
-    @WithMockUser
     void shouldReturnBadRequestWhenRatingIsLessThan1() throws Exception {
         // Given - rating = 0 (invalid)
         final var request = new CreateReviewRequest(
@@ -161,7 +161,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldReturnBadRequestWhenRatingIsGreaterThan5() throws Exception {
         // Given - rating = 6 (invalid)
         final var request = new CreateReviewRequest(
@@ -181,7 +180,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldReturnBadRequestWhenWineIdIsNull() throws Exception {
         // Given - wineId is null
         final var request = new CreateReviewRequest(
@@ -201,7 +199,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldReturnNotFoundWhenWineDoesNotExist() throws Exception {
         // Given - non-existent wine ID
         final var nonExistentWineId = UUID.randomUUID().toString();
@@ -231,10 +228,9 @@ class ReviewControllerIT extends AbstractIntegrationTest {
                 null
         );
 
-        // When & Then
+        // When & Then - DO NOT add .with(authenticated()) - this test verifies 403 Forbidden
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isForbidden());
@@ -250,8 +246,8 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         final var review = createTestReview(testUser, testWine, 5, "Ótimo vinho!");
 
         // When & Then
-        mockMvc.perform(get("/reviews/{id}", review.getId()))
-                .with(authenticated(testUser.getId()))
+        mockMvc.perform(get("/reviews/{id}", review.getId())
+                        .with(authenticated(testUser.getId())))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(review.getId().toString()))
@@ -268,8 +264,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
 
         // When & Then
         mockMvc.perform(get("/reviews/{id}", nonExistentId)
-                .with(authenticated(testUser.getId()))
-                .with(authenticated(testUser.getId()))))
+                        .with(authenticated(testUser.getId())))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -287,8 +282,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
 
         // When & Then
         mockMvc.perform(get("/reviews")
-                .with(authenticated(testUser.getId()))
-                .with(authenticated(testUser.getId()))))
+                        .with(authenticated(testUser.getId())))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
@@ -307,8 +301,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
 
         // When & Then - request page 0 with size 2
         mockMvc.perform(get("/reviews")
-                .with(authenticated(testUser.getId()))
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .param("page", "0")
                         .param("size", "2"))
                 .andDo(print())
@@ -327,8 +320,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
 
         // When & Then - sort by rating descending
         mockMvc.perform(get("/reviews")
-                .with(authenticated(testUser.getId()))
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .param("sort", "rating,desc"))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -351,8 +343,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
 
         // When & Then - filter by testWine ID
         mockMvc.perform(get("/reviews")
-                .with(authenticated(testUser.getId()))
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .param("wineId", testWine.getId().toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -374,8 +365,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
 
         // When & Then - filter by testUser ID
         mockMvc.perform(get("/reviews")
-                .with(authenticated(testUser.getId()))
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .param("userId", testUser.getId().toString()))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -388,7 +378,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     // =========================================================================
 
     @Test
-    @WithMockUser
     void shouldUpdateReview() throws Exception {
         // Given - create a review
         final var review = createTestReview(testUser, testWine, 3, "Nota inicial");
@@ -418,7 +407,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldUpdateReviewPartially() throws Exception {
         // Given - update only rating
         final var review = createTestReview(testUser, testWine, 3, "Nota inicial");
@@ -441,7 +429,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldReturnNotFoundWhenUpdatingNonExistentReview() throws Exception {
         // Given - non-existent review ID
         final var nonExistentId = UUID.randomUUID();
@@ -457,7 +444,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldReturnBadRequestWhenUpdatingWithInvalidRating() throws Exception {
         // Given - invalid rating
         final var review = createTestReview(testUser, testWine, 3, "Original");
@@ -481,15 +467,13 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     // =========================================================================
 
     @Test
-    @WithMockUser
     void shouldDeleteReview() throws Exception {
         // Given - create a review
         final var review = createTestReview(testUser, testWine, 5, "To be deleted");
 
         // When & Then
-        mockMvc.perform(delete("/reviews/{id}", review.getId()
-                .with(authenticated(testUser.getId()))
-                .with(authenticated(testUser.getId()))))
+        mockMvc.perform(delete("/reviews/{id}", review.getId())
+                        .with(authenticated(testUser.getId())))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 
@@ -498,14 +482,13 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
-    @WithMockUser
     void shouldReturnNotFoundWhenDeletingNonExistentReview() throws Exception {
         // Given - non-existent review ID
         final var nonExistentId = UUID.randomUUID();
 
         // When & Then
         mockMvc.perform(delete("/reviews/{id}", nonExistentId)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId())))
                 .andDo(print())
                 .andExpect(status().isNotFound());
     }
@@ -515,7 +498,6 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     // =========================================================================
 
     @Test
-    @WithMockUser
     void shouldEnforceForeignKeyConstraint() throws Exception {
         // Given - non-existent wine ID (foreign key violation)
         final var nonExistentWineId = UUID.randomUUID().toString();
@@ -539,26 +521,30 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     void shouldCascadeDeleteReviewsWhenUserIsDeleted() {
         // Given - create a review
         final var review = createTestReview(testUser, testWine, 5, "Review to cascade");
+        final var reviewId = review.getId();
 
-        // When - delete user (should cascade to reviews)
+        // When - delete user (should cascade to reviews via database ON DELETE CASCADE)
         userRepository.delete(testUser);
         userRepository.flush();
+        entityManager.clear(); // Clear Hibernate cache to see database cascade effect
 
-        // Then - review should be deleted
-        assertThat(reviewRepository.findById(review.getId())).isEmpty();
+        // Then - review should be deleted by database cascade
+        assertThat(reviewRepository.findById(reviewId)).isEmpty();
     }
 
     @Test
     void shouldCascadeDeleteReviewsWhenWineIsDeleted() {
         // Given - create a review
         final var review = createTestReview(testUser, testWine, 5, "Review to cascade");
+        final var reviewId = review.getId();
 
-        // When - delete wine (should cascade to reviews)
+        // When - delete wine (should cascade to reviews via database ON DELETE CASCADE)
         wineRepository.delete(testWine);
         wineRepository.flush();
+        entityManager.clear(); // Clear Hibernate cache to see database cascade effect
 
-        // Then - review should be deleted
-        assertThat(reviewRepository.findById(review.getId())).isEmpty();
+        // Then - review should be deleted by database cascade
+        assertThat(reviewRepository.findById(reviewId)).isEmpty();
     }
 
     // =========================================================================
