@@ -67,6 +67,7 @@ wine-reviewer/
 - Avoid overengineering; implement MVP features first
 - Never commit secrets, API keys, or credentials
 - Use free tools and assets with proper licenses only
+- **Auto-add new commands to JSON config files** - When creating new slash commands or custom commands, automatically add them to the appropriate JSON configuration files (e.g., `.claude/commands.json`, VSCode settings, etc.) without requiring explicit user request. This ensures commands are immediately available for use. *(Added 2025-10-22)*
 
 ### Git & CI/CD
 - **CI/CD Pipelines:** Path filters to avoid unnecessary runs
@@ -214,6 +215,38 @@ Run tests for a specific service or controller class.
 - **Benefit:** Fast feedback during development, no need to run entire test suite
 
 **How to use:** Simply type the command in Claude Code CLI (e.g., `/start-session`). The command will expand into a full prompt automatically.
+
+### Reusing Commands in Other Projects
+
+All custom commands in this project are also available in a reusable template repository:
+
+**Location:** `C:\repo\claude-command-templates\`
+
+This template repository contains:
+- ✅ **Generic commands** - Work with any project (directive, start-session, finish-session, review-code)
+- ✅ **Java/Spring Boot commands** - Build, test, Docker, API docs, etc.
+- 🚧 **Flutter commands** - Coming soon
+- 🚧 **Node.js commands** - Coming soon
+
+**To reuse in new projects:**
+
+```bash
+# Option 1: Manual copy (recommended)
+cp C:/repo/claude-command-templates/generic/* /path/to/new-project/.claude/commands/
+cp C:/repo/claude-command-templates/java-spring/* /path/to/new-project/.claude/commands/
+
+# Option 2: Bootstrap script (Windows PowerShell)
+cd C:\repo\claude-command-templates
+.\bootstrap.ps1 -StackType java-spring -ProjectDir C:\path\to\new-project
+
+# Option 3: Bootstrap script (Linux/Mac)
+cd /repo/claude-command-templates
+./bootstrap.sh java-spring /path/to/new-project
+```
+
+**Important:** Each command includes an **"Adaptation Guide"** section with instructions for adapting to your project's structure (paths, ports, tools, etc.). Always review and adapt commands after copying.
+
+**See also:** `C:\repo\claude-command-templates\README.md` for full documentation.
 
 ## Important Constraints
 
