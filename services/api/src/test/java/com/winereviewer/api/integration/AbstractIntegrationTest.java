@@ -15,6 +15,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.request.RequestPostProcessor;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
+
 /**
  * Base class for integration tests using Testcontainers with PostgreSQL.
  * <p>
@@ -77,6 +87,32 @@ public abstract class AbstractIntegrationTest {
     void setUp() {
         // Subclasses can override this method to add custom setup
         // Example: insert test data, configure mocks, etc.
+    }
+
+    /**
+     * Creates a RequestPostProcessor that authenticates the request with a given userId.
+     * <p>
+     * This helper simulates Spring Security authentication by creating an Authentication
+     * object with the userId as the principal name. The ReviewController will extract
+     * the userId from Authentication.getName().
+     * <p>
+     * <strong>Usage in tests:</strong>
+     * <pre>
+     * mockMvc.perform(post("/reviews")
+     *     .with(authenticated(testUser.getId()))
+     *     .contentType(MediaType.APPLICATION_JSON)
+     *     .content(objectMapper.writeValueAsString(request)))
+     * </pre>
+     *
+     * @param userId the UUID of the user to authenticate as
+     * @return RequestPostProcessor that sets up authentication context
+     */
+    protected RequestPostProcessor authenticated(UUID userId) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                userId.toString(),
+                null,
+                List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        return authentication(auth);
     }
 
 }

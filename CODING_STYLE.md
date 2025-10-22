@@ -390,6 +390,58 @@ public class ReviewService {
 - Consistência no codebase
 - Preferência pessoal do desenvolvedor
 
+### Formatação de Lambdas e Method Chaining
+
+**REGRA CRÍTICA - Closing Parenthesis na Mesma Linha do Último Método:**
+
+Quando usar **lambda expressions** com **method chaining** (especialmente em builders como Spring Security, JPA Criteria, etc.), sempre colocar o **closing parenthesis `)`** na **mesma linha** do último método.
+
+**Princípio:** Evitar parênteses "soltos" em linhas isoladas.
+
+**Exemplos:**
+
+```java
+// ✅ CORRETO - Closing parenthesis na mesma linha
+@Bean
+public SecurityFilterChain testSecurityFilterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                    .anyRequest().permitAll());
+    return http.build();
+}
+
+// ✅ CORRETO - Múltiplos níveis de nesting
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/public/**").permitAll()
+                    .anyRequest().authenticated());
+    return http.build();
+}
+
+// ❌ INCORRETO - Parênteses isolados em linha separada
+http
+        .authorizeHttpRequests(auth -> auth
+                .anyRequest().permitAll()
+        );  // ← Parêntese isolado (evitar!)
+```
+
+**Justificativa:**
+- Reduz poluição visual (menos linhas "vazias" apenas com `)` ou `);`)
+- Mantém o código mais compacto e legível
+- Segue convenção comum em projetos Spring Boot modernos
+- Facilita leitura top-down (cada linha tem conteúdo significativo)
+
+**Onde aplicar:**
+- ✅ Spring Security `HttpSecurity` builders
+- ✅ JPA Criteria API
+- ✅ Stream API com lambdas longos
+- ✅ Builders fluentes com lambdas
+- ✅ Qualquer method chaining com lambda expressions
+
 ### Tratamento de Exceções
 
 **Regras:**

@@ -7,7 +7,9 @@
       "Bash(./mvnw clean:*)",
       "Bash(git add:*)",
       "Bash(docker --version)",
-      "Bash(git log -1 --format='%an %ae')"
+      "Bash(git log -1 --format='%an %ae')",
+      "Bash(git commit -m \"$(cat <<''EOF''\nfeat: Add integration tests with Testcontainers\n\nImplemented comprehensive integration test infrastructure:\n- AbstractIntegrationTest base class with shared PostgreSQL container\n- application-integration.yml profile for integration tests\n- ReviewControllerIT: 23 tests covering all CRUD endpoints\n- AuthControllerIT: 14 tests covering Google OAuth authentication\n- Total: 37 integration tests + 46 unit tests = 83 tests (all passing)\n\nDocumentation updates:\n- Added PART 4: INFRASTRUCTURE to CLAUDE.md, CODING_STYLE.md, README.md\n- Updated implementation status and roadmap in CLAUDE.md\n- Added Testcontainers best practices and Docker standards\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

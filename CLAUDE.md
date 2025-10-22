@@ -1,4 +1,4 @@
-# CLAUDE.md
+1# CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
@@ -540,11 +540,22 @@ src/test/java/com/winereviewer/api/integration/
 
 **IMPORTANT:** This section should be updated at the **end of each development session** to track what's next.
 
-**Last updated:** 2025-10-22
+**Last updated:** 2025-10-22 (Session 2 - Integration Test Authentication - WIP)
 
 ### Immediate Next Steps (Priority Order)
 
-1. **✅ COMPLETED: Add Integration Tests with Testcontainers** (2025-10-22)
+1. **🚧 IN PROGRESS: Fix Integration Test Authentication** (Started 2025-10-22)
+   - ✅ Created `TestSecurityConfig` to disable security in integration tests
+   - ✅ Modified `ReviewController` to extract userId from `Authentication` context (production-ready approach)
+   - ✅ Added `authenticated()` helper method in `AbstractIntegrationTest`
+   - ✅ Documented lambda formatting standard in `CODING_STYLE.md`
+   - ❌ **PENDING:** Manually add `.with(authenticated(testUser.getId()))` to all 21 `mockMvc.perform()` calls in `ReviewControllerIT`
+   - ❌ **PENDING:** Fix cascade delete constraints in database schema (2 tests failing)
+   - ❌ **PENDING:** Fix AuthController error response mapping (1 test failing)
+   - **Status:** Code compiles but integration tests not running yet (needs manual `.with()` additions)
+   - **Next Session:** Complete ReviewControllerIT fixes, then run tests to verify cascade delete and AuthController issues
+
+2. **✅ COMPLETED: Add Integration Tests with Testcontainers** (2025-10-22)
    - ✅ Setup Testcontainers for PostgreSQL
    - ✅ Create integration tests for Review endpoints (23 tests)
    - ✅ Create integration tests for Auth endpoints (14 tests)
@@ -552,7 +563,7 @@ src/test/java/com/winereviewer/api/integration/
    - ✅ Test database constraints and validations
    - ✅ Add PART 4: INFRASTRUCTURE to all documentation files
 
-2. **Implement Image Upload with Pre-signed URLs**
+3. **Implement Image Upload with Pre-signed URLs**
    - Choose storage provider (S3 Free Tier or Supabase Storage)
    - Implement pre-signed URL generation endpoint
    - Add image upload validation (size, MIME type)
@@ -584,6 +595,39 @@ src/test/java/com/winereviewer/api/integration/
 
 ---
 
+## 📚 Learnings & Technical Decisions Log
+
+### Session 2025-10-22: Integration Test Authentication Architecture
+
+**Problem:** Integration tests with Testcontainers were failing due to JWT authentication being enforced but no valid tokens being provided.
+
+**Initial Approach Considered (REJECTED):**
+- ❌ Adding `X-User-Id` header to controller endpoints
+- **Why rejected:** Security anti-pattern - allows any client to impersonate users; mixes test code with production code
+
+**Final Solution (ACCEPTED):**
+1. **TestSecurityConfig**: Disables security only for integration tests (via `@Profile("integration")`)
+2. **ReviewController**: Modified to extract `userId` from Spring Security `Authentication.getName()` (production-ready)
+3. **AbstractIntegrationTest**: Added `authenticated(UUID userId)` helper that creates `UsernamePasswordAuthenticationToken`
+4. **Tests**: Use `.with(authenticated(testUser.getId()))` in `mockMvc.perform()` calls
+
+**Key Insights:**
+- Never compromise production code security for testing convenience
+- Spring Security Testing provides proper mechanisms (`RequestPostProcessor`) for authentication in tests
+- Separation of concerns: Test infrastructure should not leak into production code
+- `@Profile` annotations are powerful for test-specific configurations
+
+**Formatting Standard Established:**
+- Lambda closing parentheses should be on the same line as the last method call
+- Example: `.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());` (not `)` on separate line)
+- Documented in `CODING_STYLE.md` section "Formatação de Lambdas e Method Chaining"
+
+**IntelliJ Working Mode:**
+- ⚠️ Running Claude Code inside IntelliJ terminal causes conflicts with auto-formatters
+- **Solution for next session:** Run Claude Code in separate terminal to avoid file modification conflicts
+
+---
+
 ## Useful References
 
 - **Coding Style Guide:** See `CODING_STYLE.md` for detailed conventions (organized by General/Backend/Frontend)
@@ -591,3 +635,6 @@ src/test/java/com/winereviewer/api/integration/
 - **README Files:** Each subdirectory (apps/mobile, services/api, infra) has specific setup instructions
 - **GitHub Actions:** Workflows use path filters for monorepo efficiency
 - **Docker Compose:** Start here for local development (`infra/docker-compose.yml`)
+- claude.md preciso ir trabalhar. Nas proximas eu nao vou abrir o claude no terminal do intellij, mas a parte. 
+registre os aprendizados e commite, mesmo estando em estado nao-funcional. Na proxima sessao nos fazemos os ajustes. 
+adicione as correcoes pendentes a area de proximos passos do claude.md

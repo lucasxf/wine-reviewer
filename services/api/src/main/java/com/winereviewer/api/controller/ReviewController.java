@@ -21,6 +21,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.UUID;
 
@@ -69,10 +70,12 @@ public class ReviewController {
     })
     @PostMapping
     public ResponseEntity<ReviewResponse> createReview(
-            @RequestBody @Valid CreateReviewRequest request) {
+            @RequestBody @Valid CreateReviewRequest request,
+            Authentication authentication) {
         log.info("Recebida requisição para criar avaliação do vinho: {}", request.wineId());
-        // TODO capture authenticated user ID via JWT
-        final var review = service.createReview(request, UUID.randomUUID());
+        // Extract userId from Spring Security Authentication context
+        final UUID userId = UUID.fromString(authentication.getName());
+        final var review = service.createReview(request, userId);
         log.info("Avaliação criada com sucesso. ID: {}", review.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(review);
     }
@@ -111,10 +114,12 @@ public class ReviewController {
     public ResponseEntity<ReviewResponse> updateReview(
             @Parameter(description = "ID da avaliação", required = true)
             @PathVariable UUID reviewId,
-            @RequestBody @Valid UpdateReviewRequest request) {
+            @RequestBody @Valid UpdateReviewRequest request,
+            Authentication authentication) {
         log.info("Recebida requisição para atualizar avaliação: {}", reviewId);
-        // TODO capture authenticated user ID via JWT
-        final var review = service.updateReview(reviewId, request, UUID.randomUUID());
+        // Extract userId from Spring Security Authentication context
+        final UUID userId = UUID.fromString(authentication.getName());
+        final var review = service.updateReview(reviewId, request, userId);
         log.info("Avaliação atualizada com sucesso: {}", reviewId);
         return ResponseEntity.ok(review);
     }
@@ -225,10 +230,12 @@ public class ReviewController {
     @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> deleteReview(
             @Parameter(description = "ID da avaliação", required = true)
-            @PathVariable UUID reviewId) {
+            @PathVariable UUID reviewId,
+            Authentication authentication) {
         log.info("Recebida requisição para excluir avaliação: {}", reviewId);
-        // TODO capture authenticated user ID via JWT
-        service.deleteReview(reviewId, UUID.randomUUID());
+        // Extract userId from Spring Security Authentication context
+        final UUID userId = UUID.fromString(authentication.getName());
+        service.deleteReview(reviewId, userId);
         log.info("Avaliação excluída com sucesso: {}", reviewId);
         return ResponseEntity.noContent().build();
     }
