@@ -490,10 +490,65 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ## Frontend Code Conventions
 
-- Models and DTOs using freezed + json_serializable
-- Consistent formatting with `dart format`
-- Widget tests and golden tests for UI components
-- Error handling in dio interceptors with retry logic
+### Important Coding Standards
+
+- **Models and DTOs using freezed + json_serializable** - Immutable data classes with code generation
+- **Consistent formatting with `dart format`** - Always format before committing
+- **Widget tests and golden tests for UI components** - Visual regression testing
+- **Error handling in dio interceptors with retry logic** - Resilient HTTP client
+
+### Critical Directive: Detailed Frontend Explanations (Added 2025-10-22)
+
+**Context:** The user is a backend engineer with little frontend experience and no Flutter knowledge.
+
+**Rule:** For **ALL** frontend modifications and decisions (directories, files, classes, methods, scripts, widgets, state management, etc.), you **MUST** provide detailed explanations covering:
+
+1. **What** - What is being created/modified (file, class, widget, etc.)
+2. **Why** - Why this approach/pattern is being used
+3. **How** - How it works in Flutter/Dart context
+4. **Alternatives** - What other approaches exist and why this one was chosen
+5. **Best Practices** - Flutter/Dart conventions being followed
+
+**Examples:**
+
+<example>
+**Bad (no explanation):**
+"I'll create `lib/features/auth/presentation/screens/login_screen.dart` with a LoginScreen widget."
+
+**Good (with explanation):**
+"I'll create `lib/features/auth/presentation/screens/login_screen.dart` with a LoginScreen widget.
+
+**Explanation:**
+- **What:** A StatelessWidget that displays the login UI
+- **Why:** Flutter uses widgets as the building blocks of UI. StatelessWidget is used because the UI doesn't need internal mutable state (Riverpod will manage state externally)
+- **How:** The widget builds a widget tree with Scaffold (material design structure), Column (vertical layout), TextFormField (email input), and ElevatedButton (submit button)
+- **Structure:** Following feature-first architecture - `features/auth/presentation/screens/` separates presentation layer from business logic
+- **Alternative:** Could use StatefulWidget with setState, but Riverpod provides better state management for complex apps
+- **Best Practice:** Keeping widgets small and focused on presentation, delegating business logic to providers"
+</example>
+
+<example>
+**Bad (no explanation):**
+"I'll use Riverpod for state management."
+
+**Good (with explanation):**
+"I'll use Riverpod for state management.
+
+**Explanation:**
+- **What:** Riverpod is a reactive caching and data-binding framework for Flutter
+- **Why:** It's the modern evolution of Provider (Flutter's recommended state management), with compile-time safety and better testing support
+- **How:** Uses providers (similar to services) that widgets can watch/read. When provider state changes, widgets automatically rebuild
+- **Key Concepts:**
+  - `Provider` - Exposes read-only values (like repositories, services)
+  - `StateNotifierProvider` - Exposes mutable state (like authentication status, user profile)
+  - `FutureProvider` - Handles async operations (like API calls)
+  - `ref.watch()` - Listens to provider changes and rebuilds widget
+  - `ref.read()` - One-time read without listening (for callbacks)
+- **Alternatives:** BLoC (more verbose, steeper learning curve), GetX (less type-safe), setState (doesn't scale well)
+- **Best Practice:** Riverpod provides dependency injection, making code testable and decoupled"
+</example>
+
+**Never skip these explanations, even for "simple" changes. Always assume zero Flutter knowledge.**
 
 ## Frontend Testing Strategy
 
