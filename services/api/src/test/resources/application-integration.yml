@@ -1,0 +1,58 @@
+# =============================================================================
+# INTEGRATION TEST CONFIGURATION
+# =============================================================================
+# This profile is used for integration tests with Testcontainers.
+# Datasource properties are dynamically overridden by @DynamicPropertySource
+# in AbstractIntegrationTest to use the Testcontainers PostgreSQL instance.
+# =============================================================================
+
+spring:
+  # Datasource will be overridden by Testcontainers
+  datasource:
+    url: jdbc:postgresql://localhost:5432/override_by_testcontainers
+    username: override_by_testcontainers
+    password: override_by_testcontainers
+
+  jpa:
+    hibernate:
+      ddl-auto: validate  # Use Flyway migrations, don't auto-create schema
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          time_zone: UTC
+    show-sql: false  # Reduce log noise in tests
+
+  # Flyway migrations enabled for integration tests
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    validate-on-migrate: true
+    clean-disabled: false  # Allow cleaning in tests
+
+  # Jackson configuration
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+      indent-output: true  # Pretty-print for easier debugging
+    time-zone: UTC
+
+# JWT configuration for tests
+jwt:
+  secret: test-integration-secret-key-for-testing-purposes-only-minimum-256-bits-required-for-hs512
+  expiration: 3_600_000  # 1 hour
+
+# Google OAuth configuration (mock values for tests)
+google:
+  oauth:
+    client-id: test-client-id.apps.googleusercontent.com
+
+# Logging configuration for integration tests
+logging:
+  level:
+    com.winereviewer.api: DEBUG
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    org.testcontainers: INFO

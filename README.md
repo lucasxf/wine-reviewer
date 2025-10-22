@@ -27,7 +27,7 @@
 
 ## ✨ Features
 
-### Current (v0.1.0 - Updated 2025-10-21)
+### Current (v0.1.0 - Updated 2025-10-22)
 - ✅ Complete Review CRUD API endpoints
 - ✅ Comment system for reviews
 - ✅ JWT authentication structure (JJWT 0.12.6)
@@ -36,7 +36,8 @@
 - ✅ PostgreSQL with Flyway migrations
 - ✅ OpenAPI/Swagger documentation
 - ✅ Docker Compose setup for local development
-- ✅ **Comprehensive test suite** (46 tests, 100% passing)
+- ✅ **Comprehensive test suite** (83 total tests: 46 unit + 37 integration)
+- ✅ **✨ NEW: Integration tests with Testcontainers** (PostgreSQL, real database testing)
 
 ### Exception Handling System
 - ✅ `DomainException` abstract base class with `getHttpStatus()` method
@@ -405,6 +406,132 @@ flutter test --coverage
 - Use `const` constructors for performance
 
 See `CODING_STYLE.md` → **PART 3: FRONTEND STANDARDS** for detailed conventions.
+
+---
+
+# 🐳 PART 4: INFRASTRUCTURE (Docker, Testing, CI/CD)
+
+> **This section:** DevOps setup, integration testing with Testcontainers, deployment strategies.
+
+## Integration Tests with Testcontainers
+
+### Running Integration Tests
+
+**Requirements:**
+- Docker daemon running (Docker Desktop on Windows/macOS, Docker Engine on Linux)
+- PostgreSQL container will be automatically created by Testcontainers
+
+```bash
+cd services/api
+
+# Run integration tests only (requires Docker)
+./mvnw test -Dtest=*IT
+
+# Run all tests (unit + integration)
+./mvnw verify
+
+# Run unit tests only (no Docker required)
+./mvnw test
+```
+
+### Integration Test Coverage
+
+**Current Tests:** 37 integration tests covering critical API endpoints
+
+**ReviewControllerIT (23 tests):**
+- ✅ POST /reviews - Create review with validation
+- ✅ GET /reviews/{id} - Get review by ID
+- ✅ GET /reviews - List with pagination, sorting, filtering
+- ✅ PUT /reviews/{id} - Update review
+- ✅ DELETE /reviews/{id} - Delete review
+- ✅ Database constraints (rating 1-5, cascade delete, foreign keys)
+- ✅ Exception handling (404, 403, 400, 422)
+
+**AuthControllerIT (14 tests):**
+- ✅ POST /auth/google - Google OAuth authentication
+- ✅ POST /auth/login - Simple login (MVP testing endpoint)
+- ✅ User creation and update logic
+- ✅ Token validation and error handling
+
+### Testcontainers Architecture
+
+**Base class:** `AbstractIntegrationTest`
+- Shared PostgreSQL container (postgres:16-alpine)
+- Automatic database migration with Flyway
+- `@Transactional` test isolation (auto-rollback)
+- MockMvc for HTTP request/response testing
+- GoogleTokenValidator mocked (no external API calls)
+
+**Key Files:**
+- `src/test/java/com/winereviewer/api/integration/AbstractIntegrationTest.java`
+- `src/test/java/com/winereviewer/api/integration/ReviewControllerIT.java`
+- `src/test/java/com/winereviewer/api/integration/AuthControllerIT.java`
+- `src/test/resources/application-integration.yml`
+
+## Docker Setup
+
+### Local Development with Docker Compose
+
+```bash
+cd infra
+
+# Start all services (PostgreSQL + API)
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# View logs for specific service
+docker compose logs -f api
+
+# Stop services
+docker compose down
+
+# Stop and remove volumes (fresh start)
+docker compose down -v
+```
+
+### Docker Services
+
+**PostgreSQL Database:**
+- Image: `postgres:16-alpine`
+- Port: `5432:5432`
+- Health check configured
+- Persistent volume: `postgres-data`
+
+**API Service:**
+- Built from `services/api/Dockerfile`
+- Port: `8080:8080`
+- Depends on PostgreSQL
+- Auto-restarts on failure
+
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+
+**API Pipeline (`.github/workflows/ci-api.yml`):**
+- Triggers on `services/api/**` changes
+- Maven dependency caching
+- Runs unit tests + integration tests (with Testcontainers)
+- Builds Docker image
+
+**Mobile Pipeline (`.github/workflows/ci-app.yml`):**
+- Triggers on `apps/mobile/**` changes
+- Flutter pub cache
+- Runs Flutter tests and analysis
+
+**Release Pipeline (`.github/workflows/release.yml`):**
+- Manual trigger with semantic versioning
+- Tags and creates GitHub release
+
+### Path-Based Triggers
+
+Pipelines use path filters to avoid unnecessary runs:
+```yaml
+paths:
+  - 'services/api/**'
+  - '.github/workflows/ci-api.yml'
+```
 
 ---
 

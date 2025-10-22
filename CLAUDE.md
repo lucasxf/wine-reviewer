@@ -406,9 +406,99 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ---
 
+# 🐳 PART 4: INFRASTRUCTURE (Docker, Testcontainers, CI/CD)
+
+> **Use this section for:** DevOps, containerization, testing infrastructure, deployment.
+> **Copy from here when creating:** Microservices, containerized apps, CI/CD pipelines.
+
+## Infrastructure Development Commands
+
+```bash
+# Docker Compose (local development)
+cd infra
+docker compose up -d --build         # Start all services
+docker compose logs -f               # View logs
+docker compose down -v               # Stop and remove volumes
+
+# Integration tests with Testcontainers
+cd services/api
+./mvnw test -Dtest=*IT              # Run integration tests only
+./mvnw verify                        # Run all tests (unit + integration)
+./mvnw test                          # Run unit tests only
+```
+
+## Docker & Testcontainers
+
+### Docker Compose Setup
+- **Services:** PostgreSQL 16 + API
+- **Health Checks:** Configured for all dependent services
+- **Volumes:** Named volumes for data persistence
+- **Networks:** Bridge network for service communication
+
+**Key Files:**
+- `infra/docker-compose.yml` - Main compose configuration
+- `services/api/Dockerfile` - Multi-stage build for API
+
+### Testcontainers Integration Tests
+
+**Purpose:** Run integration tests against real PostgreSQL database in isolated Docker containers.
+
+**Configuration:**
+- **Base Class:** `AbstractIntegrationTest` - Shared PostgreSQL container
+- **Profile:** `application-integration.yml` - Test-specific configuration
+- **Container:** `postgres:16-alpine` with reuse enabled for speed
+- **Isolation:** `@Transactional` on test class for auto-rollback
+
+**Test Structure:**
+```
+src/test/java/com/winereviewer/api/integration/
+├── AbstractIntegrationTest.java       # Base class with Testcontainers setup
+├── ReviewControllerIT.java            # Review endpoints (23 tests)
+└── AuthControllerIT.java              # Auth endpoints (14 tests)
+```
+
+**Why Testcontainers:**
+- ✅ **Production Parity:** Tests run against real PostgreSQL (same as prod)
+- ✅ **Isolation:** Each test run gets fresh database state
+- ✅ **Constraints:** Database constraints (CHECK, FK, CASCADE) work exactly like production
+- ✅ **CI/CD Ready:** No manual database setup required
+
+**Important Notes:**
+- **Requires Docker:** Testcontainers needs Docker daemon running
+- **Shared Container:** Static container reused across all test classes for performance
+- **Flyway Enabled:** Migrations run automatically before tests
+- **Mock External APIs:** GoogleTokenValidator mocked (no real Google API calls)
+
+### Integration Test Naming Convention
+- **Suffix:** `*IT.java` (e.g., `ReviewControllerIT`, `AuthControllerIT`)
+- **Location:** Same package as production code, under `src/test/java/`
+- **Profile:** Use `@ActiveProfiles("integration")` annotation
+
+## CI/CD Pipeline
+
+### GitHub Actions Workflows
+- **API Pipeline:** `.github/workflows/ci-api.yml` - Triggers on `services/api/**` changes
+- **Mobile Pipeline:** `.github/workflows/ci-app.yml` - Triggers on `apps/mobile/**` changes
+- **Release:** `.github/workflows/release.yml` - Manual workflow with semantic versioning
+
+**Path Filters:** Pipelines only run when relevant files change (avoids unnecessary builds)
+
+**Caching Strategy:**
+- Maven dependencies cached for faster API builds
+- Flutter pub cache for faster mobile builds
+
+## Infrastructure Entry Points
+
+- **Docker Compose:** `infra/docker-compose.yml`
+- **Integration Test Base:** `services/api/src/test/java/com/winereviewer/api/integration/AbstractIntegrationTest.java`
+- **Integration Test Profile:** `services/api/src/test/resources/application-integration.yml`
+- **CI/CD Workflows:** `.github/workflows/`
+
+---
+
 # 🎯 Current Implementation Status & Roadmap
 
-## ✅ Implemented (as of 2025-10-21)
+## ✅ Implemented (as of 2025-10-22)
 
 ### Backend API (Spring Boot)
 - Complete Review CRUD endpoints (`ReviewController`, `ReviewService`)
@@ -422,48 +512,57 @@ flutter pub run build_runner build --delete-conflicting-outputs
 - OpenAPI/Swagger documentation
 - Application configuration with profiles (dev/prod)
 - Docker support (Dockerfile + docker-compose)
-- **Complete test suite** (46 tests: ReviewControllerTest, ReviewServiceTest, DomainExceptionTest, AuthServiceTest, GoogleTokenValidatorTest)
+- **Complete unit test suite** (46 tests, 100% passing: ReviewControllerTest, ReviewServiceTest, DomainExceptionTest, AuthServiceTest, GoogleTokenValidatorTest)
+- **✨ NEW: Integration tests with Testcontainers** (37 tests: ReviewControllerIT, AuthControllerIT)
 
 ### Infrastructure
 - Docker Compose with PostgreSQL 16 and API service
 - Health checks and dependencies configured
+- **✨ NEW: Testcontainers integration test infrastructure** (`AbstractIntegrationTest`, `application-integration.yml`)
 
 ### CI/CD
 - GitHub Actions for API (`ci-api.yml`) with path filters
 - GitHub Actions for Mobile (`ci-app.yml`) with path filters
 - Release workflow (`release.yml`)
 
+### Testing Coverage
+- **Unit Tests:** 46 tests covering services, controllers, exceptions, validators
+- **Integration Tests:** 37 tests covering API endpoints with real PostgreSQL database
+- **Total:** 83 tests (all passing)
+- **Coverage:** Review CRUD (100%), Auth (100%), Database constraints (100%), Exception scenarios (100%)
+
 ## 🚧 In Progress / TODO
 - Mobile app (Flutter) - not yet initialized
 - Image upload with pre-signed URLs
-- Integration tests with Testcontainers
 - Observability (metrics, tracing)
 
 ## 🎯 Next Steps (Roadmap)
 
 **IMPORTANT:** This section should be updated at the **end of each development session** to track what's next.
 
-**Last updated:** 2025-10-21
+**Last updated:** 2025-10-22
 
 ### Immediate Next Steps (Priority Order)
 
-1. **Add Integration Tests with Testcontainers**
-   - Setup Testcontainers for PostgreSQL
-   - Create integration tests for Review endpoints
-   - Create integration tests for Auth endpoints
-   - Test exception handling in real scenarios
-   - Test database constraints and validations
+1. **✅ COMPLETED: Add Integration Tests with Testcontainers** (2025-10-22)
+   - ✅ Setup Testcontainers for PostgreSQL
+   - ✅ Create integration tests for Review endpoints (23 tests)
+   - ✅ Create integration tests for Auth endpoints (14 tests)
+   - ✅ Test exception handling in real scenarios
+   - ✅ Test database constraints and validations
+   - ✅ Add PART 4: INFRASTRUCTURE to all documentation files
 
 2. **Implement Image Upload with Pre-signed URLs**
    - Choose storage provider (S3 Free Tier or Supabase Storage)
    - Implement pre-signed URL generation endpoint
    - Add image upload validation (size, MIME type)
    - Update Review entity to store image URLs
+   - Add integration tests for image upload flow
 
 3. **Implement Comment System**
    - Complete CRUD endpoints for comments
    - Add OpenAPI documentation
-   - Create tests for comment endpoints
+   - Create unit and integration tests for comment endpoints
 
 4. **Start Flutter Mobile App (F2 Phase)**
    - Initialize Flutter project structure

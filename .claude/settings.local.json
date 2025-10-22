@@ -5,7 +5,9 @@
       "Bash(./mvnw test -Dtest=ReviewServiceTest)",
       "Bash(./mvnw test:*)",
       "Bash(./mvnw clean:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(docker --version)",
+      "Bash(git log -1 --format='%an %ae')"
     ],
     "deny": [],
     "ask": []
