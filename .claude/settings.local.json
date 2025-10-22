@@ -5,7 +5,10 @@
       "Bash(docker compose:*)",
       "Bash(timeout 300 ./mvnw test:*)",
       "Bash(timeout 180 ./mvnw test:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(claude --version)"
     ],
     "deny": [],
     "ask": []

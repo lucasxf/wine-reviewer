@@ -173,6 +173,48 @@ All main documentation files (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **mus
 - Maintain clear distinction between ✅ Implemented, 🚧 In Progress, 📍 Planned
 - **Update "Next Steps (Roadmap)" section** - Move completed items to "Implemented", add new next steps based on progress
 
+## Custom Slash Commands for Productivity
+
+This project includes custom slash commands to streamline common workflows:
+
+### `/directive <content>`
+Add a new coding directive to CLAUDE.md automatically.
+- **Usage:** `/directive "Always use constructor injection over field injection"`
+- **What it does:** Adds the directive to the appropriate section (General/Backend/Frontend)
+- **Benefit:** Quick way to capture new learnings without manually editing documentation
+
+### `/start-session [context]`
+Initialize a new development session with standard context loading.
+- **Usage:** `/start-session "Fixing authentication bugs"`
+- **What it does:** Loads CLAUDE.md, CODING_STYLE.md, README.md, reviews roadmap, checks git status
+- **Benefit:** Standardized session startup - no need to manually type the same prompt every time
+
+### `/finish-session [commit-context]`
+Complete a development session with tests, docs update, and commit.
+- **Usage:** `/finish-session "Implemented comment endpoints"`
+- **What it does:** Runs tests in quiet mode → Prompts for doc updates → Shows git diff → Creates commit
+- **Benefit:** Ensures you never forget to test, document, or commit changes
+
+### `/review-code [path-or-scope]`
+Analyze code quality and generate improvement report.
+- **Usage:** `/review-code services/api/service/`
+- **What it does:** Checks adherence to CODING_STYLE.md, test coverage, documentation, security, and performance
+- **Benefit:** Automated code review before commits or PRs, identifies issues early
+
+### `/update-roadmap <what-was-completed>`
+Update the "Next Steps (Roadmap)" section in CLAUDE.md.
+- **Usage:** `/update-roadmap "Integration tests with Testcontainers completed"`
+- **What it does:** Moves completed items to "Implemented", updates priorities, adds new tasks
+- **Benefit:** Keeps roadmap accurate and up-to-date without manual editing
+
+### `/quick-test <ServiceName>`
+Run tests for a specific service or controller class.
+- **Usage:** `/quick-test ReviewService`
+- **What it does:** Runs both unit tests (*Test) and integration tests (*IT) for the specified class
+- **Benefit:** Fast feedback during development, no need to run entire test suite
+
+**How to use:** Simply type the command in Claude Code CLI (e.g., `/start-session`). The command will expand into a full prompt automatically.
+
 ## Important Constraints
 
 1. **Free Hosting Only:** MVP must run on 100% free services (AWS Free Tier preferred but not required)
