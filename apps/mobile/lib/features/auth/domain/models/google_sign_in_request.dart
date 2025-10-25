@@ -15,6 +15,4 @@ class GoogleSignInRequest with _$GoogleSignInRequest {
 
   factory GoogleSignInRequest.fromJson(Map<String, dynamic> json) =>
       _$GoogleSignInRequestFromJson(json);
-
-  Map<String, dynamic> toJson() => {'idToken': idToken};
 }
