@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-25 (Session 6 - Go Router & Screens Implementation - Completed)
+**Last updated:** 2025-10-25 (Session 7 - AuthService Implementation - Completed)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -71,9 +71,20 @@ This file tracks the current implementation status and next steps for the Wine R
 - Rotas: `/` (splash), `/login`, `/home`, `/review/:id`
 - Deep linking support, parametrized routes, error handling (404)
 
+**Authentication (AuthService):** (as of 2025-10-25)
+- `lib/features/auth/domain/models/` - Domain models (User, AuthResponse, GoogleSignInRequest) with freezed
+- `lib/features/auth/data/services/` - AuthService interface + implementation (Google Sign-In + backend API)
+- `lib/features/auth/providers/` - Riverpod providers (AuthState, AuthStateNotifier, auth providers)
+- `lib/core/storage/` - Secure storage documentation (README.md, storage_keys.dart)
+- Complete authentication flow: Google OAuth → Backend validation → JWT token → Secure storage
+- State management with Riverpod (AuthState union type with 4 states)
+- Auto-login support (checkAuthStatus on app startup)
+- Comprehensive documentation with backend analogies
+
 **Documentation:**
 - `DEPENDENCIES_EXPLAINED.md` - Detailed package explanations
 - `SETUP_INSTRUCTIONS.md` - Development environment setup
+- `lib/core/storage/README.md` - Flutter Secure Storage documentation
 
 ### Infrastructure
 
@@ -92,41 +103,51 @@ This file tracks the current implementation status and next steps for the Wine R
 ## 🚧 In Progress
 
 ### Mobile App (Flutter)
-- Initial main.dart with ProviderScope and MaterialApp
-- Android emulator testing
+- None currently
 
 ---
 
 ## 🎯 Next Steps (Priority Order)
 
-### 1. 🚧 PRIORITY 1: Complete Flutter Core Infrastructure (Started 2025-10-25)
+### 1. 📱 PRIORITY 1: Integrate Authentication with UI (Started 2025-10-25)
 
-**Status:** In Progress
+**Status:** Ready to start
 
-**Completed:**
-- ✅ Initialize Flutter 3.35.6 project with feature-first architecture
-- ✅ Configure 10 essential dependencies (Riverpod, dio, go_router, freezed, etc.)
-- ✅ Create core configuration files (app_colors, app_theme, api_constants)
-- ✅ Create Dio HTTP client with auth interceptor (AuthInterceptor, LoggingInterceptor, DioClient, NetworkExceptions, Providers)
-- ✅ Setup go_router navigation structure (4 screens: splash, login, home, review details + app_router.dart)
+**Goal:** Connect AuthService with login screen and implement full authentication flow
 
-**Next Actions:**
-- ⏳ Create initial main.dart with ProviderScope and MaterialApp
-- ⏳ Test app compiles and runs on Android emulator
+**Tasks:**
+- Update `main.dart` to initialize AuthStateNotifier (checkAuthStatus on startup)
+- Update `login_screen.dart` to use AuthStateNotifier (replace mock with real Google Sign-In)
+- Update `splash_screen.dart` to handle AuthState (initial → authenticated/unauthenticated)
+- Update `app_router.dart` to protect routes (redirect to login if unauthenticated)
+- Test complete flow: App startup → Auto-login OR Login screen → Home screen → Logout
+- Handle errors gracefully (show SnackBar with error messages)
+
+**Acceptance Criteria:**
+- ✅ App starts with splash screen (checks if token exists)
+- ✅ If token exists → Home screen (auto-login)
+- ✅ If no token → Login screen
+- ✅ Click "Sign in with Google" → Opens Google dialog → Authenticates → Home screen
+- ✅ Click "Logout" → Clears tokens → Login screen
+- ✅ Error handling (cancel login, network error, invalid token)
 
 ---
 
-### 2. 📱 Implement Flutter Authentication Flow (F2 Phase)
+### 2. 📱 Implement Flutter Authentication Flow (F2 Phase) - ✅ COMPLETED
 
-**Goal:** Complete user authentication with Google Sign-In
+**Status:** ✅ Completed (2025-10-25)
 
-**Tasks:**
-- Create auth feature structure (data/domain/presentation/providers)
-- Implement Google Sign-In integration
-- Create login screen UI with Material Design 3
-- Setup flutter_secure_storage for JWT token persistence
-- Implement auto-login (check token on app startup)
-- Test authentication flow end-to-end
+**Completed:**
+- ✅ Create auth feature structure (data/domain/presentation/providers)
+- ✅ Implement Google Sign-In integration (AuthServiceImpl)
+- ✅ Setup flutter_secure_storage for JWT token persistence (StorageKeys, documentation)
+- ✅ Implement auto-login support (checkAuthStatus method)
+- ✅ Riverpod state management (AuthState, AuthStateNotifier, providers)
+- ✅ Comprehensive documentation (storage README, backend analogies)
+
+**Pending:**
+- ⏳ UI integration (connect AuthService with screens)
+- ⏳ End-to-end testing (full authentication flow)
 
 ---
 
@@ -199,7 +220,8 @@ This file tracks the current implementation status and next steps for the Wine R
 | **Test Pass Rate** | 100% |
 | **Backend Endpoints** | Review CRUD + Auth |
 | **Flutter Dependencies** | 10 configured |
-| **Flutter Screens** | 0 (in progress) |
+| **Flutter Auth Components** | 18 files (models, services, providers, docs) |
+| **Flutter Screens** | 4 (splash, login, home, review details) |
 | **CI/CD Pipelines** | 3 (API, Mobile, Release) |
 
 ---

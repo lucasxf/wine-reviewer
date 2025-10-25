@@ -27,7 +27,8 @@
 
 ## ✨ Features
 
-### Current (v0.1.0 - Updated 2025-10-22)
+### Current (v0.1.0 - Updated 2025-10-25)
+**Backend API:**
 - ✅ Complete Review CRUD API endpoints
 - ✅ Comment system for reviews
 - ✅ JWT authentication structure (JJWT 0.12.6)
@@ -36,8 +37,20 @@
 - ✅ PostgreSQL with Flyway migrations
 - ✅ OpenAPI/Swagger documentation
 - ✅ Docker Compose setup for local development
-- ✅ **Comprehensive test suite** (83 total tests: 46 unit + 37 integration)
-- ✅ **✨ NEW: Integration tests with Testcontainers** (PostgreSQL, real database testing)
+- ✅ **Comprehensive test suite** (82 total tests: 46 unit + 36 integration)
+- ✅ **Integration tests with Testcontainers** (PostgreSQL, real database testing)
+
+**Mobile App (Flutter):**
+- ✅ **Flutter 3.35.6** with feature-first architecture
+- ✅ **Dio HTTP client** with auth interceptor (automatic JWT injection)
+- ✅ **go_router navigation** (4 screens: splash, login, home, review details)
+- ✅ **✨ NEW: Complete AuthService implementation**
+  - Google Sign-In integration
+  - Backend API communication (POST /api/auth/google)
+  - JWT token persistence (flutter_secure_storage with hardware encryption)
+  - Riverpod state management (AuthState, AuthStateNotifier)
+  - Auto-login support (checkAuthStatus)
+  - Comprehensive documentation (storage README, best practices)
 
 ### Exception Handling System
 - ✅ `DomainException` abstract base class with `getHttpStatus()` method
@@ -49,9 +62,8 @@
 - ✅ `GlobalExceptionHandler` with unified domain exception handling
 
 ### In Progress
-- 🚧 Flutter mobile app
+- 🚧 Flutter UI integration with AuthService (connect providers to screens)
 - 🚧 Image upload with pre-signed URLs
-- 🚧 Integration tests with Testcontainers
 
 ### Planned
 - 📍 Observability (metrics, distributed tracing)

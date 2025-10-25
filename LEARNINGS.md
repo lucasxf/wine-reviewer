@@ -6,6 +6,160 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## Session 2025-10-25 (Session 7): AuthService Implementation
+
+**Session Goal:** Implement complete authentication service with Google Sign-In, backend API integration, Riverpod state management, and secure token storage
+
+### 📱 Frontend (Flutter)
+
+**Context:** Backend has Google OAuth authentication (POST /api/auth/google) returning JWT token. Mobile app needs complete authentication flow with auto-login support.
+
+**What Was Done:**
+1. **Domain Layer (Models):**
+   - Created freezed models: `User`, `AuthResponse`, `GoogleSignInRequest`
+   - Matched `AuthResponse` structure with backend (flat fields: token, userId, email, displayName, avatarUrl)
+   - Generated `.freezed.dart` and `.g.dart` files with build_runner
+
+2. **Data Layer (AuthService):**
+   - Created `AuthService` interface (abstract contract)
+   - Implemented `AuthServiceImpl` with Google Sign-In + backend API integration
+   - Methods: `signInWithGoogle()`, `signOut()`, `getCurrentUser()`, `refreshAccessToken()`
+   - Complete OAuth flow: Google dialog → ID token → Backend validation → JWT storage
+
+3. **Providers (Riverpod State Management):**
+   - Created `AuthState` union type with 4 states (initial, authenticated, unauthenticated, loading)
+   - Implemented `AuthStateNotifier` (StateNotifier pattern)
+   - Created 4 providers: `googleSignInProvider`, `authServiceProvider`, `authStateNotifierProvider`, `currentUserProvider`
+   - Full dependency injection with Riverpod (no tight coupling)
+
+4. **Secure Storage (Documentation & Integration):**
+   - Created comprehensive README.md (453 lines) explaining flutter_secure_storage
+   - Created `StorageKeys` class with centralized key constants
+   - Refactored `AuthInterceptor` to use `StorageKeys.authToken`
+   - Documented KeyStore/Keychain hardware encryption
+
+**Key Insights:**
+
+**1. Union Types vs Boolean Flags (Type-Safety)**
+- **Problem:** Boolean flags allow invalid states (`isLoading=true + isAuthenticated=true`)
+- **Solution:** Freezed union types ensure type-safe states (compiler enforces valid states)
+- **Example:**
+  ```dart
+  // ❌ Bad (boolean flags)
+  class AuthState { bool isLoading; bool isAuth; User? user; }
+
+  // ✅ Good (union type)
+  @freezed
+  class AuthState with _$AuthState {
+    const factory AuthState.loading() = _Loading;
+    const factory AuthState.authenticated(User user) = _Authenticated;
+  }
+  ```
+- **Benefit:** If `authenticated`, user is ALWAYS non-null (compiler guarantee)
+
+**2. StateNotifier vs ChangeNotifier (Immutability)**
+- **Problem:** ChangeNotifier uses mutable state (prone to bugs from accidental mutations)
+- **Solution:** StateNotifier enforces immutable state changes
+- **Example:**
+  ```dart
+  // StateNotifier - immutable
+  state = const AuthState.loading();  // Replaces entire state
+  state = AuthState.authenticated(user);  // New state object
+  ```
+- **Benefit:** Predictable state transitions, easier debugging, time-travel debugging support
+
+**3. Provider vs Service Locator (Compile-Time Safety)**
+- **Problem:** GetIt/ServiceLocator uses runtime lookups (crashes if dependency not registered)
+- **Solution:** Riverpod providers fail at compile-time if dependency missing
+- **Example:**
+  ```dart
+  // Riverpod - compile-time safe
+  final authService = ref.watch(authServiceProvider);  // Compiler knows type
+
+  // GetIt - runtime only
+  final authService = getIt<AuthService>();  // Crashes at runtime if not registered
+  ```
+- **Benefit:** Catch errors during development, not production
+
+**4. Derived Providers (Boilerplate Reduction)**
+- **Problem:** UI needs to extract data from complex state (e.g., User from AuthState)
+- **Solution:** Create derived provider that auto-updates when source changes
+- **Example:**
+  ```dart
+  final currentUserProvider = Provider<User?>((ref) {
+    final authState = ref.watch(authStateNotifierProvider);
+    return authState.maybeWhen(
+      authenticated: (user) => user,
+      orElse: () => null,
+    );
+  });
+  ```
+- **Benefit:** Simplifies UI code (no need for `.when()` pattern matching everywhere)
+
+**5. Interface Segregation (Testability)**
+- **Decision:** Separate interface (`AuthService`) from implementation (`AuthServiceImpl`)
+- **Reason:** Easy to mock in tests, swap implementations, follow SOLID principles
+- **Example:**
+  ```dart
+  // Production
+  final authServiceProvider = Provider<AuthService>((ref) {
+    return AuthServiceImpl(...);
+  });
+
+  // Tests
+  final mockAuthService = MockAuthService();
+  container.overrideWithValue(authServiceProvider, mockAuthService);
+  ```
+- **Benefit:** Tests don't depend on real Google Sign-In or backend API
+
+**6. Hardware Encryption (Security)**
+- **Learning:** flutter_secure_storage uses native platform encryption (not software AES)
+- **Android:** KeyStore with hardware-backed keys (Secure Element)
+- **iOS:** Keychain with Secure Enclave (dedicated crypto chip)
+- **Benefit:** Tokens protected even if device is rooted/jailbroken
+
+**Problems Encountered:**
+
+1. **Problem:** AuthResponse model didn't match backend structure (had nested `user` object)
+   - **Root cause:** Initial assumption backend would return `{token, refreshToken, user: {...}}`
+   - **Reality:** Backend returns flat `{token, userId, email, displayName, avatarUrl}`
+   - **Solution:** Refactored `AuthResponse` to match backend exactly (removed nested `user`, no `refreshToken`)
+   - **Lesson:** Always check backend API response structure before creating models
+
+2. **Problem:** Dio client `post<T>()` generic type caused analyzer error
+   - **Error:** `wrong_number_of_type_arguments_method`
+   - **Root cause:** DioClient.post() doesn't accept type parameter (returns `Response<dynamic>`)
+   - **Solution:** Removed `<Map<String, dynamic>>` and cast `response.data as Map<String, dynamic>`
+   - **Lesson:** Check Dio method signatures before using generics
+
+3. **Problem:** Freezed `toJson()` override caused `annotate_overrides` warning
+   - **Root cause:** Manually added `toJson()` but freezed already generates it
+   - **Solution:** Removed manual `toJson()` method (let freezed handle it)
+   - **Lesson:** Trust freezed code generation (don't override generated methods)
+
+**Solutions Applied:**
+
+1. **AuthResponse refactor:** Changed from nested to flat structure matching backend
+2. **Dio client casting:** Use `response.data as Map<String, dynamic>` instead of generic type
+3. **Build runner fixes:** Removed manual `toJson()`, regenerated freezed code
+4. **Storage keys:** Created `StorageKeys` class to prevent magic strings and typos
+5. **Documentation:** Added comprehensive README.md explaining hardware encryption and best practices
+
+**Metrics:**
+- **Files created:** 18 (3 models + 6 generated + 2 services + 3 providers + 1 generated + 2 storage + 1 README)
+- **Lines of code:** ~3500 (including generated code + documentation)
+- **Commits:** 5 (domain models, freezed generation, AuthService, Riverpod providers, storage docs)
+- **Dependencies:** 0 new (all packages already configured)
+- **Tests:** 0 (unit tests for AuthService will be added in future session)
+
+**Next Steps:**
+- Integrate AuthService with UI (main.dart, login_screen.dart, splash_screen.dart, app_router.dart)
+- Add unit tests for AuthService (mock GoogleSignIn, DioClient)
+- Implement getCurrentUser() completely (decode JWT or call backend /api/auth/me)
+- Add refresh token support when backend implements /api/auth/refresh
+
+---
+
 ## Session 2025-10-25 (Part 2): Documentation Optimization & Structure
 
 **Session Goal:** Reduce CLAUDE.md bloat (40k chars) while preserving essential context for AI and developer
