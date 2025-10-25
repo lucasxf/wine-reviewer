@@ -632,6 +632,9 @@ Sessions are organized chronologically (newest-first) with subsections for Backe
 - **`CODING_STYLE.md`** - Detailed coding conventions (organized by General/Backend/Frontend/Infrastructure)
 - **`README.md`** - Project setup instructions and overview
 
+**Efficiency & Best Practices:**
+- **`C:\repo\ai\claude-code\tips\EFFICIENCY.md`** - Claude Code efficiency guide (token optimization, workflow strategies, file organization tips) - Optional reference for improving development performance
+
 **Other References:**
 - **Prompt Pack:** `prompts/PACK.md` - AI guidance and agent schemas
 - **Stack-specific READMEs:** `apps/mobile/`, `services/api/`, `infra/` - Detailed setup per stack
