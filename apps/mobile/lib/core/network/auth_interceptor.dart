@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:wine_reviewer_mobile/core/constants/api_constants.dart';
+import 'package:wine_reviewer_mobile/core/storage/storage_keys.dart';
 
 /// Interceptor de autenticação - adiciona JWT token automaticamente
 ///
@@ -42,13 +43,6 @@ class AuthInterceptor extends Interceptor {
   /// - flutter_secure_storage usa criptografia nativa do SO
   final FlutterSecureStorage _storage;
 
-  /// Key usada para salvar/ler token do storage
-  ///
-  /// CONVENÇÃO:
-  /// - Use constante para evitar typos
-  /// - Prefixo 'auth_' para separar de outras keys
-  static const String _tokenKey = 'auth_jwt_token';
-
   AuthInterceptor(this._storage);
 
   /// onRequest - Intercepta requisição ANTES de enviar
@@ -67,7 +61,7 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     // Lê JWT token do storage seguro
-    final token = await _storage.read(key: _tokenKey);
+    final token = await _storage.read(key: StorageKeys.authToken);
 
     // Se token existe, adiciona no header Authorization
     if (token != null && token.isNotEmpty) {
@@ -122,7 +116,7 @@ class AuthInterceptor extends Interceptor {
   /// await authInterceptor.saveToken(token);
   /// ```
   Future<void> saveToken(String token) async {
-    await _storage.write(key: _tokenKey, value: token);
+    await _storage.write(key: StorageKeys.authToken, value: token);
   }
 
   /// Remove JWT token do storage (logout)
@@ -137,7 +131,7 @@ class AuthInterceptor extends Interceptor {
   /// await authInterceptor.clearToken();
   /// ```
   Future<void> clearToken() async {
-    await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: StorageKeys.authToken);
   }
 
   /// Verifica se token existe no storage
@@ -157,7 +151,7 @@ class AuthInterceptor extends Interceptor {
   /// }
   /// ```
   Future<bool> hasToken() async {
-    final token = await _storage.read(key: _tokenKey);
+    final token = await _storage.read(key: StorageKeys.authToken);
     return token != null && token.isNotEmpty;
   }
 }
