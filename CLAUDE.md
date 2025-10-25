@@ -678,67 +678,78 @@ src/test/java/com/winereviewer/api/integration/
 ### Infrastructure
 - Docker Compose with PostgreSQL 16 and API service
 - Health checks and dependencies configured
-- **✨ NEW: Testcontainers integration test infrastructure** (`AbstractIntegrationTest`, `application-integration.yml`)
+- **Testcontainers integration test infrastructure** (`AbstractIntegrationTest`, `application-integration.yml`)
 
 ### CI/CD
 - GitHub Actions for API (`ci-api.yml`) with path filters
 - GitHub Actions for Mobile (`ci-app.yml`) with path filters
 - Release workflow (`release.yml`)
 
-### Testing Coverage
+### Testing Coverage (Backend)
 - **Unit Tests:** 46 tests covering services, controllers, exceptions, validators
 - **Integration Tests:** 36 tests covering API endpoints with real PostgreSQL database
 - **Total:** 82 tests (all passing)
 - **Coverage:** Review CRUD (100%), Auth (100%), Database constraints (100%), Exception scenarios (100%)
 
+### Mobile App (Flutter) - **✨ NEW** (as of 2025-10-25)
+- **Project initialized:** Flutter 3.35.6 with package `com.winereviewer.wine_reviewer_mobile`
+- **Dependencies configured (10 packages):**
+  - `flutter_riverpod` - State management + DI
+  - `go_router` - Navigation with deep linking
+  - `dio` - HTTP client with interceptors
+  - `freezed` + `json_serializable` - Immutable models
+  - `flutter_secure_storage` - Encrypted token storage
+  - `image_picker` + `cached_network_image` - Image handling
+  - `google_sign_in` - OAuth authentication
+  - `build_runner` + `golden_toolkit` - Code gen + testing
+- **Feature-first architecture:** `lib/features/` (auth, review, wine), `lib/core/`, `lib/common/`
+- **Core configuration files:**
+  - `app_colors.dart` - Color palette (wine theme)
+  - `app_theme.dart` - Material Design 3 theme
+  - `api_constants.dart` - API URLs, endpoints, timeouts
+- **Documentation:** `DEPENDENCIES_EXPLAINED.md`, `SETUP_INSTRUCTIONS.md`
+- **Platform support:** Android (primary), iOS, Web, Windows, macOS, Linux (generated)
+
 ## 🚧 In Progress / TODO
-- Mobile app (Flutter) - not yet initialized
-- Image upload with pre-signed URLs
+- **Mobile app (Flutter):** Core network layer (Dio client, auth interceptor) - in progress
+- Image upload with pre-signed URLs (backend)
 - Observability (metrics, tracing)
 
 ## 🎯 Next Steps (Roadmap)
 
 **IMPORTANT:** This section should be updated at the **end of each development session** to track what's next.
 
-**Last updated:** 2025-10-22 (Session 3 - Integration Test Authentication - Completed)
+**Last updated:** 2025-10-25 (Session 4 - Flutter Mobile App Initialization - In Progress)
 
 ### Immediate Next Steps (Priority Order)
 
-1. **✅ COMPLETED: Fix Integration Test Authentication** (Completed 2025-10-22)
-   - ✅ Created `TestSecurityConfig` to disable security in integration tests
-   - ✅ Modified `ReviewController` to extract userId from `Authentication` context (production-ready approach)
-   - ✅ Added `authenticated()` helper method in `AbstractIntegrationTest`
-   - ✅ Documented lambda formatting standard in `CODING_STYLE.md`
-   - ✅ All 21 `mockMvc.perform()` calls in `ReviewControllerIT` already had `.with(authenticated(testUser.getId()))` added
-   - ✅ Cascade delete constraints working correctly (tests passing)
-   - ✅ AuthController error response mapping correct (tests passing)
-   - **Final Status:** All 82 tests passing (46 unit + 36 integration)
+1. **🚧 IN PROGRESS: Complete Flutter Core Infrastructure** (Started 2025-10-25)
+   - ✅ Initialize Flutter 3.35.6 project with feature-first architecture
+   - ✅ Configure 10 essential dependencies (Riverpod, dio, go_router, freezed, etc.)
+   - ✅ Create core configuration files (app_colors, app_theme, api_constants)
+   - ⏳ **Next:** Create Dio HTTP client with auth interceptor
+   - ⏳ Setup go_router navigation structure (splash, login, home, review details)
+   - ⏳ Create initial main.dart with ProviderScope and MaterialApp
+   - ⏳ Test app compiles and runs on Android emulator
 
-2. **✅ COMPLETED: Add Integration Tests with Testcontainers** (2025-10-22)
-   - ✅ Setup Testcontainers for PostgreSQL
-   - ✅ Create integration tests for Review endpoints (23 tests)
-   - ✅ Create integration tests for Auth endpoints (14 tests)
-   - ✅ Test exception handling in real scenarios
-   - ✅ Test database constraints and validations
-   - ✅ Add PART 4: INFRASTRUCTURE to all documentation files
+2. **Implement Flutter Authentication Flow (F2 Phase)**
+   - Create auth feature structure (data/domain/presentation/providers)
+   - Implement Google Sign-In integration
+   - Create login screen UI with Material Design 3
+   - Setup flutter_secure_storage for JWT token persistence
+   - Implement auto-login (check token on app startup)
 
-3. **Implement Image Upload with Pre-signed URLs**
+3. **Implement Image Upload with Pre-signed URLs (Backend)**
    - Choose storage provider (S3 Free Tier or Supabase Storage)
    - Implement pre-signed URL generation endpoint
    - Add image upload validation (size, MIME type)
    - Update Review entity to store image URLs
    - Add integration tests for image upload flow
 
-4. **Implement Comment System**
+4. **Implement Comment System (Backend)**
    - Complete CRUD endpoints for comments
    - Add OpenAPI documentation
    - Create unit and integration tests for comment endpoints
-
-5. **Start Flutter Mobile App (F2 Phase)**
-   - Initialize Flutter project structure
-   - Setup Riverpod for state management
-   - Implement Google Sign-In flow
-   - Create login screen
 
 ### Future Backlog (Post-MVP)
 
