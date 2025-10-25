@@ -170,13 +170,13 @@ class AppTheme {
       /// EXPLICAÇÃO Card:
       /// - Card = container com elevação e cantos arredondados
       /// - Usado para agrupar informações relacionadas (review card, wine card)
-      cardTheme: CardTheme(
+      cardTheme: const CardThemeData(
         color: AppColors.surface, // Fundo branco
         elevation: 2, // Sombra
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12), // Cantos arredondados
+          borderRadius: BorderRadius.all(Radius.circular(12)), // Cantos arredondados
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       ),
 
       // Divider Theme - Estilo padrão dos divisores
