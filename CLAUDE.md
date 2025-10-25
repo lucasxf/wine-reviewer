@@ -136,28 +136,36 @@ All main documentation files (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **mus
 
 ### Files to Update After Significant Changes
 
-1. **`CLAUDE.md`** (this file)
-   - Update when: New architectural decisions, directives, or patterns are adopted
-   - Include: Context about why decisions were made, tradeoffs considered
-   - **Structure:** 3 parts (General/Backend/Frontend)
+1. **`ROADMAP.md`** (UPDATED EACH SESSION)
+   - Update when: End of every development session
+   - Include: Move completed items to "Implemented", update priorities, new tasks
+   - Use command: `/update-roadmap` or `/finish-session`
 
-2. **`CODING_STYLE.md`**
+2. **`LEARNINGS.md`** (updated when significant)
+   - Update when: Significant learnings, technical decisions, or problems solved
+   - Include: Session log with Backend/Frontend/Infrastructure subsections
+   - Format: Hybrid chronological (sessions with stack subsections)
+
+3. **`CLAUDE.md`** (this file - update rarely)
+   - Update when: New architectural patterns, critical directives
+   - Don't update: For roadmap (use ROADMAP.md) or learnings (use LEARNINGS.md)
+   - **Structure:** 3 parts (General/Backend/Frontend/Infrastructure)
+
+4. **`CODING_STYLE.md`** (update when new conventions)
    - Update when: New code patterns or conventions are identified
    - Include: Examples of correct/incorrect usage, rationale
+   - **Structure:** 3 parts (General/Backend/Frontend/Infrastructure)
+
+5. **`README.md`** (update when features added)
+   - Update when: New features, endpoints, or major configuration changes
+   - Include: Setup instructions, feature overview
    - **Structure:** 3 parts (General/Backend/Frontend)
 
-3. **`README.md`** (main project README)
-   - Update when: Application state changes (new features, endpoints, configuration)
-   - Include: Current implementation status, setup instructions, API overview
-   - Keep accurate: What's implemented vs. what's planned
-   - **Structure:** 3 parts (General/Backend/Frontend)
-
-4. **OpenAPI/Swagger Documentation** (Backend)
-   - **CRITICAL:** Update **immediately** when creating/modifying REST API endpoints
-   - How: Add/update `@Tag`, `@Operation`, `@ApiResponses`, `@Parameter` annotations in controllers
+6. **OpenAPI/Swagger Documentation** (Backend - CRITICAL)
+   - **Update immediately** when creating/modifying REST API endpoints
+   - How: Add/update `@Tag`, `@Operation`, `@ApiResponses`, `@Parameter` annotations
    - Required for: **Every new endpoint** (no exceptions)
    - Verify: Check Swagger UI at `/swagger-ui.html` after updates
-   - Document: All possible HTTP status codes (200, 201, 400, 403, 404, 422, 500, 501)
 
 ### What Constitutes "Significant Changes"
 - ✅ New features implemented (services, controllers, domain logic)
@@ -168,85 +176,34 @@ All main documentation files (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **mus
 - ❌ Minor bug fixes or refactorings (unless they establish new patterns)
 
 ### Update Format
-- Always include **date** of update
-- Briefly describe **what changed** and **why**
-- Update **Current Implementation Status** section with latest features
-- Maintain clear distinction between ✅ Implemented, 🚧 In Progress, 📍 Planned
-- **Update "Next Steps (Roadmap)" section** - Move completed items to "Implemented", add new next steps based on progress
+- **ROADMAP.md:** Update at end of each session (use `/update-roadmap` or `/finish-session`)
+- **LEARNINGS.md:** Add session entry when significant decisions/learnings occur
+- **CLAUDE.md / CODING_STYLE.md:** Update only for new patterns/conventions, include date
+- **README.md:** Update when features/setup changes, keep current with implementation
 
 ## Custom Slash Commands for Productivity
 
-This project includes custom slash commands to streamline common workflows:
+This project includes custom slash commands to streamline common workflows. Type the command in Claude Code CLI to expand it into a full prompt.
 
-### `/directive <content>`
-Add a new coding directive to CLAUDE.md automatically.
-- **Usage:** `/directive "Always use constructor injection over field injection"`
-- **What it does:** Adds the directive to the appropriate section (General/Backend/Frontend)
-- **Benefit:** Quick way to capture new learnings without manually editing documentation
+**Workflow Commands:**
+- `/start-session [context]` - Load project context (CLAUDE.md, CODING_STYLE.md, ROADMAP.md, README.md) to begin session
+- `/finish-session [commit-context]` - Run tests, prompt for doc updates, show git diff, create commit
+- `/update-roadmap <what-was-completed>` - Update ROADMAP.md (move completed items, reprioritize next steps)
 
-### `/start-session [context]`
-Initialize a new development session with standard context loading.
-- **Usage:** `/start-session "Fixing authentication bugs"`
-- **What it does:** Loads CLAUDE.md, CODING_STYLE.md, README.md, reviews roadmap, checks git status
-- **Benefit:** Standardized session startup - no need to manually type the same prompt every time
+**Development Commands:**
+- `/directive <content>` - Add new directive to CLAUDE.md or CODING_STYLE.md with deduplication check
+- `/review-code [path]` - Analyze code quality, test coverage, CODING_STYLE.md adherence
+- `/quick-test <ServiceName>` - Run unit + integration tests for specific class
 
-### `/finish-session [commit-context]`
-Complete a development session with tests, docs update, and commit.
-- **Usage:** `/finish-session "Implemented comment endpoints"`
-- **What it does:** Runs tests in quiet mode → Prompts for doc updates → Shows git diff → Creates commit
-- **Benefit:** Ensures you never forget to test, document, or commit changes
+**Backend Commands (Java/Spring):**
+- `/build-quiet` - Clean build in quiet mode
+- `/verify-quiet` - Run full verification (build + tests) in quiet mode
+- `/test-service` - Run tests for specific service class
+- `/docker-start` - Start all Docker services (PostgreSQL + API)
+- `/docker-stop` - Stop all Docker services
+- `/api-doc` - Open API documentation (Swagger UI)
 
-### `/review-code [path-or-scope]`
-Analyze code quality and generate improvement report.
-- **Usage:** `/review-code services/api/service/`
-- **What it does:** Checks adherence to CODING_STYLE.md, test coverage, documentation, security, and performance
-- **Benefit:** Automated code review before commits or PRs, identifies issues early
-
-### `/update-roadmap <what-was-completed>`
-Update the "Next Steps (Roadmap)" section in CLAUDE.md.
-- **Usage:** `/update-roadmap "Integration tests with Testcontainers completed"`
-- **What it does:** Moves completed items to "Implemented", updates priorities, adds new tasks
-- **Benefit:** Keeps roadmap accurate and up-to-date without manual editing
-
-### `/quick-test <ServiceName>`
-Run tests for a specific service or controller class.
-- **Usage:** `/quick-test ReviewService`
-- **What it does:** Runs both unit tests (*Test) and integration tests (*IT) for the specified class
-- **Benefit:** Fast feedback during development, no need to run entire test suite
-
-**How to use:** Simply type the command in Claude Code CLI (e.g., `/start-session`). The command will expand into a full prompt automatically.
-
-### Reusing Commands in Other Projects
-
-All custom commands in this project are also available in a reusable template repository:
-
-**Location:** `C:\repo\claude-command-templates\`
-
-This template repository contains:
-- ✅ **Generic commands** - Work with any project (directive, start-session, finish-session, review-code)
-- ✅ **Java/Spring Boot commands** - Build, test, Docker, API docs, etc.
-- 🚧 **Flutter commands** - Coming soon
-- 🚧 **Node.js commands** - Coming soon
-
-**To reuse in new projects:**
-
-```bash
-# Option 1: Manual copy (recommended)
-cp C:/repo/claude-command-templates/generic/* /path/to/new-project/.claude/commands/
-cp C:/repo/claude-command-templates/java-spring/* /path/to/new-project/.claude/commands/
-
-# Option 2: Bootstrap script (Windows PowerShell)
-cd C:\repo\claude-command-templates
-.\bootstrap.ps1 -StackType java-spring -ProjectDir C:\path\to\new-project
-
-# Option 3: Bootstrap script (Linux/Mac)
-cd /repo/claude-command-templates
-./bootstrap.sh java-spring /path/to/new-project
-```
-
-**Important:** Each command includes an **"Adaptation Guide"** section with instructions for adapting to your project's structure (paths, ports, tools, etc.). Always review and adapt commands after copying.
-
-**See also:** `C:\repo\claude-command-templates\README.md` for full documentation.
+**Command Templates:** Reusable versions available at `C:\repo\claude-command-templates\` for new projects.
 
 ## Important Constraints
 
@@ -276,26 +233,14 @@ The project follows a phased approach:
 
 ## Command Execution Guidelines
 
-**CRITICAL RULE: Always Use Non-Verbose Mode (Token Efficiency)**
+**CRITICAL RULE:** Always use non-verbose/quiet mode for commands to optimize token usage.
 
-To optimize token usage during Claude Code sessions, **ALWAYS** execute commands in non-verbose/quiet mode unless explicitly requested otherwise by the user.
+**Examples:**
+- Maven: `./mvnw test -q`, `./mvnw verify -q`
+- Docker: `docker compose up -d --build --quiet-pull`
+- Use `--quiet`, `-q`, or `--silent` flags when available
 
-### Maven Commands
-- ✅ **Correct:** `./mvnw test -q` (quiet mode)
-- ❌ **Incorrect:** `./mvnw test` (verbose, wastes tokens)
-- ✅ **Correct:** `./mvnw verify -q` (quiet mode)
-- ❌ **Incorrect:** `./mvnw verify --batch-mode` (still verbose)
-
-### Docker Commands
-- ✅ **Correct:** `docker compose up -d --build --quiet-pull` (quiet mode)
-- ❌ **Incorrect:** `docker compose up -d --build` (verbose image pulls)
-- ✅ **Correct:** `docker compose down` (already quiet)
-
-### Other Commands
-- ✅ **Correct:** Use `--quiet`, `-q`, `--silent`, or equivalent flags
-- ❌ **Incorrect:** Running commands without quiet flags
-
-**Exception:** Only use verbose mode if the user explicitly asks for it (e.g., "run tests with verbose output").
+**Exception:** Use verbose mode only if user explicitly requests it.
 
 ## Backend Development Commands
 
@@ -373,20 +318,15 @@ Key indexes:
 
 ## Backend Code Conventions
 
-### Important Coding Standards
-- **Constructor injection only** - Never use `@Autowired` on fields
-- **ConfigurationProperties over @Value** - Always use `@ConfigurationProperties` with POJOs for type-safety and testability
-- **Maven dependency versions in `<properties>`** - Centralize versions, use placeholders like `${jwt.version}`
-- **Large numbers with underscores** - Always: `3_600_000` (not `3600000`)
-- **Method ordering: public → private** - Public methods first, then private methods ordered by invocation flow (top-down reading)
-- **Java 21 features encouraged** - Use `var`, records, sealed classes, pattern matching, text blocks
-- **Lombok selectively** - `@Slf4j` for logging, `@Getter` selectively, avoid `@Data` on domain entities
-- **Javadoc required** - Include `@author` and `@date` on public classes
-- **ALWAYS add blank line before closing bracket of classes (except records)**
-- **Always use imports** - Never use full class names (e.g., use `@ActiveProfiles` not `@org.springframework.test.context.ActiveProfiles`)
-- **Use .getFirst() over .get(0)** - For Java 21+ collections, prefer `list.getFirst()` instead of `list.get(0)`
-- **Show git diff before commit** - ALWAYS show consolidated `git diff` output for user review before committing changes
-- **Auto-update directives** - When new directives are added, automatically update CLAUDE.md and other relevant documentation files
+**See `CODING_STYLE.md` Part 2 (Backend) for detailed conventions.**
+
+**Key Rules:**
+- Constructor injection only (never `@Autowired` on fields)
+- `@ConfigurationProperties` over `@Value` (type-safe configuration)
+- Maven versions in `<properties>` with placeholders
+- Java 21 features encouraged (var, records, pattern matching)
+- Method ordering: public → private (invocation flow)
+- OpenAPI/Swagger annotations required for all REST endpoints
 
 ### Exception Handling (Backend)
 - Custom domain exceptions extending base `DomainException`
@@ -490,12 +430,14 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ## Frontend Code Conventions
 
-### Important Coding Standards
+**See `CODING_STYLE.md` Part 3 (Frontend) for detailed conventions.**
 
-- **Models and DTOs using freezed + json_serializable** - Immutable data classes with code generation
-- **Consistent formatting with `dart format`** - Always format before committing
-- **Widget tests and golden tests for UI components** - Visual regression testing
-- **Error handling in dio interceptors with retry logic** - Resilient HTTP client
+**Key Rules:**
+- Feature-first folder structure (`lib/features/`, `lib/core/`, `lib/common/`)
+- Models with freezed + json_serializable (immutable data classes)
+- Riverpod for state management (compile-time safe, testable)
+- Widget tests + golden tests for UI components
+- Always format with `dart format` before committing
 
 ### Critical Directive: Detailed Frontend Explanations (Added 2025-10-22)
 
@@ -656,213 +598,44 @@ src/test/java/com/winereviewer/api/integration/
 
 ---
 
-# 🎯 Current Implementation Status & Roadmap
+# 🎯 Current Status & Roadmap
 
-## ✅ Implemented (as of 2025-10-22)
+**See `ROADMAP.md` for detailed implementation status, next steps, and backlog.**
 
-### Backend API (Spring Boot)
-- Complete Review CRUD endpoints (`ReviewController`, `ReviewService`)
-- Comment endpoints (`CommentController`)
-- JWT authentication structure (`JwtUtil`, `JwtProperties`) - updated to JJWT 0.12.x
-- **Google OAuth authentication** (`AuthService`, `GoogleTokenValidator`)
-- **Domain exception hierarchy** (`DomainException` base, `ResourceNotFoundException`, `InvalidRatingException`, `UnauthorizedAccessException`, `BusinessRuleViolationException`, `InvalidTokenException`)
-- Global exception handling (`GlobalExceptionHandler`) with domain exception support
-- Database entities: User, Wine, Review, Comment (with domain exception validation)
-- Flyway migrations setup
-- OpenAPI/Swagger documentation
-- Application configuration with profiles (dev/prod)
-- Docker support (Dockerfile + docker-compose)
-- **Complete unit test suite** (46 tests, 100% passing: ReviewControllerTest, ReviewServiceTest, DomainExceptionTest, AuthServiceTest, GoogleTokenValidatorTest)
-- **✨ NEW: Integration tests with Testcontainers** (37 tests: ReviewControllerIT, AuthControllerIT)
-
-### Infrastructure
-- Docker Compose with PostgreSQL 16 and API service
-- Health checks and dependencies configured
-- **Testcontainers integration test infrastructure** (`AbstractIntegrationTest`, `application-integration.yml`)
-
-### CI/CD
-- GitHub Actions for API (`ci-api.yml`) with path filters
-- GitHub Actions for Mobile (`ci-app.yml`) with path filters
-- Release workflow (`release.yml`)
-
-### Testing Coverage (Backend)
-- **Unit Tests:** 46 tests covering services, controllers, exceptions, validators
-- **Integration Tests:** 36 tests covering API endpoints with real PostgreSQL database
-- **Total:** 82 tests (all passing)
-- **Coverage:** Review CRUD (100%), Auth (100%), Database constraints (100%), Exception scenarios (100%)
-
-### Mobile App (Flutter) - **✨ NEW** (as of 2025-10-25)
-- **Project initialized:** Flutter 3.35.6 with package `com.winereviewer.wine_reviewer_mobile`
-- **Dependencies configured (10 packages):**
-  - `flutter_riverpod` - State management + DI
-  - `go_router` - Navigation with deep linking
-  - `dio` - HTTP client with interceptors
-  - `freezed` + `json_serializable` - Immutable models
-  - `flutter_secure_storage` - Encrypted token storage
-  - `image_picker` + `cached_network_image` - Image handling
-  - `google_sign_in` - OAuth authentication
-  - `build_runner` + `golden_toolkit` - Code gen + testing
-- **Feature-first architecture:** `lib/features/` (auth, review, wine), `lib/core/`, `lib/common/`
-- **Core configuration files:**
-  - `app_colors.dart` - Color palette (wine theme)
-  - `app_theme.dart` - Material Design 3 theme
-  - `api_constants.dart` - API URLs, endpoints, timeouts
-- **Documentation:** `DEPENDENCIES_EXPLAINED.md`, `SETUP_INSTRUCTIONS.md`
-- **Platform support:** Android (primary), iOS, Web, Windows, macOS, Linux (generated)
-
-## 🚧 In Progress / TODO
-- **Mobile app (Flutter):** Core network layer (Dio client, auth interceptor) - in progress
-- Image upload with pre-signed URLs (backend)
-- Observability (metrics, tracing)
-
-## 🎯 Next Steps (Roadmap)
-
-**IMPORTANT:** This section should be updated at the **end of each development session** to track what's next.
-
-**Last updated:** 2025-10-25 (Session 4 - Flutter Mobile App Initialization - In Progress)
-
-### Immediate Next Steps (Priority Order)
-
-1. **🚧 IN PROGRESS: Complete Flutter Core Infrastructure** (Started 2025-10-25)
-   - ✅ Initialize Flutter 3.35.6 project with feature-first architecture
-   - ✅ Configure 10 essential dependencies (Riverpod, dio, go_router, freezed, etc.)
-   - ✅ Create core configuration files (app_colors, app_theme, api_constants)
-   - ⏳ **Next:** Create Dio HTTP client with auth interceptor
-   - ⏳ Setup go_router navigation structure (splash, login, home, review details)
-   - ⏳ Create initial main.dart with ProviderScope and MaterialApp
-   - ⏳ Test app compiles and runs on Android emulator
-
-2. **Implement Flutter Authentication Flow (F2 Phase)**
-   - Create auth feature structure (data/domain/presentation/providers)
-   - Implement Google Sign-In integration
-   - Create login screen UI with Material Design 3
-   - Setup flutter_secure_storage for JWT token persistence
-   - Implement auto-login (check token on app startup)
-
-3. **Implement Image Upload with Pre-signed URLs (Backend)**
-   - Choose storage provider (S3 Free Tier or Supabase Storage)
-   - Implement pre-signed URL generation endpoint
-   - Add image upload validation (size, MIME type)
-   - Update Review entity to store image URLs
-   - Add integration tests for image upload flow
-
-4. **Implement Comment System (Backend)**
-   - Complete CRUD endpoints for comments
-   - Add OpenAPI documentation
-   - Create unit and integration tests for comment endpoints
-
-### Future Backlog (Post-MVP)
-
-- **Observability:** Metrics, distributed tracing, structured logging
-- **User Follow System:** Follow/unfollow users
-- **Wine Recommendations:** Recommendation algorithm
-- **Internationalization:** i18n support for multiple languages
-- **iOS Support:** Expand Flutter app to iOS
-
-### Blocked/Waiting
-
-- None currently
+**Quick Summary:**
+- ✅ Backend API: Review CRUD + Auth (82 tests, 100% passing)
+- ✅ Mobile App: Flutter initialized with 10 dependencies
+- 🚧 In Progress: Flutter core infrastructure (network layer, router, main.dart)
+- 📍 Next: Flutter authentication flow → Image upload → Comments
 
 ---
 
 ## 📚 Learnings & Technical Decisions Log
 
-### Session 2025-10-22: Integration Test Authentication Architecture
+**See `LEARNINGS.md` for detailed session logs, technical decisions, problems encountered, and solutions.**
 
-**Problem:** Integration tests with Testcontainers were failing due to JWT authentication being enforced but no valid tokens being provided.
+Sessions are organized chronologically (newest-first) with subsections for Backend (☕), Frontend (📱), and Infrastructure (🐳) work.
 
-**Initial Approach Considered (REJECTED):**
-- ❌ Adding `X-User-Id` header to controller endpoints
-- **Why rejected:** Security anti-pattern - allows any client to impersonate users; mixes test code with production code
-
-**Final Solution (ACCEPTED):**
-1. **TestSecurityConfig**: Disables security only for integration tests (via `@Profile("integration")`)
-2. **ReviewController**: Modified to extract `userId` from Spring Security `Authentication.getName()` (production-ready)
-3. **AbstractIntegrationTest**: Added `authenticated(UUID userId)` helper that creates `UsernamePasswordAuthenticationToken`
-4. **Tests**: Use `.with(authenticated(testUser.getId()))` in `mockMvc.perform()` calls
-
-**Key Insights:**
-- Never compromise production code security for testing convenience
-- Spring Security Testing provides proper mechanisms (`RequestPostProcessor`) for authentication in tests
-- Separation of concerns: Test infrastructure should not leak into production code
-- `@Profile` annotations are powerful for test-specific configurations
-
-**Formatting Standard Established:**
-- Lambda closing parentheses should be on the same line as the last method call
-- Example: `.authorizeHttpRequests(auth -> auth.anyRequest().permitAll());` (not `)` on separate line)
-- Documented in `CODING_STYLE.md` section "Formatação de Lambdas e Method Chaining"
-
-**IntelliJ Working Mode:**
-- ⚠️ Running Claude Code inside IntelliJ terminal causes conflicts with auto-formatters
-- **Solution for next session:** Run Claude Code in separate terminal to avoid file modification conflicts
-
-### Session 2025-10-22 (Part 2): Integration Test Fixes & Code Quality Improvements
-
-**Problems Fixed:**
-1. **Cascade Delete Tests Failing** - Hibernate cache wasn't seeing database CASCADE DELETE
-2. **AuthController Test Mismatch** - Expected 500 but got 404 (correct behavior)
-3. **Optional Fields JSON Test** - Expected `.isEmpty()` but Jackson omits null fields
-4. **Unit Test Authentication** - ReviewControllerTest missing proper authentication setup
-
-**Solutions:**
-1. **Cascade Delete:** Added `entityManager.clear()` after `flush()` to force Hibernate to reload from database
-2. **AuthController:** Renamed test and changed expectation from 500 → 404 (user not found is 404, not 500)
-3. **Optional Fields:** Changed `.isEmpty()` → `.doesNotExist()` (Jackson default behavior)
-4. **Unit Test Auth:** Added `.with(user(userId.toString()))` + import `SecurityMockMvcRequestPostProcessors.user`
-
-**New Directives Established:**
-- **Always use imports over full class names** - Improves readability and follows Java conventions
-- **Prefer `.getFirst()` over `.get(0)`** - Java 21+ idiomatic code
-- **Show git diff before commit** - User must review all changes before committing
-- **Auto-update directives** - New directives automatically added to CLAUDE.md
-
-**Test Results:**
-- ✅ **82 tests passing** (46 unit + 36 integration)
-- ✅ All authentication tests working correctly
-- ✅ All cascade delete tests passing
-- ✅ All JSON serialization tests passing
-
-**Token Efficiency Improvements:**
-- Added "Command Execution Guidelines" section to CLAUDE.md
-- Updated all commands to use quiet mode (`-q`, `--quiet-pull`)
-- Documented rationale: Optimize token usage in Claude Code sessions
-
-### Session 2025-10-22 (Part 3): Integration Test Authentication Completed
-
-**Context:**
-- Previous session left integration tests in non-functional state
-- Expected to manually add `.with(authenticated())` to 21 test methods
-- Expected cascade delete and AuthController failures
-
-**Discoveries:**
-1. **Authentication Already Implemented** - All 21 `mockMvc.perform()` calls already had `.with(authenticated(testUser.getId()))` from previous session
-2. **Tests Already Passing** - No cascade delete or AuthController failures found
-3. **Previous Session Incomplete Commit** - Work was committed in non-functional state but was actually functional
-
-**Verification:**
-- ✅ Integration tests: 36 tests passing (13 AuthController + 23 ReviewController)
-- ✅ Unit tests: 46 tests passing
-- ✅ **Total: 82 tests passing** (100% success rate)
-
-**Key Insight:**
-- Running Claude Code in IntelliJ terminal (from previous session) may have caused confusion about actual file state
-- Current session (running Claude Code in separate terminal) revealed code was already functional
-- Importance of verifying test state before assuming failures
-
-**Working Mode Recommendation Confirmed:**
-- ✅ **Always run Claude Code in separate terminal** (not inside IntelliJ terminal)
-- ✅ Avoids auto-formatter conflicts and state confusion
-- ✅ Clearer view of actual file state
+**Recent Sessions:**
+- 2025-10-25: Flutter Mobile App Initialization
+- 2025-10-22 (Part 3): Integration Test Authentication Completed
+- 2025-10-22 (Part 2): Integration Test Fixes & Code Quality
+- 2025-10-22 (Part 1): Integration Test Authentication Architecture
 
 ---
 
 ## Useful References
 
-- **Coding Style Guide:** See `CODING_STYLE.md` for detailed conventions (organized by General/Backend/Frontend)
-- **Main Prompt Pack:** See `prompts/PACK.md` for comprehensive AI guidance and agent schemas
-- **README Files:** Each subdirectory (apps/mobile, services/api, infra) has specific setup instructions
-- **GitHub Actions:** Workflows use path filters for monorepo efficiency
-- **Docker Compose:** Start here for local development (`infra/docker-compose.yml`)
-- claude.md preciso ir trabalhar. Nas proximas eu nao vou abrir o claude no terminal do intellij, mas a parte. 
-registre os aprendizados e commite, mesmo estando em estado nao-funcional. Na proxima sessao nos fazemos os ajustes. 
-adicione as correcoes pendentes a area de proximos passos do claude.md
+**Core Documentation:**
+- **`ROADMAP.md`** - Current implementation status, next steps, backlog (updated each session)
+- **`LEARNINGS.md`** - Session logs, technical decisions, problems & solutions (chronological archive)
+- **`CODING_STYLE.md`** - Detailed coding conventions (organized by General/Backend/Frontend/Infrastructure)
+- **`README.md`** - Project setup instructions and overview
+
+**Other References:**
+- **Prompt Pack:** `prompts/PACK.md` - AI guidance and agent schemas
+- **Stack-specific READMEs:** `apps/mobile/`, `services/api/`, `infra/` - Detailed setup per stack
+- **OpenAPI/Swagger:** `http://localhost:8080/swagger-ui.html` - Live API documentation (when backend running)
+- **GitHub Actions:** `.github/workflows/` - CI/CD pipelines with path filters
+- **Docker Compose:** `infra/docker-compose.yml` - Local development environment
+- **Command Templates:** `C:\repo\claude-command-templates\` - Reusable slash commands for new projects

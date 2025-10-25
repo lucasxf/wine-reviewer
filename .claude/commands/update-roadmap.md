@@ -1,7 +1,9 @@
 ---
-description: Update Next Steps roadmap in CLAUDE.md
+description: Update project roadmap in ROADMAP.md
 argument-hint: <what-was-completed>
 ---
+
+# ROADMAP.md
 
 **Update Project Roadmap**
 
@@ -9,35 +11,46 @@ What was completed: $ARGUMENTS
 
 ## Instructions
 
-Update the "Next Steps (Roadmap)" section in CLAUDE.md:
+Update ROADMAP.md with the following steps:
 
 ### 1. Identify Completed Items
-- Review what was just implemented/completed
-- Check the "Immediate Next Steps" list for matching items
+- Review what was just implemented/completed: $ARGUMENTS
+- Check the "Next Steps (Priority Order)" list for matching items
+- Check "In Progress" section for items that may now be completed
 
-### 2. Move Completed Items
-- Move finished tasks from "Immediate Next Steps" to "✅ Implemented" section
-- Include completion date (today: use current date)
-- Add brief description of what was delivered
+### 2. Move Completed Items to "Implemented" Section
+- Move finished tasks from "In Progress" or "Next Steps" → "✅ Implemented"
+- Add under appropriate subsection (Backend API / Mobile App / Infrastructure)
+- Include what was delivered (brief bullet points)
+- No need for completion date (tracked in git commits)
 
-### 3. Update Immediate Next Steps
+### 3. Update "In Progress" Section
+- Remove completed items
+- Add new items currently being worked on
+- Keep only actively in-progress work (not future plans)
+
+### 4. Update "Next Steps (Priority Order)"
 - Remove completed items from priority list
 - Promote next logical tasks from "Future Backlog" if applicable
-- Reorder remaining items by new priority
+- Reorder remaining items by new priority (1, 2, 3, 4...)
+- Update task details if scope changed
 
-### 4. Add New Discoveries
-- If new tasks were discovered during implementation, add them to appropriate section
-- Mark blockers in "Blocked/Waiting" if applicable
+### 5. Add New Discoveries
+- If new tasks were discovered during implementation, add to:
+  - "Next Steps" (if high priority)
+  - "Future Backlog" (if post-MVP)
+  - "Blocked/Waiting" (if waiting on decisions/dependencies)
 
-### 5. Update "Last updated" Timestamp
-- Change the "Last updated:" line to today's date
-- Add session number if tracking sessions
+### 6. Update Metadata
+- Change "Last updated:" timestamp at top to today's date + session context
+- Update "Metrics" table if test count or endpoint count changed
 
-## Example Output
+## Output Format
 
-Show me:
-1. What will be moved to "✅ Implemented"
-2. What the new "Immediate Next Steps" list will look like
-3. Any new items added to "Future Backlog"
+Show me a preview before editing:
+1. What will be moved to "✅ Implemented" (and which subsection)
+2. What the new "🎯 Next Steps" list will look like (Priority 1, 2, 3...)
+3. Any new items added to "📍 Future Backlog" or "🚫 Blocked"
+4. Updated "In Progress" section
 
-Then update CLAUDE.md and show git diff for review.
+Then update ROADMAP.md and show git diff for review.
