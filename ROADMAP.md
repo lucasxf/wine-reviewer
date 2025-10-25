@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-25 (Session 4 - Flutter Mobile App Initialization - In Progress)
+**Last updated:** 2025-10-25 (Session 5 - Dio HTTP Client Implementation - Completed)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -54,6 +54,14 @@ This file tracks the current implementation status and next steps for the Wine R
 - `app_theme.dart` - Material Design 3 theme
 - `api_constants.dart` - API URLs, endpoints, timeouts
 
+**Network Layer (HTTP Client):**
+- `dio_client.dart` - HTTP client configurado (Singleton, timeouts, headers)
+- `auth_interceptor.dart` - JWT token automático (flutter_secure_storage)
+- `logging_interceptor.dart` - Logging de requisições/respostas (debug mode)
+- `network_exception.dart` - 9 exceções customizadas (401, 403, 404, 400, 422, 5xx, timeout, connection)
+- `network_providers.dart` - Riverpod providers (DI para DioClient, AuthInterceptor, Storage)
+- `lib/core/network/README.md` - Documentação completa de uso
+
 **Documentation:**
 - `DEPENDENCIES_EXPLAINED.md` - Detailed package explanations
 - `SETUP_INSTRUCTIONS.md` - Development environment setup
@@ -75,7 +83,6 @@ This file tracks the current implementation status and next steps for the Wine R
 ## 🚧 In Progress
 
 ### Mobile App (Flutter)
-- Core network layer (Dio client, auth interceptor)
 - Router configuration (go_router with splash, login, home, review details)
 - Initial main.dart with ProviderScope and MaterialApp
 - Android emulator testing
@@ -92,9 +99,9 @@ This file tracks the current implementation status and next steps for the Wine R
 - ✅ Initialize Flutter 3.35.6 project with feature-first architecture
 - ✅ Configure 10 essential dependencies (Riverpod, dio, go_router, freezed, etc.)
 - ✅ Create core configuration files (app_colors, app_theme, api_constants)
+- ✅ Create Dio HTTP client with auth interceptor (AuthInterceptor, LoggingInterceptor, DioClient, NetworkExceptions, Providers)
 
 **Next Actions:**
-- ⏳ Create Dio HTTP client with auth interceptor
 - ⏳ Setup go_router navigation structure (splash, login, home, review details)
 - ⏳ Create initial main.dart with ProviderScope and MaterialApp
 - ⏳ Test app compiles and runs on Android emulator
