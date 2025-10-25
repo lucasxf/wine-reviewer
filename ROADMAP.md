@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-25 (Session 5 - Dio HTTP Client Implementation - Completed)
+**Last updated:** 2025-10-25 (Session 6 - Go Router & Screens Implementation - Completed)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -62,6 +62,15 @@ This file tracks the current implementation status and next steps for the Wine R
 - `network_providers.dart` - Riverpod providers (DI para DioClient, AuthInterceptor, Storage)
 - `lib/core/network/README.md` - Documentação completa de uso
 
+**Router & Navigation (go_router):**
+- `app_router.dart` - Configuração declarativa de rotas (4 rotas + error handler)
+- `splash_screen.dart` - Tela inicial (verifica autenticação, redireciona)
+- `login_screen.dart` - Tela de login (Google Sign-In + MVP testing)
+- `home_screen.dart` - Feed de reviews (ListView.builder com 10 reviews mockados)
+- `review_details_screen.dart` - Detalhes do review (parametrizado por ID)
+- Rotas: `/` (splash), `/login`, `/home`, `/review/:id`
+- Deep linking support, parametrized routes, error handling (404)
+
 **Documentation:**
 - `DEPENDENCIES_EXPLAINED.md` - Detailed package explanations
 - `SETUP_INSTRUCTIONS.md` - Development environment setup
@@ -83,7 +92,6 @@ This file tracks the current implementation status and next steps for the Wine R
 ## 🚧 In Progress
 
 ### Mobile App (Flutter)
-- Router configuration (go_router with splash, login, home, review details)
 - Initial main.dart with ProviderScope and MaterialApp
 - Android emulator testing
 
@@ -100,9 +108,9 @@ This file tracks the current implementation status and next steps for the Wine R
 - ✅ Configure 10 essential dependencies (Riverpod, dio, go_router, freezed, etc.)
 - ✅ Create core configuration files (app_colors, app_theme, api_constants)
 - ✅ Create Dio HTTP client with auth interceptor (AuthInterceptor, LoggingInterceptor, DioClient, NetworkExceptions, Providers)
+- ✅ Setup go_router navigation structure (4 screens: splash, login, home, review details + app_router.dart)
 
 **Next Actions:**
-- ⏳ Setup go_router navigation structure (splash, login, home, review details)
 - ⏳ Create initial main.dart with ProviderScope and MaterialApp
 - ⏳ Test app compiles and runs on Android emulator
 
