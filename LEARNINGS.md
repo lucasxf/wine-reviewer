@@ -6,6 +6,47 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## Session 2025-10-25 (Part 2): Documentation Optimization & Structure
+
+**Session Goal:** Reduce CLAUDE.md bloat (40k chars) while preserving essential context for AI and developer
+
+### 📚 General (Cross-stack)
+
+**Context:** CLAUDE.md had grown to 869 lines (~40k chars) and would grow indefinitely with session logs and roadmap updates.
+
+**What Was Done:**
+- Analyzed CLAUDE.md bloat sources (session logs: 90 lines, roadmap: 100 lines, duplicate conventions: 50+ lines)
+- Designed 3-file strategy: CLAUDE.md (architecture) + ROADMAP.md (status) + LEARNINGS.md (history)
+- Created ROADMAP.md (154 lines) - current status, in-progress work, prioritized next steps
+- Created LEARNINGS.md (213 lines) - session logs with hybrid chronological format (sessions with Backend/Frontend/Infrastructure subsections)
+- Condensed CLAUDE.md by 44% (869 → 489 lines, 40k → 28k chars)
+- Enhanced /directive command with smart deduplication (searches CLAUDE.md + CODING_STYLE.md)
+- Updated /start-session to load ROADMAP.md
+- Updated /finish-session to prompt for ROADMAP.md + LEARNINGS.md updates
+- Updated /update-roadmap to target ROADMAP.md instead of CLAUDE.md
+
+**Key Insights:**
+- **Hybrid chronological format wins:** Sessions organized chronologically with Backend/Frontend/Infrastructure subsections reflects real mixed-stack work better than pure sectioned format
+- **Separation of concerns:** Architecture (CLAUDE.md) vs Status (ROADMAP.md) vs History (LEARNINGS.md) prevents bloat and improves maintainability
+- **Smart deduplication prevents redundancy:** Enhanced /directive searches both files for similar directives before adding
+- **Scalability:** LEARNINGS.md can grow indefinitely without bloating CLAUDE.md (core architecture)
+- **Token efficiency:** 44% reduction in main file = faster AI context loading
+
+**Problems Encountered:**
+- None - smooth implementation with clear user requirements and approved strategy
+
+**Solutions Applied:**
+- File structure: CLAUDE.md (architecture patterns) + ROADMAP.md (status tracking) + LEARNINGS.md (session logs)
+- Command updates: All workflow commands now reference correct files
+- Cross-references updated: Documentation strategy section now mentions all 3 files with clear update triggers
+
+**Metrics:**
+- CLAUDE.md: 869 → 489 lines (44% reduction)
+- New files: ROADMAP.md (154 lines), LEARNINGS.md (213 lines)
+- Total: 856 lines vs 869 original (but most sessions load only CLAUDE.md + ROADMAP.md ~35k chars)
+
+---
+
 ## Session 2025-10-25: Flutter Mobile App Initialization
 
 **Session Goal:** Initialize Flutter mobile app with core dependencies and project structure
