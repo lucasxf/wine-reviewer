@@ -19,19 +19,20 @@ class AppColors {
   AppColors._();
 
   // Primary colors - Cores principais (tema vinho/uva)
-  static const Color primary = Color(0xFF722F37); // Vinho tinto (bordô escuro)
-  static const Color primaryLight = Color(0xFF9B4451); // Vinho tinto claro
-  static const Color primaryDark = Color(0xFF4A1F26); // Vinho tinto escuro
+  // Paleta personalizada de vinhos (c:/repo/paleta-de-cores.dart)
+  static const Color primary = Color(0xFF810020); // Vinho profundo (vinhoProfundo)
+  static const Color primaryLight = Color(0xFF9F1D35); // Vinho vivo (vinhoVivo)
+  static const Color primaryDark = Color(0xFF4C1C24); // Bordeaux escuro (bordeauxEscuro)
 
-  // Secondary colors - Cores secundárias (dourado/champagne)
-  static const Color secondary = Color(0xFFD4AF37); // Dourado
-  static const Color secondaryLight = Color(0xFFE5C965); // Dourado claro
-  static const Color secondaryDark = Color(0xFFA38728); // Dourado escuro
+  // Secondary colors - Cores secundárias (tons de vinho)
+  static const Color secondary = Color(0xFFB11225); // Tinto médio (tintoMedio)
+  static const Color secondaryLight = Color(0xFF9F1D35); // Vinho vivo (vinhoVivo)
+  static const Color secondaryDark = Color(0xFF4D4147); // Vinho acinzentado (vinhoAcinzentado)
 
   // Neutral colors - Cores neutras (cinzas, preto, branco)
-  static const Color background = Color(0xFFF5F5F5); // Fundo claro (cinza bem claro)
+  static const Color background = Color(0xFFF5F5F5); // Fundo claro (fundoClaro)
   static const Color surface = Color(0xFFFFFFFF); // Superfície (branco)
-  static const Color textPrimary = Color(0xFF212121); // Texto principal (preto quase)
+  static const Color textPrimary = Color(0xFF333333); // Texto principal (textoEscuro)
   static const Color textSecondary = Color(0xFF757575); // Texto secundário (cinza)
   static const Color divider = Color(0xFFBDBDBD); // Divisores/bordas (cinza médio)
 
@@ -43,7 +44,7 @@ class AppColors {
 
   // Rating colors - Cores para as taças de avaliação (1-5 taças)
   static const Color ratingEmpty = Color(0xFFE0E0E0); // Taça vazia (cinza claro)
-  static const Color ratingFilled = Color(0xFF722F37); // Taça cheia (vinho tinto)
+  static const Color ratingFilled = Color(0xFF810020); // Taça cheia (vinho profundo)
 
   // Shimmer effect colors - Cores para loading skeleton
   /// EXPLICAÇÃO Shimmer:
