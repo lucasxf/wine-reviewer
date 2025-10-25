@@ -8,14 +8,18 @@ part of 'auth_response.dart';
 
 _$AuthResponseImpl _$$AuthResponseImplFromJson(Map<String, dynamic> json) =>
     _$AuthResponseImpl(
-      accessToken: json['accessToken'] as String,
-      refreshToken: json['refreshToken'] as String,
-      user: User.fromJson(json['user'] as Map<String, dynamic>),
+      token: json['token'] as String,
+      userId: json['userId'] as String,
+      email: json['email'] as String,
+      displayName: json['displayName'] as String,
+      avatarUrl: json['avatarUrl'] as String?,
     );
 
 Map<String, dynamic> _$$AuthResponseImplToJson(_$AuthResponseImpl instance) =>
     <String, dynamic>{
-      'accessToken': instance.accessToken,
-      'refreshToken': instance.refreshToken,
-      'user': instance.user,
+      'token': instance.token,
+      'userId': instance.userId,
+      'email': instance.email,
+      'displayName': instance.displayName,
+      'avatarUrl': instance.avatarUrl,
     };

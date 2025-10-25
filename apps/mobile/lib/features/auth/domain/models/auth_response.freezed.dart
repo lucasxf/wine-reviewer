@@ -21,9 +21,11 @@ AuthResponse _$AuthResponseFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$AuthResponse {
-  String get accessToken => throw _privateConstructorUsedError;
-  String get refreshToken => throw _privateConstructorUsedError;
-  User get user => throw _privateConstructorUsedError;
+  String get token => throw _privateConstructorUsedError;
+  String get userId => throw _privateConstructorUsedError;
+  String get email => throw _privateConstructorUsedError;
+  String get displayName => throw _privateConstructorUsedError;
+  String? get avatarUrl => throw _privateConstructorUsedError;
 
   /// Serializes this AuthResponse to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -42,9 +44,13 @@ abstract class $AuthResponseCopyWith<$Res> {
     $Res Function(AuthResponse) then,
   ) = _$AuthResponseCopyWithImpl<$Res, AuthResponse>;
   @useResult
-  $Res call({String accessToken, String refreshToken, User user});
-
-  $UserCopyWith<$Res> get user;
+  $Res call({
+    String token,
+    String userId,
+    String email,
+    String displayName,
+    String? avatarUrl,
+  });
 }
 
 /// @nodoc
@@ -62,37 +68,37 @@ class _$AuthResponseCopyWithImpl<$Res, $Val extends AuthResponse>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? accessToken = null,
-    Object? refreshToken = null,
-    Object? user = null,
+    Object? token = null,
+    Object? userId = null,
+    Object? email = null,
+    Object? displayName = null,
+    Object? avatarUrl = freezed,
   }) {
     return _then(
       _value.copyWith(
-            accessToken: null == accessToken
-                ? _value.accessToken
-                : accessToken // ignore: cast_nullable_to_non_nullable
+            token: null == token
+                ? _value.token
+                : token // ignore: cast_nullable_to_non_nullable
                       as String,
-            refreshToken: null == refreshToken
-                ? _value.refreshToken
-                : refreshToken // ignore: cast_nullable_to_non_nullable
+            userId: null == userId
+                ? _value.userId
+                : userId // ignore: cast_nullable_to_non_nullable
                       as String,
-            user: null == user
-                ? _value.user
-                : user // ignore: cast_nullable_to_non_nullable
-                      as User,
+            email: null == email
+                ? _value.email
+                : email // ignore: cast_nullable_to_non_nullable
+                      as String,
+            displayName: null == displayName
+                ? _value.displayName
+                : displayName // ignore: cast_nullable_to_non_nullable
+                      as String,
+            avatarUrl: freezed == avatarUrl
+                ? _value.avatarUrl
+                : avatarUrl // ignore: cast_nullable_to_non_nullable
+                      as String?,
           )
           as $Val,
     );
-  }
-
-  /// Create a copy of AuthResponse
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $UserCopyWith<$Res> get user {
-    return $UserCopyWith<$Res>(_value.user, (value) {
-      return _then(_value.copyWith(user: value) as $Val);
-    });
   }
 }
 
@@ -105,10 +111,13 @@ abstract class _$$AuthResponseImplCopyWith<$Res>
   ) = __$$AuthResponseImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String accessToken, String refreshToken, User user});
-
-  @override
-  $UserCopyWith<$Res> get user;
+  $Res call({
+    String token,
+    String userId,
+    String email,
+    String displayName,
+    String? avatarUrl,
+  });
 }
 
 /// @nodoc
@@ -125,24 +134,34 @@ class __$$AuthResponseImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? accessToken = null,
-    Object? refreshToken = null,
-    Object? user = null,
+    Object? token = null,
+    Object? userId = null,
+    Object? email = null,
+    Object? displayName = null,
+    Object? avatarUrl = freezed,
   }) {
     return _then(
       _$AuthResponseImpl(
-        accessToken: null == accessToken
-            ? _value.accessToken
-            : accessToken // ignore: cast_nullable_to_non_nullable
+        token: null == token
+            ? _value.token
+            : token // ignore: cast_nullable_to_non_nullable
                   as String,
-        refreshToken: null == refreshToken
-            ? _value.refreshToken
-            : refreshToken // ignore: cast_nullable_to_non_nullable
+        userId: null == userId
+            ? _value.userId
+            : userId // ignore: cast_nullable_to_non_nullable
                   as String,
-        user: null == user
-            ? _value.user
-            : user // ignore: cast_nullable_to_non_nullable
-                  as User,
+        email: null == email
+            ? _value.email
+            : email // ignore: cast_nullable_to_non_nullable
+                  as String,
+        displayName: null == displayName
+            ? _value.displayName
+            : displayName // ignore: cast_nullable_to_non_nullable
+                  as String,
+        avatarUrl: freezed == avatarUrl
+            ? _value.avatarUrl
+            : avatarUrl // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -152,24 +171,30 @@ class __$$AuthResponseImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$AuthResponseImpl implements _AuthResponse {
   const _$AuthResponseImpl({
-    required this.accessToken,
-    required this.refreshToken,
-    required this.user,
+    required this.token,
+    required this.userId,
+    required this.email,
+    required this.displayName,
+    this.avatarUrl,
   });
 
   factory _$AuthResponseImpl.fromJson(Map<String, dynamic> json) =>
       _$$AuthResponseImplFromJson(json);
 
   @override
-  final String accessToken;
+  final String token;
   @override
-  final String refreshToken;
+  final String userId;
   @override
-  final User user;
+  final String email;
+  @override
+  final String displayName;
+  @override
+  final String? avatarUrl;
 
   @override
   String toString() {
-    return 'AuthResponse(accessToken: $accessToken, refreshToken: $refreshToken, user: $user)';
+    return 'AuthResponse(token: $token, userId: $userId, email: $email, displayName: $displayName, avatarUrl: $avatarUrl)';
   }
 
   @override
@@ -177,16 +202,19 @@ class _$AuthResponseImpl implements _AuthResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AuthResponseImpl &&
-            (identical(other.accessToken, accessToken) ||
-                other.accessToken == accessToken) &&
-            (identical(other.refreshToken, refreshToken) ||
-                other.refreshToken == refreshToken) &&
-            (identical(other.user, user) || other.user == user));
+            (identical(other.token, token) || other.token == token) &&
+            (identical(other.userId, userId) || other.userId == userId) &&
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.displayName, displayName) ||
+                other.displayName == displayName) &&
+            (identical(other.avatarUrl, avatarUrl) ||
+                other.avatarUrl == avatarUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, accessToken, refreshToken, user);
+  int get hashCode =>
+      Object.hash(runtimeType, token, userId, email, displayName, avatarUrl);
 
   /// Create a copy of AuthResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -204,20 +232,26 @@ class _$AuthResponseImpl implements _AuthResponse {
 
 abstract class _AuthResponse implements AuthResponse {
   const factory _AuthResponse({
-    required final String accessToken,
-    required final String refreshToken,
-    required final User user,
+    required final String token,
+    required final String userId,
+    required final String email,
+    required final String displayName,
+    final String? avatarUrl,
   }) = _$AuthResponseImpl;
 
   factory _AuthResponse.fromJson(Map<String, dynamic> json) =
       _$AuthResponseImpl.fromJson;
 
   @override
-  String get accessToken;
+  String get token;
   @override
-  String get refreshToken;
+  String get userId;
   @override
-  User get user;
+  String get email;
+  @override
+  String get displayName;
+  @override
+  String? get avatarUrl;
 
   /// Create a copy of AuthResponse
   /// with the given fields replaced by the non-null parameter values.
