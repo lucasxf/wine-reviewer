@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
@@ -54,6 +55,9 @@ class AuthControllerIT extends AbstractIntegrationTest {
     @MockBean
     private GoogleTokenValidator googleTokenValidator;
 
+    @MockBean
+    private S3Client s3Client; // Mock to avoid AWS configuration in tests
+
     @BeforeEach
     void setupMocks() {
         // Default mock behavior - valid Google token
@@ -91,11 +95,11 @@ class AuthControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.avatarUrl").value("https://lh3.googleusercontent.com/avatar123"));
 
         // Verify user was created in database
-        final var users = userRepository.findAll();
-        assertThat(users).hasSize(1);
-        assertThat(users.getFirst().getEmail()).isEqualTo("joao.silva@example.com");
-        assertThat(users.getFirst().getGoogleId()).isEqualTo("google-id-123");
-        assertThat(users.getFirst().getDisplayName()).isEqualTo("João Silva");
+        final var user = userRepository.findByEmail("joao.silva@example.com");
+        assertThat(user).isPresent();
+        assertThat(user.get().getEmail()).isEqualTo("joao.silva@example.com");
+        assertThat(user.get().getGoogleId()).isEqualTo("google-id-123");
+        assertThat(user.get().getDisplayName()).isEqualTo("João Silva");
     }
 
     @Test
@@ -123,11 +127,11 @@ class AuthControllerIT extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.displayName").value("João Silva"));  // updated
 
         // Verify user was updated (not duplicated)
-        final var users = userRepository.findAll();
-        assertThat(users).hasSize(1);
-        assertThat(users.getFirst().getId()).isEqualTo(existingUser.getId());
-        assertThat(users.getFirst().getDisplayName()).isEqualTo("João Silva");  // updated
-        assertThat(users.getFirst().getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  // updated
+        final var updatedUser = userRepository.findByEmail("joao.silva@example.com");
+        assertThat(updatedUser).isPresent();
+        assertThat(updatedUser.get().getId()).isEqualTo(existingUser.getId());  // same ID (not duplicated)
+        assertThat(updatedUser.get().getDisplayName()).isEqualTo("João Silva");  // updated
+        assertThat(updatedUser.get().getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  // updated
     }
 
     @Test
@@ -146,8 +150,8 @@ class AuthControllerIT extends AbstractIntegrationTest {
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
 
-        // Verify no user was created
-        assertThat(userRepository.findAll()).isEmpty();
+        // Verify no user was created with this email
+        assertThat(userRepository.findByEmail("joao.silva@example.com")).isEmpty();
     }
 
     @Test

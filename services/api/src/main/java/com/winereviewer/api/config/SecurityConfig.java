@@ -131,7 +131,8 @@ public class SecurityConfig {
                                 "/api-docs/**",      // OpenAPI docs
                                 "/swagger-ui/**",    // Swagger UI
                                 "/swagger-ui.html",  // Swagger UI HTML
-                                "/auth/**"           // Login endpoint (será criado)
+                                "/auth/**",          // Login endpoint (será criado)
+                                "/files/**"          // File upload (temporary public for MVP testing - see FileUploadController @Deprecated)
                         ).permitAll()
 
                         // Todos os outros endpoints precisam autenticação

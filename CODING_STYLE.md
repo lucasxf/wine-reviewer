@@ -392,9 +392,12 @@ public class ReviewService {
 
 ### Formatação de Lambdas e Method Chaining
 
-**REGRA CRÍTICA - Closing Parenthesis na Mesma Linha do Último Método:**
+**REGRA CRÍTICA - Closing Parenthesis na Mesma Linha (Updated 2025-10-26):**
 
-Quando usar **lambda expressions** com **method chaining** (especialmente em builders como Spring Security, JPA Criteria, etc.), sempre colocar o **closing parenthesis `)`** na **mesma linha** do último método.
+Sempre colocar o **closing parenthesis `)`** na **mesma linha** do último elemento, seja em:
+- **Lambda expressions** com **method chaining** (builders como Spring Security, JPA Criteria, etc.)
+- **Chamadas de construtores** com múltiplos parâmetros
+- **Chamadas de métodos** com múltiplos parâmetros
 
 **Princípio:** Evitar parênteses "soltos" em linhas isoladas.
 
@@ -427,6 +430,28 @@ http
         .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
         );  // ← Parêntese isolado (evitar!)
+
+// ✅ CORRETO - Constructor calls (closing parenthesis na mesma linha)
+final var request = new CreateReviewRequest(
+        testWine.getId().toString(),
+        5,
+        "Excelente vinho!",
+        null);
+
+// ✅ CORRETO - Method calls (closing parenthesis na mesma linha)
+final var result = someService.processData(
+        param1,
+        param2,
+        param3,
+        param4);
+
+// ❌ INCORRETO - Closing parenthesis isolado
+final var request = new CreateReviewRequest(
+        testWine.getId().toString(),
+        5,
+        "Excelente vinho!",
+        null
+);  // ← Parêntese isolado (evitar!)
 ```
 
 **Justificativa:**
@@ -441,6 +466,8 @@ http
 - ✅ Stream API com lambdas longos
 - ✅ Builders fluentes com lambdas
 - ✅ Qualquer method chaining com lambda expressions
+- ✅ Chamadas de construtores com múltiplos parâmetros (DTOs, entities, test objects)
+- ✅ Chamadas de métodos com múltiplos parâmetros
 
 ### Tratamento de Exceções
 

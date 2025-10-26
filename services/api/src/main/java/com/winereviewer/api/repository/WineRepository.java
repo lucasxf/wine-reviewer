@@ -2,6 +2,7 @@ package com.winereviewer.api.repository;
 
 import com.winereviewer.api.domain.Wine;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import java.util.UUID;
  * @author lucas
  * @date 18/10/2025 14:30
  */
+@Repository
 public interface WineRepository extends JpaRepository<Wine, UUID> {
 
     List<Wine> findByNameContainingIgnoreCase(String name);

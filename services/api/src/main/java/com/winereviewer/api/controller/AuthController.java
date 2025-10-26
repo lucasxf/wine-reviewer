@@ -1,5 +1,6 @@
 package com.winereviewer.api.controller;
 
+import com.winereviewer.api.domain.User;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.security.JwtUtil;
 import com.winereviewer.api.service.AuthService;
@@ -19,6 +20,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
+import java.util.UUID;
 
 /**
  * Controller para autenticação e geração de tokens JWT.

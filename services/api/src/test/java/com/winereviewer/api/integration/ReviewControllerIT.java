@@ -11,8 +11,10 @@ import com.winereviewer.api.repository.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.UUID;
 
@@ -55,6 +57,9 @@ class ReviewControllerIT extends AbstractIntegrationTest {
 
     @Autowired
     private jakarta.persistence.EntityManager entityManager;
+
+    @MockBean
+    private S3Client s3Client; // Mock to avoid AWS configuration in tests
 
     private User testUser;
     private Wine testWine;

@@ -17,9 +17,16 @@ spring:
   application:
     name: wine-reviewer-api
 
+# REST
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 20MB
+
   # Database connection (same for all environments, credentials via env vars)
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/winereviewer}
+    #url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/winereviewer}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/winedb}
     username: ${SPRING_DATASOURCE_USERNAME:wineuser}
     password: ${SPRING_DATASOURCE_PASSWORD:winepass}
     driver-class-name: org.postgresql.Driver
@@ -77,7 +84,7 @@ spring:
 
 # Server configuration
 server:
-  port: ${PORT:8080}
+  port: 8080  # Fixed port for local development (Docker uses 8090:8080 mapping)
   compression:
     enabled: true
   # Tomcat-specific timeout settings
@@ -141,8 +148,8 @@ app:
     s3:
       bucket-name: ${AWS_S3_BUCKET:wine-reviewer-images}
       region: ${AWS_REGION:us-east-1}
-      access-key: ${AWS_ACCESS_KEY:}
-      secret-key: ${AWS_SECRET_KEY:}
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
     supabase:
       url: ${SUPABASE_URL:}
       key: ${SUPABASE_KEY:}

@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -61,6 +62,9 @@ class ReviewControllerTest {
 
     @MockBean
     private ReviewService service;
+
+    @MockBean
+    private S3Client s3Client; // Mock to avoid AWS configuration in tests
 
     @Test
     void shouldCreateReviewWhenValidRequest() throws Exception {

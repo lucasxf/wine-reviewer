@@ -380,6 +380,80 @@ DomainException (abstract)
 - **Naming Convention:** `ClassNameTest` for unit tests, `ClassNameIT` for integration tests
 - **Location:** `src/test/java/` mirroring the same package structure as `src/main/java/`
 
+### Testcontainers Integration Tests (CRITICAL - Updated 2025-10-26)
+
+**Why Testcontainers over H2:**
+- ✅ **Production Parity:** Tests run against real PostgreSQL (same as prod)
+- ✅ **Isolation:** Each test run gets fresh database state
+- ✅ **Constraints:** Database constraints (CHECK, FK, CASCADE) work exactly like production
+- ✅ **CI/CD Ready:** No manual database setup required
+
+**Base Class Pattern:**
+- **AbstractIntegrationTest** - Shared PostgreSQL container across all integration tests
+- Static `@Container` with `.withReuse(true)` for performance (avoids container restart per test class)
+- `@Transactional` on test class for automatic rollback (test isolation)
+- `@DirtiesContext(classMode = AFTER_CLASS)` to clean Spring context after all tests
+- `@ActiveProfiles("integration")` to use `application-integration.yml` configuration
+
+**Authentication in Tests:**
+- **Helper method:** `authenticated(UUID userId)` creates proper Spring Security authentication
+- Returns `RequestPostProcessor` that can be used with `.with(authenticated(userId))`
+- Simulates JWT authentication without requiring actual tokens
+- Example: `mockMvc.perform(post("/reviews").with(authenticated(testUser.getId())))`
+
+**Mock External Dependencies:**
+- **GoogleTokenValidator** - Mocked to avoid external Google API calls
+- **S3Client** - Mocked with `@MockBean` to avoid AWS configuration
+- Only infrastructure dependencies (database) are real
+
+**Integration Test Structure (ReviewControllerIT example):**
+1. **Setup:** `@BeforeEach` creates test data (users, wines) via repositories
+2. **Test:** Uses `mockMvc` to make HTTP requests with authentication
+3. **Assertions:** Verify HTTP response + database state with AssertJ
+4. **Cleanup:** Automatic rollback via `@Transactional`
+
+**Key Testing Patterns:**
+- **CRUD Coverage:** Create, Read, Update, Delete for all entities
+- **Validation:** Test all `@Valid` constraints (null, min/max, format)
+- **Authorization:** Test 403 Forbidden without authentication
+- **Business Rules:** Test rating 1-5, cascade deletes, foreign keys
+- **Pagination:** Test page/size/sort parameters
+- **Edge Cases:** Non-existent IDs (404), invalid tokens (401), blank inputs (400)
+
+**Example Integration Test:**
+```java
+@Test
+void shouldCreateReviewWithValidData() throws Exception {
+    final var request = new CreateReviewRequest(
+            testWine.getId().toString(),
+            5,
+            "Excelente vinho!",
+            "https://example.com/photo.jpg");
+
+    mockMvc.perform(post("/reviews")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .with(authenticated(testUser.getId()))
+                    .content(objectMapper.writeValueAsString(request)))
+            .andDo(print())
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.rating").value(5))
+            .andExpect(jsonPath("$.author.displayName").value(testUser.getDisplayName()));
+
+    // Verify database persistence
+    final var reviews = reviewRepository.findAll();
+    assertThat(reviews).hasSize(1);
+    assertThat(reviews.getFirst().getRating()).isEqualTo(5);
+}
+```
+
+**Common Mistakes to Avoid:**
+- ❌ Using H2 for integration tests (database constraints differ from PostgreSQL)
+- ❌ Starting new container per test class (slow - use static shared container)
+- ❌ Not mocking external APIs (GoogleTokenValidator, S3Client)
+- ❌ Forgetting `@Transactional` (tests pollute database state)
+- ❌ Not testing authentication (403 Forbidden scenarios)
+- ❌ Isolating closing parenthesis `)` on separate line (see CODING_STYLE.md)
+
 ## Backend Entry Points
 
 - **API Main Application:** `services/api/src/main/java/com/winereviewer/api/WineReviewerApiApplication.java`

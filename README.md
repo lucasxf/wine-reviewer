@@ -37,8 +37,12 @@
 - ✅ PostgreSQL with Flyway migrations
 - ✅ OpenAPI/Swagger documentation
 - ✅ Docker Compose setup for local development
-- ✅ **Comprehensive test suite** (82 total tests: 46 unit + 36 integration)
-- ✅ **Integration tests with Testcontainers** (PostgreSQL, real database testing)
+- ✅ **Comprehensive test suite** (82 total tests: 46 unit + 36 integration, 100% passing)
+- ✅ **Integration tests with Testcontainers** (Real PostgreSQL testing with production parity)
+  - Shared container pattern for performance (static @Container with reuse)
+  - Proper authentication helpers (authenticated(userId) method)
+  - Mock external APIs (GoogleTokenValidator, S3Client)
+  - Full CRUD coverage, validation, authorization, and edge cases
 
 **Mobile App (Flutter):**
 - ✅ **Flutter 3.35.6** with feature-first architecture
@@ -154,9 +158,9 @@ wine-reviewer/
 
 4. **Check database:**
    - Host: `localhost:5432`
-   - Database: `winereviewer`
+   - Database: `winedb`
    - User: `winereviewer`
-   - Password: `winereviewer_dev_pass`
+   - Password: `winepass`
 
 ### Docker Commands (General)
 

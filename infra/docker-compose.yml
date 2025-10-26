@@ -3,15 +3,16 @@ services:
     image: postgres:16-alpine
     container_name: adv-postgres
     environment:
-      POSTGRES_DB: advdb
-      POSTGRES_USER: advuser
-      POSTGRES_PASSWORD: advpass
+      POSTGRES_DB: winedb #advdb
+      POSTGRES_USER: wineuser # advuser
+      POSTGRES_PASSWORD: winepass # advpass
     ports:
       - "5432:5432"
     volumes:
       - adv_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U advuser -d advdb"]
+      test: ["CMD-SHELL", "pg_isready -U wineuser -d winedb"]
+      # test: ["CMD-SHELL", "pg_isready -U advuser -d advdb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -25,11 +26,14 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/advdb
-      SPRING_DATASOURCE_USERNAME: advuser
-      SPRING_DATASOURCE_PASSWORD: advpass
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/winedb
+      SPRING_DATASOURCE_USERNAME: wineuser
+      SPRING_DATASOURCE_PASSWORD: winepass
+      # AWS Credentials (set these before running docker compose!)
+      # AWS_ACCESS_KEY_ID: your-access-key-here
+      # AWS_SECRET_ACCESS_KEY: your-secret-key-here
     ports:
-      - "8080:8080"
+      - "8090:8080"  # Host:Container (avoid conflict with local Spring Boot on 8080)
 
 volumes:
   adv_pgdata:

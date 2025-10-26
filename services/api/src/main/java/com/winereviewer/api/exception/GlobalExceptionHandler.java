@@ -5,8 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -88,6 +90,42 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Trata MissingServletRequestParameterException (parâmetro obrigatório ausente).
+     * <p>
+     * Lançada quando um @RequestParam obrigatório está faltando na requisição.
+     * Comum em endpoints multipart quando o parâmetro "file" não é enviado.
+     *
+     * @param e exception de parâmetro ausente
+     * @return erro padronizado com status 400 Bad Request
+     */
+    @ExceptionHandler(exception = {
+            MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class })
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(Exception e) {
+        final ErrorResponse errorResponse;
+        switch (e) {
+            case MissingServletRequestParameterException ex -> {
+                log.warn("Parâmetro obrigatório ausente: {}", ex.getParameterName());
+                errorResponse = new ErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Parâmetro obrigatório ausente",
+                        String.format("O parâmetro '%s' é obrigatório", ex.getParameterName()));
+            }
+            case MissingServletRequestPartException ex -> {
+                log.warn("Parte obrigatória ausente: {}", ex.getRequestPartName());
+                errorResponse = new ErrorResponse(
+                        LocalDateTime.now(),
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Parâmetro obrigatório ausente",
+                        String.format("A parte '%s' é obrigatória", ex.getRequestPartName()));
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + e);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    /**
      * Trata IllegalArgumentException (entidade não encontrada, parâmetros inválidos).
      * <p>
      * <strong>DEPRECADO:</strong> Use {@link ResourceNotFoundException} ao invés desta exceção.
@@ -153,6 +191,25 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(errorResponse);
     }
+
+    /**
+     * Trata exceções de arquivo inválido (vazio, nome ausente, etc.).
+     * <p>
+     * Captura {@link InvalidFileException},
+     * {@link FileTooLargeException},
+     * {@link UnsupportedFileTypeException}
+     * <p>
+     * Todas são subclasses de {@link DomainException} e retornam 400 Bad Request.
+     * Este handler é redundante (DomainException já captura tudo), mas está aqui
+     * para documentação explícita de que file upload exceptions são tratadas.
+     *
+     * @param ex exception de arquivo inválido
+     * @return erro padronizado com status 400 Bad Request
+     * @see DomainException
+     * @deprecated Use {@link #handleDomainException(DomainException)} que já captura todas
+     */
+    // NOTE: Este handler é opcional, pois DomainException já captura todas.
+    // Mantido apenas para documentação explícita.
 
     /**
      * Trata qualquer exceção não mapeada (fallback).

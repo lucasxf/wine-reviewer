@@ -48,6 +48,7 @@
         <commons-compress.version>1.27.1</commons-compress.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <xmlunit.version>2.10.0</xmlunit.version>
+        <aws.version>2.35.0</aws.version>
     </properties>
 
     <dependencyManagement>
@@ -237,6 +238,14 @@
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/software.amazon.awssdk/s3 -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${aws.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
