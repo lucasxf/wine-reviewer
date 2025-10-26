@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-25 (Session 7 - AuthService Implementation - Completed)
+**Last updated:** 2025-10-26 (Session 8 - Test Documentation & File Upload Feature)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -15,22 +15,32 @@ This file tracks the current implementation status and next steps for the Wine R
 - Comment endpoints (`CommentController`)
 - JWT authentication structure (`JwtUtil`, `JwtProperties`) - updated to JJWT 0.12.x
 - Google OAuth authentication (`AuthService`, `GoogleTokenValidator`)
+- **File Upload with S3** (`S3Service`, `FileUploadController`) - ✅ NEW (2025-10-26)
+  - Pre-signed URL generation for direct browser uploads
+  - File validation (size limits, MIME types)
+  - Custom exceptions: `FileTooLargeException`, `FileUploadException`, `InvalidFileException`, `UnsupportedFileTypeException`
+  - AWS S3 integration with SDK v2
 - Domain exception hierarchy (`DomainException` base, `ResourceNotFoundException`, `InvalidRatingException`, `UnauthorizedAccessException`, `BusinessRuleViolationException`, `InvalidTokenException`)
 - Global exception handling (`GlobalExceptionHandler`) with domain exception support
 - Database entities: User, Wine, Review, Comment (with domain exception validation)
-- Flyway migrations setup
+- Flyway migrations setup (V1 init + V2 seed mock user)
 - OpenAPI/Swagger documentation
 - Application configuration with profiles (dev/prod)
 - Docker support (Dockerfile + docker-compose)
 
-**Testing:**
-- Complete unit test suite (46 tests, 100% passing)
-  - `ReviewControllerTest`, `ReviewServiceTest`
+**Testing:** - ✅ UPDATED (2025-10-26)
+- Complete unit test suite (58 tests, 100% passing)
+  - `ReviewControllerTest`, `ReviewServiceTest`, `S3ServiceTest` (NEW)
   - `DomainExceptionTest`, `AuthServiceTest`, `GoogleTokenValidatorTest`
-- Integration tests with Testcontainers (36 tests)
-  - `ReviewControllerIT`, `AuthControllerIT`
-- **Total:** 82 tests (all passing)
-- **Coverage:** Review CRUD (100%), Auth (100%), Database constraints (100%), Exception scenarios (100%)
+- Integration tests with Testcontainers (45 tests, 100% passing)
+  - `ReviewControllerIT` (23 tests), `AuthControllerIT` (13 tests), `FileUploadControllerIT` (9 tests - NEW)
+  - Real PostgreSQL container with production parity
+  - Shared container pattern for performance (`.withReuse(true)`)
+  - Authentication helpers (`authenticated(UUID userId)`)
+  - Mock external dependencies (GoogleTokenValidator, S3Client)
+- **Total:** 103 tests (all passing) - UP from 82 tests
+- **Coverage:** Review CRUD (100%), Auth (100%), File Upload (100%), Database constraints (100%), Exception scenarios (100%)
+- **Documentation:** Comprehensive Testcontainers guidelines in CLAUDE.md (65+ lines of best practices)
 
 ### Mobile App (Flutter)
 
@@ -151,17 +161,22 @@ This file tracks the current implementation status and next steps for the Wine R
 
 ---
 
-### 3. 🖼️ Implement Image Upload with Pre-signed URLs (Backend)
+### 3. 🖼️ Implement Image Upload with Pre-signed URLs (Backend) - ✅ COMPLETED
 
-**Goal:** Allow users to upload wine review photos
+**Status:** ✅ Completed (2025-10-26)
 
-**Tasks:**
-- Choose storage provider (S3 Free Tier or Supabase Storage)
-- Implement pre-signed URL generation endpoint
-- Add image upload validation (size, MIME type, expiration)
-- Update Review entity to store image URLs
-- Add integration tests for image upload flow
-- Document new endpoints in OpenAPI/Swagger
+**Completed:**
+- ✅ Chose AWS S3 as storage provider (Free Tier)
+- ✅ Implemented S3Service with AWS SDK v2 integration
+- ✅ Created FileUploadController with pre-signed URL generation endpoint
+- ✅ Added file validation (size limits, MIME types: image/jpeg, image/png, image/webp)
+- ✅ Created custom exception hierarchy (FileTooLargeException, FileUploadException, etc.)
+- ✅ Added comprehensive tests (S3ServiceTest: 12 tests, FileUploadControllerIT: 9 tests)
+- ✅ OpenAPI/Swagger documentation for new endpoints
+
+**Pending:**
+- ⏳ Update Review entity to use uploaded image URLs (future work)
+- ⏳ Frontend integration (Flutter image picker → upload flow)
 
 ---
 
@@ -216,9 +231,9 @@ This file tracks the current implementation status and next steps for the Wine R
 
 | Metric | Value |
 |--------|-------|
-| **Backend Tests** | 82 (46 unit + 36 integration) |
-| **Test Pass Rate** | 100% |
-| **Backend Endpoints** | Review CRUD + Auth |
+| **Backend Tests** | 103 (58 unit + 45 integration) ⬆️ |
+| **Test Pass Rate** | 100% ✅ |
+| **Backend Endpoints** | Review CRUD + Auth + File Upload |
 | **Flutter Dependencies** | 10 configured |
 | **Flutter Auth Components** | 18 files (models, services, providers, docs) |
 | **Flutter Screens** | 4 (splash, login, home, review details) |

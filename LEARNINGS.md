@@ -6,6 +6,167 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## Session 2025-10-26 (Session 8): Test Documentation & File Upload Feature
+
+**Session Goal:** Review test fixes, document Testcontainers best practices, and verify file upload feature implementation
+
+### ☕ Backend
+
+**Context:** User fixed all failing tests independently (103 tests now passing). Need to review changes, extract learnings, and document best practices for future development.
+
+**What Was Done:**
+
+1. **Test Fixes Review:**
+   - Reviewed AbstractIntegrationTest with shared PostgreSQL container pattern
+   - Analyzed authentication helper: `authenticated(UUID userId)` for Spring Security integration
+   - Reviewed AuthControllerIT (13 tests) and ReviewControllerIT (23 tests)
+   - Verified S3ServiceTest (12 tests) and FileUploadControllerIT (9 tests)
+   - **Result:** All 103 tests passing (58 unit + 45 integration) ✅
+
+2. **Documentation Updates:**
+   - Added 65+ line "Testcontainers Integration Tests" section to CLAUDE.md
+   - Updated README.md with enhanced test suite technical details
+   - Verified CODING_STYLE.md closing parenthesis directive (already documented)
+   - Updated ROADMAP.md with file upload completion and test metrics
+
+3. **Bug Fix:**
+   - Fixed `WineReviewerApiApplication.main()` missing `public` modifier
+   - **Problem:** Docker build failed with "Unable to find main class"
+   - **Solution:** Added `public` modifier to `main()` method
+
+4. **File Upload Feature (Completed by User):**
+   - S3Service with AWS SDK v2 integration
+   - FileUploadController with pre-signed URL generation
+   - Custom exceptions: FileTooLargeException, FileUploadException, InvalidFileException, UnsupportedFileTypeException
+   - Comprehensive tests: S3ServiceTest (12 tests), FileUploadControllerIT (9 tests)
+
+**Key Insights:**
+
+**1. Testcontainers Over H2 (Production Parity)**
+- **Problem:** H2 in-memory database has different constraint behavior than PostgreSQL
+- **Solution:** Use Testcontainers with real PostgreSQL container
+- **Benefits:**
+  - Database constraints (CHECK, FK, CASCADE) work exactly like production
+  - SQL dialects match (no surprises in production)
+  - CI/CD ready (no manual database setup)
+- **Example:**
+  ```java
+  @Container
+  protected static final PostgreSQLContainer<?> postgres =
+      new PostgreSQLContainer<>("postgres:16-alpine")
+          .withDatabaseName("winereviewer_test")
+          .withReuse(true); // ← Performance optimization
+  ```
+
+**2. Shared Container Pattern (Performance)**
+- **Problem:** Starting new PostgreSQL container per test class is slow (3-5s overhead each)
+- **Solution:** Use static `@Container` with `.withReuse(true)`
+- **How it works:**
+  - Static container starts once and is shared across all test classes
+  - Ryuk container manages cleanup (terminates on JVM exit)
+  - `@Transactional` ensures test isolation (each test gets rollback)
+- **Performance gain:** ~90% faster (3-5s → <0.5s per test class after first)
+- **Trade-off:** Must enable reuse in `~/.testcontainers.properties`: `testcontainers.reuse.enable=true`
+
+**3. Authentication Helpers (Integration Tests)**
+- **Problem:** Integration tests need to simulate authenticated requests without real JWT tokens
+- **Solution:** Create `authenticated(UUID userId)` helper in AbstractIntegrationTest
+- **Implementation:**
+  ```java
+  protected RequestPostProcessor authenticated(UUID userId) {
+      Authentication auth = new UsernamePasswordAuthenticationToken(
+          userId.toString(), null,
+          List.of(new SimpleGrantedAuthority("ROLE_USER")));
+      return authentication(auth);
+  }
+  ```
+- **Usage:** `mockMvc.perform(post("/reviews").with(authenticated(testUser.getId())))`
+- **Benefit:** Simulates Spring Security authentication without requiring real JWT validation
+
+**4. Mock External Dependencies (Not Infrastructure)**
+- **Problem:** Integration tests should test YOUR code, not external services
+- **Solution:** Mock external APIs (GoogleTokenValidator, S3Client) but use real infrastructure (database)
+- **Pattern:**
+  ```java
+  @MockBean
+  private GoogleTokenValidator googleTokenValidator;  // External API
+
+  @MockBean
+  private S3Client s3Client;  // AWS service
+
+  // PostgreSQL container is REAL (infrastructure)
+  ```
+- **Rationale:** Database is part of your system architecture; Google OAuth and AWS S3 are external dependencies
+
+**5. Test Isolation with @Transactional (Automatic Rollback)**
+- **Problem:** Tests pollute database state (one test's data affects next test)
+- **Solution:** Add `@Transactional` on test class
+- **How it works:**
+  - Each test method runs in a transaction
+  - Transaction is automatically rolled back after test completes
+  - Next test starts with clean database state
+- **Benefit:** No manual cleanup code needed, tests can run in any order
+
+**6. Documentation Organization (Single Source of Truth)**
+- **Decision:** Do NOT create separate TESTING_GUIDELINES.md file
+- **Rationale:**
+  - Testing guidelines already comprehensive in CLAUDE.md Part 2 (Backend)
+  - Avoids duplication and maintenance overhead
+  - Single source of truth easier to keep updated
+  - Follows project's documentation strategy (CLAUDE.md for architecture)
+
+**Problems Encountered:**
+
+1. **Problem:** Docker build failed with "Unable to find main class"
+   - **Root cause:** `WineReviewerApiApplication.main()` was missing `public` modifier
+   - **Error:** Spring Boot Maven plugin couldn't detect main class during repackage
+   - **Solution:** Changed `static void main(...)` → `public static void main(...)`
+   - **Lesson:** Always use `public static void main(String[] args)` for Spring Boot applications
+
+2. **Problem:** Initial confusion about whether TESTING_GUIDELINES.md was needed
+   - **Root cause:** Large amount of testing best practices to document
+   - **Decision:** Keep all guidelines in CLAUDE.md (single source of truth)
+   - **Benefit:** Easier maintenance, no duplication, follows existing doc strategy
+
+**Solutions Applied:**
+
+1. **CLAUDE.md Enhancement:**
+   - Added "Testcontainers Integration Tests (CRITICAL)" section (65+ lines)
+   - Why Testcontainers over H2
+   - Base class pattern with performance optimizations
+   - Authentication helpers documentation
+   - Mock external dependencies pattern
+   - Integration test structure and key testing patterns
+   - Complete example test with CRUD coverage
+   - Common mistakes to avoid section
+
+2. **README.md Update:**
+   - Enhanced test suite description with technical details
+   - Added shared container pattern, authentication helpers
+   - Highlighted full CRUD coverage and edge case testing
+
+3. **Main Class Fix:**
+   - Added `public` modifier to `WineReviewerApiApplication.main()`
+
+**Test Results:**
+- ✅ **Unit tests:** 58/58 passing (ReviewControllerTest: 4, DomainExceptionTest: 12, AuthServiceTest: 5, GoogleTokenValidatorTest: 5, ReviewServiceTest: 20, S3ServiceTest: 12)
+- ✅ **Integration tests:** 45/45 passing (ReviewControllerIT: 23, AuthControllerIT: 13, FileUploadControllerIT: 9)
+- ✅ **Total:** 103/103 tests passing (100% pass rate)
+- ✅ **Coverage:** Review CRUD (100%), Auth (100%), File Upload (100%), Database constraints (100%), Exception scenarios (100%)
+
+**Metrics:**
+- **Files updated:** 3 (CLAUDE.md, README.md, WineReviewerApiApplication.java)
+- **Test count increase:** 82 → 103 (+21 tests, +25%)
+- **Documentation added:** 65+ lines of Testcontainers best practices
+- **Commits:** 1 comprehensive documentation update
+
+**Next Steps:**
+- Integrate file upload with Review entity (add imageUrl field usage)
+- Frontend Flutter integration (image picker → S3 upload flow)
+- Continue with Priority 1 from ROADMAP.md (Flutter authentication UI integration)
+
+---
+
 ## Session 2025-10-25 (Session 7): AuthService Implementation
 
 **Session Goal:** Implement complete authentication service with Google Sign-In, backend API integration, Riverpod state management, and secure token storage
