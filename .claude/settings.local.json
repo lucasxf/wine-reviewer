@@ -7,7 +7,7 @@
       "Bash(timeout 180 ./mvnw test:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push)",
+      "Bash(git push:*)",
       "Bash(claude --version)",
       "Bash(if [ -d \"C:/repos/claude-command-templates\" ])",
       "Bash(then echo \"EXISTS\")",
@@ -43,7 +43,10 @@
       "Bash(./mvnw clean test-compile:*)",
       "Bash(for f in target/surefire-reports/*.txt)",
       "Bash(do grep \"Tests run:\" \"$f\")",
-      "Bash(done)"
+      "Bash(done)",
+      "Bash(./mvnw clean:*)",
+      "Bash(./mvnw dependency:tree:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
