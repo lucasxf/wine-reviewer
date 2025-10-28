@@ -3,10 +3,10 @@ description: Start a new development session with standard context
 argument-hint: <optional-context>
 ---
 
-# CLAUDE.md
-# CODING_STYLE.md
-# ROADMAP.md
-# README.md
+@CLAUDE.md
+@CODING_STYLE.md
+@ROADMAP.md
+@README.md
 
 **Session Context:** $ARGUMENTS
 

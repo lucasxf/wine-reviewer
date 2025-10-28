@@ -3,6 +3,11 @@ description: Finish session with tests, docs update, and commit
 argument-hint: <optional-commit-message-context>
 ---
 
+@CLAUDE.md
+@CODING_STYLE.md
+@ROADMAP.md
+@README.md
+
 **Session Finalization Workflow**
 
 Additional context for commit message: $ARGUMENTS
