@@ -1,5 +1,4 @@
 target/
-.mvn/wrapper/maven-wrapper.jar
 *.iml
 .idea/
 .vscode/
@@ -7,3 +6,5 @@ target/
 .git/
 .gitignore
 README.md
+
+# .mvn/wrapper/maven-wrapper.jar

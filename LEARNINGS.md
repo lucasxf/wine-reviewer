@@ -6,6 +6,113 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## Session 2025-10-27 (Session 9): Docker Cross-Platform Fixes
+
+**Session Goal:** Review and validate Docker Compose fixes for cross-platform development (Windows ↔ Linux)
+
+### 🐳 Infrastructure
+
+**Context:** User set up development environment on a second PC (Windows). Encountered `docker compose up` failures related to line endings and Maven Wrapper. Googled solutions and fixed the issues independently. This session reviews those fixes.
+
+**What Was Done:**
+
+1. **Line Ending Fix (`.gitattributes`):**
+   - **Problem:** Maven Wrapper (`mvnw`) uses Unix shell syntax (#!/bin/sh). Windows Git checks out files with CRLF line endings by default. When Docker (Linux) tries to execute `mvnw`, it fails with `/bin/sh^M: bad interpreter` (^M is carriage return \r).
+   - **Solution:** Created `.gitattributes` to enforce LF (Unix) line endings for Maven Wrapper scripts:
+     ```gitattributes
+     mvnw text eol=lf
+     .mvn/wrapper/maven-wrapper.properties text eol=lf
+     ```
+   - **How it works:** Git auto-converts line endings when checking out/committing, ensuring scripts always have LF regardless of platform.
+   - **Benefit:** Prevents line ending issues at the source (Git level).
+
+2. **Defensive Line Ending Normalization (Dockerfile):**
+   - **Problem:** If files were already committed with CRLF before `.gitattributes` was added, Git won't retroactively fix them.
+   - **Solution:** Added defensive `sed` command in Dockerfile to strip CRLF:
+     ```dockerfile
+     # Normalize line endings (in case CRLF from Windows)
+     RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
+     ```
+   - **How it works:** Strips carriage return (\r) from end of each line, then makes script executable.
+   - **Benefit:** Belt-and-suspenders approach. Ensures Docker build works even if `.gitattributes` fails or wasn't committed yet.
+
+3. **Maven Wrapper JAR Fix (`.dockerignore`):**
+   - **Problem:** `.dockerignore` was excluding `.mvn/wrapper/maven-wrapper.jar`, causing `./mvnw` to fail with "wrapper JAR not found".
+   - **Solution:** Commented out the exclusion (JAR now copied to Docker):
+     ```diff
+     -.mvn/wrapper/maven-wrapper.jar
+     +# .mvn/wrapper/maven-wrapper.jar
+     ```
+   - **How it works:** Maven Wrapper (`mvnw`) requires `maven-wrapper.jar` to bootstrap Maven. Without it, `mvnw` can't download Maven dependencies.
+   - **Benefit:** Allows `./mvnw` to work inside Docker container.
+
+4. **Tests Verification:**
+   - Ran `./mvnw test -q` to verify Docker fixes didn't break anything
+   - **Result:** All 103 tests passing (58 unit + 45 integration) ✅
+
+**Key Insights:**
+
+**1. Cross-Platform Line Ending Issues (CRLF vs LF)**
+- **Root Cause:** Git default behavior on Windows uses CRLF (`\r\n`), but Linux uses LF (`\n`). Shell scripts with CRLF fail in Docker (Linux).
+- **Solution Hierarchy:**
+  1. **Git Level:** `.gitattributes` (prevents problem at source)
+  2. **Build Level:** Dockerfile `sed` (fixes problem at build time)
+  3. **Why Both:** Defense-in-depth. `.gitattributes` is primary solution; Dockerfile `sed` is safety net.
+- **Lesson:** Always use `.gitattributes` for cross-platform projects with shell scripts.
+
+**2. Maven Wrapper Internals**
+- **How it works:** `mvnw` is a shell script that:
+  1. Checks for `MAVEN_HOME` environment variable
+  2. If not found, uses `.mvn/wrapper/maven-wrapper.jar` to download Maven
+  3. Executes Maven commands with downloaded binary
+- **Critical files:**
+  - `mvnw` - Shell script (requires LF line endings)
+  - `.mvn/wrapper/maven-wrapper.jar` - Bootstrap JAR (must be in Docker)
+  - `.mvn/wrapper/maven-wrapper.properties` - Maven version config
+- **Lesson:** Never exclude Maven Wrapper JAR from Docker; it's required for `mvnw` to work.
+
+**3. Docker `.dockerignore` Best Practices**
+- **Purpose:** Reduce build context size, exclude unnecessary files (logs, IDE config, etc.)
+- **Caution:** Don't exclude files required for build (Maven Wrapper JAR, source code, `pom.xml`)
+- **Common Mistake:** Blindly excluding `.mvn/` directory or `*.jar` files
+- **Lesson:** Test Docker builds on clean checkout to catch missing dependencies early.
+
+**4. Debugging Docker Build Failures (Cross-Platform)**
+- **Symptoms:**
+  - `/bin/sh^M: bad interpreter` → CRLF line endings
+  - `wrapper JAR not found` → Missing `.mvn/wrapper/maven-wrapper.jar`
+  - `Permission denied` → Missing executable bit (`chmod +x`)
+- **Debugging Tools:**
+  - `git ls-files --eol` - Shows line endings for tracked files
+  - `docker run --rm -it <image> sh` - Interactive shell in container for debugging
+  - `od -c mvnw | head` - Inspect file for CRLF (`\r\n`)
+- **Lesson:** Line endings and file permissions are common cross-platform pitfalls.
+
+**5. Documentation Anti-Pattern (Unrelated Changes)**
+- **Problem:** User added `settings.local.json fix this file and remove duplicate entries` to CLAUDE.md (unrelated to Docker fixes).
+- **Why it's bad:** Mixing unrelated changes in same commit makes git history harder to understand.
+- **Correct approach:** Create separate commits for separate concerns (Docker fixes vs settings cleanup).
+- **Lesson:** Keep commits focused on single logical change.
+
+**Recommendations:**
+
+1. **Add comment to `.gitattributes`:**
+   ```gitattributes
+   # Maven Wrapper scripts must use LF (Unix line endings) to run in Docker containers
+   mvnw text eol=lf
+   .mvn/wrapper/maven-wrapper.properties text eol=lf
+   ```
+
+2. **Remove CLAUDE.md unrelated change** before committing
+
+3. **Consider adding to `.gitattributes`:**
+   ```gitattributes
+   # Force LF for all shell scripts
+   *.sh text eol=lf
+   ```
+
+---
+
 ## Session 2025-10-26 (Session 8): Test Documentation & File Upload Feature
 
 **Session Goal:** Review test fixes, document Testcontainers best practices, and verify file upload feature implementation

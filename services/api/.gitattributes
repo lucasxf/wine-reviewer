@@ -1,0 +1,4 @@
+# Maven Wrapper scripts must use LF (Unix line endings) to run in Docker containers
+# Windows Git defaults to CRLF, which breaks shell scripts in Linux containers
+mvnw text eol=lf
+.mvn/wrapper/maven-wrapper.properties text eol=lf

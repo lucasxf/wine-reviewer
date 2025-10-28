@@ -8,6 +8,9 @@ WORKDIR /app
 COPY .mvn .mvn
 COPY mvnw pom.xml ./
 
+# Normalizar fim de linha do mvnw (caso tenha CRLF vindo do Windows)
+RUN sed -i 's/\r$//' mvnw && chmod +x mvnw
+
 # Download dependencies (cached layer)
 RUN ./mvnw dependency:go-offline -B
 

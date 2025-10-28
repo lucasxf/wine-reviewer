@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-26 (Session 8 - Test Documentation & File Upload Feature)
+**Last updated:** 2025-10-27 (Session 9 - Docker Cross-Platform Fixes)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -102,6 +102,10 @@ This file tracks the current implementation status and next steps for the Wine R
 - Docker Compose with PostgreSQL 16 and API service
 - Health checks and dependencies configured
 - Testcontainers integration test infrastructure (`AbstractIntegrationTest`, `application-integration.yml`)
+- **Cross-platform support** (Windows ↔ Linux) - ✅ NEW (2025-10-27)
+  - `.gitattributes` enforces Unix line endings (LF) for Maven Wrapper scripts
+  - Dockerfile with defensive line ending normalization (`sed -i 's/\r$//' mvnw`)
+  - Fixed `.dockerignore` to include Maven Wrapper JAR (required for `mvnw` to work)
 
 **CI/CD:**
 - GitHub Actions for API (`ci-api.yml`) with path filters
