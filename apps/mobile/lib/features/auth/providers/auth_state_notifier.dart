@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart'; // TODO: Migrate to Notifier API (Riverpod 3.0)
 import 'package:wine_reviewer_mobile/features/auth/data/services/auth_service.dart';
 import 'package:wine_reviewer_mobile/features/auth/domain/models/user.dart';
 

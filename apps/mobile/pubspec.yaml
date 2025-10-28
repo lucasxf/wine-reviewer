@@ -35,17 +35,17 @@ dependencies:
   cupertino_icons: ^1.0.8
 
   # State Management - Riverpod (reactive state management with dependency injection)
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: ^3.0.3
+  riverpod_annotation: ^3.0.3
 
   # Navigation - go_router (declarative routing with deep linking support)
-  go_router: ^14.6.2
+  go_router: ^16.3.0
 
   # HTTP Client - dio (powerful HTTP client with interceptors, retries, etc.)
   dio: ^5.7.0
 
   # Code Generation - freezed (immutable data classes with copy-with, equality)
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
 
   # Secure Storage - flutter_secure_storage (encrypted key-value storage for tokens)
@@ -56,7 +56,8 @@ dependencies:
   cached_network_image: ^3.4.1  # Cache images from network
 
   # Google Sign-In - OAuth authentication
-  google_sign_in: ^6.2.2
+  # TODO: Upgrade to 7.x when integrating auth UI (breaking changes require significant refactoring)
+  google_sign_in: ^6.3.0
 
   # Utilities
   intl: ^0.20.1  # Internationalization and date formatting
@@ -66,13 +67,13 @@ dev_dependencies:
     sdk: flutter
 
   # Linting - static analysis rules
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
 
   # Code Generation - Build runners for freezed, json_serializable, riverpod
-  build_runner: ^2.4.13
-  freezed: ^2.5.7
-  json_serializable: ^6.8.0
-  riverpod_generator: ^2.6.2
+  build_runner: ^2.7.1
+  freezed: ^3.2.3
+  json_serializable: ^6.11.1
+  riverpod_generator: ^3.0.3
 
   # Testing - Golden tests for visual regression testing
   golden_toolkit: ^0.15.0

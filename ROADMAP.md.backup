@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-28 (Session 10 - Flutter Dependency Updates & Build Fixes)
+**Last updated:** 2025-10-27 (Session 9 - Docker Cross-Platform Fixes)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -49,23 +49,15 @@ This file tracks the current implementation status and next steps for the Wine R
 - Feature-first architecture: `lib/features/` (auth, review, wine), `lib/core/`, `lib/common/`
 - Platform support: Android (primary), iOS, Web, Windows, macOS, Linux (generated)
 
-**Dependencies Configured (10 packages):** - ✅ UPDATED (2025-10-28)
-- `flutter_riverpod` 3.0.3 - State management + DI (updated from 2.6.1, using legacy StateNotifierProvider)
-- `go_router` 16.3.0 - Navigation with deep linking (updated from 14.6.2)
-- `dio` 5.7.0 - HTTP client with interceptors
-- `freezed` 3.2.3 + `json_serializable` 6.11.1 - Immutable models (updated from 2.5.7, breaking changes resolved)
-- `flutter_secure_storage` 9.2.3 - Encrypted token storage
-- `image_picker` 1.1.2 + `cached_network_image` 3.4.1 - Image handling
-- `google_sign_in` 6.3.0 - OAuth authentication (kept at 6.x, defer 7.x migration)
-- `build_runner` 2.7.1 + `golden_toolkit` 0.15.0 - Code gen + testing
-
-**Dependency Updates Completed:** (2025-10-28)
-- ✅ Updated 7 packages to latest stable versions (Riverpod 2.x→3.x, Freezed 2.x→3.x, go_router 14.x→16.x)
-- ✅ Resolved breaking changes: Riverpod StateNotifierProvider → legacy.dart, Freezed abstract/sealed modifiers
-- ✅ Regenerated all freezed/json_serializable models with updated code generation
-- ✅ Updated comprehensive documentation in DEPENDENCIES_EXPLAINED.md (51+ lines of migration notes)
-- ✅ Verified build success: 8 info messages (deprecations), 0 errors, 0 warnings
-- ✅ Cleaned up .gitignore to exclude auto-generated plugin registrant files
+**Dependencies Configured (10 packages):**
+- `flutter_riverpod` - State management + DI
+- `go_router` - Navigation with deep linking
+- `dio` - HTTP client with interceptors
+- `freezed` + `json_serializable` - Immutable models
+- `flutter_secure_storage` - Encrypted token storage
+- `image_picker` + `cached_network_image` - Image handling
+- `google_sign_in` - OAuth authentication
+- `build_runner` + `golden_toolkit` - Code gen + testing
 
 **Core Configuration:**
 - `app_colors.dart` - Color palette (wine theme)
@@ -246,7 +238,7 @@ This file tracks the current implementation status and next steps for the Wine R
 | **Backend Tests** | 103 (58 unit + 45 integration) ⬆️ |
 | **Test Pass Rate** | 100% ✅ |
 | **Backend Endpoints** | Review CRUD + Auth + File Upload |
-| **Flutter Dependencies** | 10 configured (updated 2025-10-28) |
+| **Flutter Dependencies** | 10 configured |
 | **Flutter Auth Components** | 18 files (models, services, providers, docs) |
 | **Flutter Screens** | 4 (splash, login, home, review details) |
 | **CI/CD Pipelines** | 3 (API, Mobile, Release) |

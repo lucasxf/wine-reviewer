@@ -8,7 +8,7 @@ part 'user.g.dart';
 /// This model is immutable (freezed) and serializable (json_serializable).
 /// It represents the user data returned from the backend API.
 @freezed
-class User with _$User {
+abstract class User with _$User {
   const factory User({
     required String id,
     required String email,

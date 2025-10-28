@@ -8,7 +8,7 @@ part 'google_sign_in_request.g.dart';
 /// Contains the Google ID token obtained from google_sign_in package.
 /// The backend will validate this token with Google OAuth servers.
 @freezed
-class GoogleSignInRequest with _$GoogleSignInRequest {
+abstract class GoogleSignInRequest with _$GoogleSignInRequest {
   const factory GoogleSignInRequest({
     required String idToken,
   }) = _GoogleSignInRequest;

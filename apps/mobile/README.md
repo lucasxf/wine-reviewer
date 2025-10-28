@@ -22,7 +22,7 @@
 ```bash
 flutter pub get
 flutter run  # selecione um dispositivo Android
-```
+``` 
 
 ## 🧪 Testes
 ```bash

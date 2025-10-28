@@ -42,13 +42,11 @@ class AppTheme {
         secondary: AppColors.secondary, // Cor secundária (FABs, switches, etc.)
         secondaryContainer: AppColors.secondaryLight, // Variante clara da secondary
         error: AppColors.error, // Cor de erro (mensagens de erro, validação)
-        surface: AppColors.surface, // Cor de superfícies (cards, dialogs)
-        background: AppColors.background, // Cor de fundo do app
+        surface: AppColors.surface, // Cor de fundo do app
         onPrimary: Colors.white, // Cor do texto/ícone SOBRE a cor primary
         onSecondary: Colors.white, // Cor do texto/ícone SOBRE a cor secondary
         onError: Colors.white, // Cor do texto/ícone SOBRE a cor error
-        onSurface: AppColors.textPrimary, // Cor do texto/ícone SOBRE surface
-        onBackground: AppColors.textPrimary, // Cor do texto/ícone SOBRE background
+        onSurface: AppColors.textPrimary, // Cor do texto/ícone SOBRE background
       ),
 
       // Scaffold Background Color - Cor de fundo padrão das telas

@@ -4,13 +4,50 @@
 
 ---
 
+## 🔄 Histórico de Atualizações
+
+### 2025-10-28: Major Version Updates (Riverpod 3.x, Freezed 3.x, go_router 16.x)
+
+**Pacotes Atualizados:**
+- ✅ `flutter_riverpod`: 2.6.1 → **3.0.3** (breaking changes: StateNotifierProvider moved to legacy)
+- ✅ `freezed`: 2.5.8 → **3.2.3** (breaking changes: abstract/sealed classes, renamed union types)
+- ✅ `go_router`: 14.8.1 → **16.3.0** (minimal impact: using basic routing)
+- ✅ `flutter_lints`: 5.0.0 → **6.0.0**
+- ✅ `json_serializable`: 6.9.5 → **6.11.1**
+- ✅ `build_runner`: 2.5.4 → **2.7.1** (limited by Flutter SDK compatibility)
+- ⏳ `google_sign_in`: 6.3.0 (kept at 6.x, defer 7.x migration - breaking changes too extensive)
+
+**Breaking Changes Resolvidas:**
+
+1. **Riverpod 3.0:**
+   - `StateNotifierProvider` movido para `package:flutter_riverpod/legacy.dart`
+   - TODO futuro: Migrar para novo `Notifier` API (mais moderno)
+   - Import adicionado: `import 'package:flutter_riverpod/legacy.dart';`
+
+2. **Freezed 3.0:**
+   - Classes simples requerem `abstract` modifier: `@freezed abstract class User`
+   - Union types requerem `sealed` modifier: `@freezed sealed class AuthState`
+   - Factory constructors renomeados: `_Loading` → `AuthStateLoading` (nomes descritivos)
+   - `.when()` e `.maybeWhen()` ainda funcionam (não removidos como documentado)
+
+3. **google_sign_in 7.0:**
+   - **Decisão:** Manter em 6.3.0 por enquanto (breaking changes extensos)
+   - Mudanças na v7: Singleton pattern, `initialize()` obrigatório, auth/authorization separados
+   - TODO futuro: Migrar para 7.x quando integrar auth UI (Priority 1 task)
+
+**Resultado:** ✅ 8 info messages (deprecations), 0 errors, 0 warnings
+
+---
+
 ## 🎯 Dependências de Produção (`dependencies`)
 
 ### 1. **flutter_riverpod** (State Management)
 ```yaml
-flutter_riverpod: ^2.6.1
-riverpod_annotation: ^2.6.1
+flutter_riverpod: ^3.0.3
+riverpod_annotation: ^3.0.3
 ```
+
+> **NOTA (2025-10-28):** Usando `StateNotifierProvider` do `legacy.dart`. TODO: Migrar para novo `Notifier` API.
 
 **O que é:**
 - Framework de gerenciamento de estado reativo
@@ -44,7 +81,7 @@ final userServiceProvider = Provider((ref) => UserService());
 
 ### 2. **go_router** (Navigation)
 ```yaml
-go_router: ^14.6.2
+go_router: ^16.3.0
 ```
 
 **O que é:**

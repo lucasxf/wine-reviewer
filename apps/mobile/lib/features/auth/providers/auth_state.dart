@@ -33,26 +33,26 @@ part 'auth_state.freezed.dart';
 /// - similar to SecurityContext.isAuthenticated()
 /// - similar to Authentication.getPrincipal()
 @freezed
-class AuthState with _$AuthState {
+sealed class AuthState with _$AuthState {
   /// Initial state when app starts.
   ///
   /// Use this state to show splash screen while checking if user is logged in.
-  const factory AuthState.initial() = _Initial;
+  const factory AuthState.initial() = AuthStateInitial;
 
   /// User is authenticated.
   ///
   /// Contains the current [User] data.
   /// This is the "happy path" state where user can access protected features.
-  const factory AuthState.authenticated(User user) = _Authenticated;
+  const factory AuthState.authenticated(User user) = AuthStateAuthenticated;
 
   /// User is not authenticated.
   ///
   /// User should be redirected to login screen.
-  const factory AuthState.unauthenticated() = _Unauthenticated;
+  const factory AuthState.unauthenticated() = AuthStateUnauthenticated;
 
   /// Authentication operation in progress.
   ///
   /// Shows during login or logout operations.
   /// UI should display loading indicator and disable user interactions.
-  const factory AuthState.loading() = _Loading;
+  const factory AuthState.loading() = AuthStateLoading;
 }

@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,163 +9,269 @@ part of 'google_sign_in_request.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-GoogleSignInRequest _$GoogleSignInRequestFromJson(Map<String, dynamic> json) {
-  return _GoogleSignInRequest.fromJson(json);
-}
 
 /// @nodoc
 mixin _$GoogleSignInRequest {
-  String get idToken => throw _privateConstructorUsedError;
+
+ String get idToken;
+/// Create a copy of GoogleSignInRequest
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GoogleSignInRequestCopyWith<GoogleSignInRequest> get copyWith => _$GoogleSignInRequestCopyWithImpl<GoogleSignInRequest>(this as GoogleSignInRequest, _$identity);
 
   /// Serializes this GoogleSignInRequest to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of GoogleSignInRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $GoogleSignInRequestCopyWith<GoogleSignInRequest> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GoogleSignInRequest&&(identical(other.idToken, idToken) || other.idToken == idToken));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,idToken);
+
+@override
+String toString() {
+  return 'GoogleSignInRequest(idToken: $idToken)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $GoogleSignInRequestCopyWith<$Res> {
-  factory $GoogleSignInRequestCopyWith(
-    GoogleSignInRequest value,
-    $Res Function(GoogleSignInRequest) then,
-  ) = _$GoogleSignInRequestCopyWithImpl<$Res, GoogleSignInRequest>;
-  @useResult
-  $Res call({String idToken});
-}
+abstract mixin class $GoogleSignInRequestCopyWith<$Res>  {
+  factory $GoogleSignInRequestCopyWith(GoogleSignInRequest value, $Res Function(GoogleSignInRequest) _then) = _$GoogleSignInRequestCopyWithImpl;
+@useResult
+$Res call({
+ String idToken
+});
 
+
+
+
+}
 /// @nodoc
-class _$GoogleSignInRequestCopyWithImpl<$Res, $Val extends GoogleSignInRequest>
+class _$GoogleSignInRequestCopyWithImpl<$Res>
     implements $GoogleSignInRequestCopyWith<$Res> {
-  _$GoogleSignInRequestCopyWithImpl(this._value, this._then);
+  _$GoogleSignInRequestCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final GoogleSignInRequest _self;
+  final $Res Function(GoogleSignInRequest) _then;
 
-  /// Create a copy of GoogleSignInRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? idToken = null}) {
-    return _then(
-      _value.copyWith(
-            idToken: null == idToken
-                ? _value.idToken
-                : idToken // ignore: cast_nullable_to_non_nullable
-                      as String,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of GoogleSignInRequest
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? idToken = null,}) {
+  return _then(_self.copyWith(
+idToken: null == idToken ? _self.idToken : idToken // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
 }
 
-/// @nodoc
-abstract class _$$GoogleSignInRequestImplCopyWith<$Res>
-    implements $GoogleSignInRequestCopyWith<$Res> {
-  factory _$$GoogleSignInRequestImplCopyWith(
-    _$GoogleSignInRequestImpl value,
-    $Res Function(_$GoogleSignInRequestImpl) then,
-  ) = __$$GoogleSignInRequestImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({String idToken});
 }
 
-/// @nodoc
-class __$$GoogleSignInRequestImplCopyWithImpl<$Res>
-    extends _$GoogleSignInRequestCopyWithImpl<$Res, _$GoogleSignInRequestImpl>
-    implements _$$GoogleSignInRequestImplCopyWith<$Res> {
-  __$$GoogleSignInRequestImplCopyWithImpl(
-    _$GoogleSignInRequestImpl _value,
-    $Res Function(_$GoogleSignInRequestImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of GoogleSignInRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? idToken = null}) {
-    return _then(
-      _$GoogleSignInRequestImpl(
-        idToken: null == idToken
-            ? _value.idToken
-            : idToken // ignore: cast_nullable_to_non_nullable
-                  as String,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [GoogleSignInRequest].
+extension GoogleSignInRequestPatterns on GoogleSignInRequest {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GoogleSignInRequest value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _GoogleSignInRequest() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GoogleSignInRequest value)  $default,){
+final _that = this;
+switch (_that) {
+case _GoogleSignInRequest():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GoogleSignInRequest value)?  $default,){
+final _that = this;
+switch (_that) {
+case _GoogleSignInRequest() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String idToken)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _GoogleSignInRequest() when $default != null:
+return $default(_that.idToken);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String idToken)  $default,) {final _that = this;
+switch (_that) {
+case _GoogleSignInRequest():
+return $default(_that.idToken);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String idToken)?  $default,) {final _that = this;
+switch (_that) {
+case _GoogleSignInRequest() when $default != null:
+return $default(_that.idToken);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$GoogleSignInRequestImpl implements _GoogleSignInRequest {
-  const _$GoogleSignInRequestImpl({required this.idToken});
 
-  factory _$GoogleSignInRequestImpl.fromJson(Map<String, dynamic> json) =>
-      _$$GoogleSignInRequestImplFromJson(json);
+class _GoogleSignInRequest implements GoogleSignInRequest {
+  const _GoogleSignInRequest({required this.idToken});
+  factory _GoogleSignInRequest.fromJson(Map<String, dynamic> json) => _$GoogleSignInRequestFromJson(json);
 
-  @override
-  final String idToken;
+@override final  String idToken;
 
-  @override
-  String toString() {
-    return 'GoogleSignInRequest(idToken: $idToken)';
-  }
+/// Create a copy of GoogleSignInRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$GoogleSignInRequestCopyWith<_GoogleSignInRequest> get copyWith => __$GoogleSignInRequestCopyWithImpl<_GoogleSignInRequest>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$GoogleSignInRequestImpl &&
-            (identical(other.idToken, idToken) || other.idToken == idToken));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, idToken);
-
-  /// Create a copy of GoogleSignInRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$GoogleSignInRequestImplCopyWith<_$GoogleSignInRequestImpl> get copyWith =>
-      __$$GoogleSignInRequestImplCopyWithImpl<_$GoogleSignInRequestImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$GoogleSignInRequestImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$GoogleSignInRequestToJson(this, );
 }
 
-abstract class _GoogleSignInRequest implements GoogleSignInRequest {
-  const factory _GoogleSignInRequest({required final String idToken}) =
-      _$GoogleSignInRequestImpl;
-
-  factory _GoogleSignInRequest.fromJson(Map<String, dynamic> json) =
-      _$GoogleSignInRequestImpl.fromJson;
-
-  @override
-  String get idToken;
-
-  /// Create a copy of GoogleSignInRequest
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GoogleSignInRequestImplCopyWith<_$GoogleSignInRequestImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GoogleSignInRequest&&(identical(other.idToken, idToken) || other.idToken == idToken));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,idToken);
+
+@override
+String toString() {
+  return 'GoogleSignInRequest(idToken: $idToken)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$GoogleSignInRequestCopyWith<$Res> implements $GoogleSignInRequestCopyWith<$Res> {
+  factory _$GoogleSignInRequestCopyWith(_GoogleSignInRequest value, $Res Function(_GoogleSignInRequest) _then) = __$GoogleSignInRequestCopyWithImpl;
+@override @useResult
+$Res call({
+ String idToken
+});
+
+
+
+
+}
+/// @nodoc
+class __$GoogleSignInRequestCopyWithImpl<$Res>
+    implements _$GoogleSignInRequestCopyWith<$Res> {
+  __$GoogleSignInRequestCopyWithImpl(this._self, this._then);
+
+  final _GoogleSignInRequest _self;
+  final $Res Function(_GoogleSignInRequest) _then;
+
+/// Create a copy of GoogleSignInRequest
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? idToken = null,}) {
+  return _then(_GoogleSignInRequest(
+idToken: null == idToken ? _self.idToken : idToken // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+// dart format on

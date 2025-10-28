@@ -6,10 +6,9 @@ part of 'google_sign_in_request.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$GoogleSignInRequestImpl _$$GoogleSignInRequestImplFromJson(
-  Map<String, dynamic> json,
-) => _$GoogleSignInRequestImpl(idToken: json['idToken'] as String);
+_GoogleSignInRequest _$GoogleSignInRequestFromJson(Map<String, dynamic> json) =>
+    _GoogleSignInRequest(idToken: json['idToken'] as String);
 
-Map<String, dynamic> _$$GoogleSignInRequestImplToJson(
-  _$GoogleSignInRequestImpl instance,
+Map<String, dynamic> _$GoogleSignInRequestToJson(
+  _GoogleSignInRequest instance,
 ) => <String, dynamic>{'idToken': instance.idToken};

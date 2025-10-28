@@ -6,6 +6,167 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## Session 2025-10-28 (Session 10): Flutter Dependency Major Version Updates
+
+**Session Goal:** Update outdated Flutter dependencies to latest stable versions and resolve breaking changes
+
+### 📱 Frontend
+
+**Context:** Mobile app dependencies were using older versions (Riverpod 2.x, Freezed 2.x, go_router 14.x). Needed to update to latest stable versions to avoid technical debt and leverage new features.
+
+**What Was Done:**
+
+1. **Dependency Version Analysis:**
+   - Identified outdated packages: `flutter_riverpod` 2.6.1 → 3.0.3, `freezed` 2.5.8 → 3.2.3, `go_router` 14.8.1 → 16.3.0
+   - Researched breaking changes in each major version upgrade
+   - Created migration plan with priority order (least breaking first)
+
+2. **Package Updates (7 packages):**
+   - `flutter_riverpod`: 2.6.1 → **3.0.3** (major breaking changes)
+   - `riverpod_annotation`: 2.6.1 → **3.0.3**
+   - `riverpod_generator`: 2.6.2 → **3.0.3**
+   - `freezed`: 2.5.8 → **3.2.3** (major breaking changes)
+   - `freezed_annotation`: 2.4.4 → **3.1.0**
+   - `go_router`: 14.8.1 → **16.3.0** (minimal breaking changes)
+   - `flutter_lints`: 5.0.0 → **6.0.0**
+   - `json_serializable`: 6.9.5 → **6.11.1** (minor update)
+   - `build_runner`: 2.5.4 → **2.7.1** (limited by Flutter SDK)
+
+3. **Breaking Changes Resolution:**
+
+   **Riverpod 3.0:**
+   - **Breaking change:** `StateNotifierProvider` moved to `package:flutter_riverpod/legacy.dart`
+   - **Reason:** New `Notifier` API is preferred, `StateNotifierProvider` deprecated
+   - **Solution:** Added import `import 'package:flutter_riverpod/legacy.dart';` to `auth_providers.dart`
+   - **Future work:** Migrate to new `Notifier` API (deferred to avoid scope creep)
+
+   **Freezed 3.0:**
+   - **Breaking change:** Simple classes require `abstract` modifier
+   - **Example:** `@freezed class User` → `@freezed abstract class User`
+   - **Affected:** `User`, `AuthResponse`, `GoogleSignInRequest`
+
+   - **Breaking change:** Union types require `sealed` modifier
+   - **Example:** `@freezed class AuthState` → `@freezed sealed class AuthState`
+   - **Affected:** `AuthState` (4 union states: initial, loading, authenticated, unauthenticated)
+
+   - **Breaking change:** Union factory names changed
+   - **Before:** `_Loading`, `_Authenticated` (underscore prefix)
+   - **After:** `AuthStateLoading`, `AuthStateAuthenticated` (descriptive names)
+   - **Impact:** `.when()` and `.maybeWhen()` still work (not removed despite docs saying otherwise)
+
+4. **Code Generation Fixes:**
+   - Deleted all `.freezed.dart` and `.g.dart` files
+   - Re-ran `flutter pub run build_runner build --delete-conflicting-outputs`
+   - **Result:** 8 info messages (deprecations), 0 errors, 0 warnings ✅
+
+5. **google_sign_in Decision (Deferred):**
+   - **Current version:** 6.3.0
+   - **Latest version:** 7.0.0+
+   - **Decision:** Keep at 6.x, defer 7.x upgrade to later session
+   - **Rationale:** v7 has extensive breaking changes (singleton pattern, `initialize()` required, auth/authorization separation)
+   - **Plan:** Upgrade when implementing auth UI integration (Priority 1 task)
+
+6. **Documentation Updates:**
+   - Added 51-line "Histórico de Atualizações" section to `DEPENDENCIES_EXPLAINED.md`
+   - Documented all breaking changes with examples
+   - Added TODO notes for future Riverpod Notifier migration and google_sign_in 7.x upgrade
+   - Updated version numbers throughout documentation
+
+7. **Cleanup:**
+   - Added `.claude/` to `.gitignore` (Claude Code local settings)
+   - Removed deleted `test/widget_test.dart` from staging
+   - Deleted auto-generated plugin registrant headers (Linux/Windows)
+
+**Key Insights:**
+
+**1. Riverpod 3.0 Migration Path (StateNotifierProvider → Notifier)**
+- **Why change:** New `Notifier` API is simpler, more consistent with other Riverpod providers
+- **Legacy support:** `StateNotifierProvider` still works via `legacy.dart` import (not breaking immediately)
+- **Migration complexity:** Low-medium (requires refactoring state classes, but compile-time safe)
+- **When to migrate:** When adding new features to auth (not during dependency update session)
+- **Lesson:** Don't mix dependency updates with architecture refactoring (scope creep risk)
+
+**2. Freezed 3.0 Abstract/Sealed Modifiers (Type Safety)**
+- **Why change:** Dart 3 sealed classes provide better exhaustiveness checking for union types
+- **Simple classes:** `abstract` prevents direct instantiation (use factories only)
+- **Union types:** `sealed` enables compiler to verify all cases covered in `.when()`
+- **Migration effort:** Minimal (just add keywords, regenerate code)
+- **Benefit:** Compile-time guarantee that all states handled (no runtime surprises)
+
+**3. Freezed Union Factory Naming (Breaking but Good)**
+- **Old naming:** `_Loading`, `_Authenticated` (private-looking names)
+- **New naming:** `AuthStateLoading`, `AuthStateAuthenticated` (fully qualified)
+- **Impact:** Code generation changed, but `.when()` pattern matching still works
+- **Lesson:** Freezed's breaking changes are usually improvements (better naming, stronger types)
+
+**4. Incremental Migration Strategy (Risk Management)**
+- **Approach:** Update dependencies first, defer architecture changes (Riverpod Notifier, google_sign_in 7.x)
+- **Benefit:** Reduces risk of multiple simultaneous breaking changes
+- **Trade-off:** Using deprecated APIs temporarily (but with clear migration path)
+- **When to complete:** During related feature work (auth UI integration for google_sign_in, state management refactor for Notifier)
+
+**5. Code Generation Tooling (build_runner)**
+- **Version constraint:** Limited to 2.7.1 (Flutter SDK compatibility)
+- **Best practice:** Always delete generated files before regenerating (`--delete-conflicting-outputs`)
+- **Why:** Prevents stale code from mixing with new generation patterns
+- **Lesson:** Treat generated code as disposable (never edit `.freezed.dart` or `.g.dart` manually)
+
+**6. Documentation as Migration Guide (Future-Proofing)**
+- **Added:** Detailed "Histórico de Atualizações" section with all breaking changes
+- **Benefit:** Next developer (or future self) knows exactly what changed and why
+- **Format:** Breaking changes → solutions → TODO for future work
+- **Lesson:** Document deferred migrations (google_sign_in 7.x, Riverpod Notifier) so they're not forgotten
+
+**Problems Encountered:**
+
+1. **Problem:** Freezed 3.0 code generation errors after version update
+   - **Error:** "Classes marked with @freezed must be abstract or sealed"
+   - **Root cause:** Freezed 3.0 requires explicit `abstract` or `sealed` modifiers
+   - **Solution:** Added `abstract` to simple classes (`User`, `AuthResponse`, `GoogleSignInRequest`), `sealed` to union type (`AuthState`)
+   - **Lesson:** Read migration guides before updating major versions
+
+2. **Problem:** Union factory naming mismatch in generated code
+   - **Symptom:** `.when()` callbacks using old names didn't match generated code
+   - **Root cause:** Freezed 3.0 changed union factory naming convention
+   - **Solution:** Regenerated code with `--delete-conflicting-outputs` (freezed updated `.when()` too)
+   - **Lesson:** Delete old generated files before regenerating (prevents stale code confusion)
+
+3. **Problem:** Riverpod 3.0 deprecation warnings for `StateNotifierProvider`
+   - **Warning:** "StateNotifierProvider is deprecated, use Notifier instead"
+   - **Root cause:** Riverpod 3.0 introduced new `Notifier` API as replacement
+   - **Solution:** Moved import to `package:flutter_riverpod/legacy.dart` (suppresses warning, still works)
+   - **Deferred:** Full migration to `Notifier` API (out of scope for dependency update session)
+
+**Solutions Applied:**
+
+1. **Freezed modifiers:** Added `abstract`/`sealed` keywords to all `@freezed` classes
+2. **Code regeneration:** Deleted all `.freezed.dart`/`.g.dart`, re-ran `build_runner`
+3. **Riverpod legacy import:** Changed to `package:flutter_riverpod/legacy.dart` for `StateNotifierProvider`
+4. **Documentation:** Added comprehensive migration notes to `DEPENDENCIES_EXPLAINED.md`
+5. **Deferred upgrades:** Documented TODOs for google_sign_in 7.x and Riverpod Notifier migration
+
+**Build Results:**
+- ✅ **Info messages:** 8 (all deprecation warnings for legacy APIs)
+- ✅ **Errors:** 0
+- ✅ **Warnings:** 0
+- ✅ **Generated files:** 8 (4 `.freezed.dart` + 4 `.g.dart`)
+- ✅ **Build status:** Success
+
+**Metrics:**
+- **Packages updated:** 7 (3 major version updates + 4 minor updates)
+- **Breaking changes resolved:** 3 (Riverpod StateNotifierProvider, Freezed abstract/sealed, Freezed union naming)
+- **Documentation added:** 51 lines (DEPENDENCIES_EXPLAINED.md update history)
+- **Files modified:** 21 (pubspec, models, providers, docs, gitignore)
+- **Commits:** 1 (consolidated dependency update)
+
+**Next Steps:**
+- Integrate AuthService with UI (Priority 1 from ROADMAP.md)
+- Complete migration to Riverpod `Notifier` API (when refactoring auth state management)
+- Upgrade google_sign_in to 7.x (when implementing Google Sign-In UI flow)
+- Add unit tests for AuthService (mock GoogleSignIn, DioClient)
+
+---
+
 ## Session 2025-10-27 (Session 9): Docker Cross-Platform Fixes
 
 **Session Goal:** Review and validate Docker Compose fixes for cross-platform development (Windows ↔ Linux)
