@@ -8,16 +8,18 @@
 
 ## 📚 Agent Overview
 
-This project includes **6 custom agents** designed to address specific needs:
+This project includes **8 custom agents** designed to address specific needs (alphabetically ordered):
 
 | Agent | Purpose | Model | When to Use |
 |-------|---------|-------|-------------|
-| **frontend-ux-specialist** | UI/UX design, screen layouts, Material Design | Sonnet | Designing screens, improving UX, accessibility |
+| **automation-sentinel** | Meta-agent: automation health, metrics, optimization | Sonnet | Checking automation health, generating reports, finding redundancy |
+| **backend-code-reviewer** | Java/Spring Boot code review, best practices | Sonnet | Reviewing backend code after implementation |
+| **cross-project-architect** | Pattern extraction, templates, new projects | Sonnet | Starting new projects, extracting reusable patterns |
 | **flutter-implementation-coach** | Flutter coding, Riverpod, Dio, debugging | Sonnet | Implementing features, state management, API integration |
+| **frontend-ux-specialist** | UI/UX design, screen layouts, Material Design | Sonnet | Designing screens, improving UX, accessibility |
 | **learning-tutor** | Teaching concepts, structured learning, exercises | Sonnet | Learning new topics, understanding patterns |
 | **session-optimizer** | Token efficiency, session planning, workflow | Haiku | Starting sessions, optimizing token usage |
-| **cross-project-architect** | Pattern extraction, templates, new projects | Sonnet | Starting new projects, extracting reusable patterns |
-| **backend-code-reviewer** | Java/Spring Boot code review, best practices | Sonnet | Reviewing backend code after implementation |
+| **tech-writer** | Documentation (external + in-code), ADRs, Javadoc, OpenAPI | Sonnet | Creating ADRs, adding Javadoc, updating docs, OpenAPI annotations |
 
 ---
 
@@ -29,6 +31,39 @@ This project includes **6 custom agents** designed to address specific needs:
 2. **Explicit Invocation** - You can request specific agents: "Use the frontend-ux-specialist to design this screen"
 3. **Complementary** - Multiple agents can work together (e.g., UX specialist designs, implementation coach codes)
 
+### ⚠️ Anti-Cyclic Dependency Rule (CRITICAL)
+
+**To prevent infinite loops, this hierarchy must be strictly enforced:**
+
+```
+Slash Commands (high-level orchestration)
+    ↓ can call
+Agents (task execution)
+    ↓ can call
+Other Agents (delegation)
+    ↓ NEVER call
+Slash Commands ❌ (would create cycle)
+```
+
+**Rules:**
+- ✅ **Commands CAN call agents** - Example: `/finish-session` calls `tech-writer`
+- ✅ **Agents CAN call other agents** - Example: `backend-code-reviewer` calls `tech-writer`
+- ❌ **Agents MUST NEVER call commands** - Would create infinite loops
+
+**Why this matters:**
+- Commands are "entry points" (user-initiated workflows)
+- Agents are "workers" (execute specific tasks)
+- Workers can delegate to other workers, but never back to entry points
+- Violating this rule causes cyclic dependencies and infinite loops
+
+**Example Safe Delegation:**
+```
+/finish-session (command)
+  → calls tech-writer (agent)
+    → calls automation-sentinel (agent)  ✅ SAFE
+    → NEVER calls /finish-session again  ❌ CYCLIC
+```
+
 ### First Time Setup
 
 Agents are already configured in `.claude/agents/`. No additional setup needed!
@@ -37,20 +72,54 @@ Agents are already configured in `.claude/agents/`. No additional setup needed!
 # Verify agents are available
 ls .claude/agents/
 
-# Should see:
+# Should see (alphabetically):
+# - automation-sentinel.md
 # - backend-code-reviewer.md
-# - frontend-ux-specialist.md
-# - flutter-implementation-coach.md
-# - learning-tutor.md
-# - session-optimizer.md
 # - cross-project-architect.md
+# - flutter-implementation-coach.md
+# - frontend-ux-specialist.md
+# - learning-tutor.md
+# - README.md
+# - session-optimizer.md
+# - tech-writer.md
 ```
 
 ---
 
 ## 🚀 Agent Usage Guide
 
-### 1. Frontend/UX Specialist
+### 1. Automation Sentinel (Meta-Agent)
+
+**🔍 Use when:**
+- Checking automation ecosystem health
+- Finding redundant agents or commands
+- Generating automation usage reports
+- Detecting obsolete automations
+- Getting optimization recommendations
+
+**Example prompts:**
+- "Check automation health"
+- "Generate automation ecosystem report"
+- "Are my agents redundant?"
+- "Which automations are most valuable?"
+- "Find unused commands"
+
+**What you get:**
+- Comprehensive health report (schema validation, dependency checks)
+- Usage analytics dashboard (most/least used automations)
+- Redundancy detection (overlapping responsibilities)
+- Obsolescence warnings (unused automations)
+- Optimization recommendations (consolidation, new automation ideas)
+
+**Strengths:**
+- Meta-level oversight (monitors all other agents)
+- Data-driven recommendations
+- Self-monitoring (validates its own schema)
+- Non-destructive (recommends, never auto-deletes)
+
+---
+
+### 2. Frontend/UX Specialist
 
 **🎨 Use when:**
 - Designing new screens
@@ -81,7 +150,7 @@ ls .claude/agents/
 
 ---
 
-### 2. Flutter Implementation Coach
+### 3. Flutter Implementation Coach
 
 **💻 Use when:**
 - Implementing Flutter features
@@ -112,7 +181,7 @@ ls .claude/agents/
 
 ---
 
-### 3. Learning Tutor
+### 4. Learning Tutor
 
 **📖 Use when:**
 - Learning new concepts
@@ -143,7 +212,7 @@ ls .claude/agents/
 
 ---
 
-### 4. Session Optimizer
+### 5. Session Optimizer
 
 **⚡ Use when:**
 - Starting a new work session
@@ -174,7 +243,7 @@ ls .claude/agents/
 
 ---
 
-### 5. Cross-Project Architect
+### 6. Cross-Project Architect
 
 **🏗️ Use when:**
 - Starting a new project
@@ -205,7 +274,7 @@ ls .claude/agents/
 
 ---
 
-### 6. Backend Code Reviewer
+### 7. Backend Code Reviewer
 
 **🔍 Use when:**
 - After implementing backend features
@@ -233,6 +302,38 @@ ls .claude/agents/
 - Checks OpenAPI documentation
 - Validates testing patterns
 - Security and performance analysis
+
+---
+
+### 8. Tech Writer
+
+**📝 Use when:**
+- Creating/updating documentation
+- Adding Javadoc to classes
+- Adding OpenAPI/Swagger annotations to endpoints
+- Creating ADRs (Architecture Decision Records)
+- Updating ROADMAP.md or LEARNINGS.md
+- Writing README sections
+
+**Example prompts:**
+- "Add OpenAPI annotations to ReviewController"
+- "Create ADR for the authentication flow decision"
+- "Add comprehensive Javadoc to ReviewService"
+- "Update LEARNINGS.md with today's session"
+- "Document this endpoint with Swagger annotations"
+
+**What you get:**
+- Comprehensive external documentation (CLAUDE.md, README, LEARNINGS, ADRs)
+- In-code documentation (Javadoc with @author, @date, examples)
+- Complete OpenAPI/Swagger annotations (all HTTP status codes documented)
+- Dartdoc for Flutter widgets
+- Follows 3-part structure (GENERAL/BACKEND/FRONTEND)
+
+**Strengths:**
+- Enforces OpenAPI documentation (CRITICAL for all REST endpoints)
+- Maintains documentation consistency across project
+- Integrates with backend-code-reviewer (fills doc gaps)
+- Automatic trigger after REST endpoint creation
 
 ---
 
@@ -406,17 +507,35 @@ OR
 
 ## 🎨 Agent Personalities
 
-### Frontend UX Specialist
-- 🎨 **Style:** Designer who teaches
-- 💬 **Tone:** Enthusiastic, visual, detailed
-- 🎯 **Focus:** Beauty + accessibility + usability
-- 📏 **Output:** Wireframes + code + explanations
+### Automation Sentinel
+- 🔍 **Style:** Vigilant watchdog, data analyst
+- 💬 **Tone:** Analytical, metric-driven, proactive
+- 🎯 **Focus:** Automation health + optimization + ROI
+- 📏 **Output:** Health reports + metrics + recommendations
+
+### Backend Code Reviewer
+- 🔍 **Style:** Critical but constructive reviewer
+- 💬 **Tone:** Professional, thorough, didactic
+- 🎯 **Focus:** Quality + best practices + security
+- 📏 **Output:** Analysis + recommendations + examples
+
+### Cross-Project Architect
+- 🏗️ **Style:** Pattern extracter, template builder
+- 💬 **Tone:** Systematic, reuse-focused, organized
+- 🎯 **Focus:** Scalability + consistency
+- 📏 **Output:** Templates + patterns + guides
 
 ### Flutter Implementation Coach
 - 💻 **Style:** Patient teacher, backend translator
 - 💬 **Tone:** Systematic, comparative, thorough
 - 🎯 **Focus:** Understanding + best practices
 - 📏 **Output:** Complete features + backend parallels
+
+### Frontend UX Specialist
+- 🎨 **Style:** Designer who teaches
+- 💬 **Tone:** Enthusiastic, visual, detailed
+- 🎯 **Focus:** Beauty + accessibility + usability
+- 📏 **Output:** Wireframes + code + explanations
 
 ### Learning Tutor
 - 📚 **Style:** Educator using structured lessons
@@ -430,17 +549,11 @@ OR
 - 🎯 **Focus:** Token savings + focused work
 - 📏 **Output:** Plans + checklists + budgets
 
-### Cross-Project Architect
-- 🏗️ **Style:** Pattern extracter, template builder
-- 💬 **Tone:** Systematic, reuse-focused, organized
-- 🎯 **Focus:** Scalability + consistency
-- 📏 **Output:** Templates + patterns + guides
-
-### Backend Code Reviewer
-- 🔍 **Style:** Critical but constructive reviewer
-- 💬 **Tone:** Professional, thorough, didactic
-- 🎯 **Focus:** Quality + best practices + security
-- 📏 **Output:** Analysis + recommendations + examples
+### Tech Writer
+- 📝 **Style:** Documentation specialist, standards enforcer
+- 💬 **Tone:** Precise, structured, comprehensive
+- 🎯 **Focus:** Documentation completeness + consistency
+- 📏 **Output:** ADRs + Javadoc + OpenAPI + READMEs
 
 ---
 
@@ -451,17 +564,21 @@ OR
 ```
 What's your task?
 │
-├─ Designing UI/screens → frontend-ux-specialist
+├─ Checking automation health / finding redundancy → automation-sentinel
+│
+├─ Reviewing backend code → backend-code-reviewer
+│
+├─ New project / extracting patterns → cross-project-architect
 │
 ├─ Coding Flutter feature → flutter-implementation-coach
+│
+├─ Designing UI/screens → frontend-ux-specialist
 │
 ├─ Learning concept → learning-tutor
 │
 ├─ Starting session / optimizing tokens → session-optimizer
 │
-├─ New project / extracting patterns → cross-project-architect
-│
-└─ Reviewing backend code → backend-code-reviewer
+└─ Creating docs / ADRs / Javadoc / OpenAPI → tech-writer
 ```
 
 ---
@@ -469,22 +586,32 @@ What's your task?
 ## 🚦 Status & Maintenance
 
 ### Current Status
-- ✅ All 6 agents created
+- ✅ All 8 agents created (2025-10-29 update: added automation-sentinel + tech-writer)
 - ✅ Tailored to your profile (backend expert, frontend novice)
 - ✅ Integrated with project conventions (CLAUDE.md, CODING_STYLE.md)
+- ✅ Anti-cyclic dependency rule documented and enforced
+- ✅ Alphabetically organized for easy navigation
 - ✅ Ready to use
+
+### Recent Updates (2025-10-29)
+- ✅ **automation-sentinel** - Meta-agent for automation lifecycle management
+- ✅ **tech-writer** - Documentation agent (external + in-code, including OpenAPI)
+- ✅ Added anti-cyclic dependency rule (prevents infinite loops)
+- ✅ Reorganized agents alphabetically
+- ✅ Generated first health report (95/100 ecosystem health score)
 
 ### Maintenance
 - **Update agents** when project conventions change
 - **Add new agents** as new needs emerge
 - **Archive agents** if no longer useful
+- **Run automation-sentinel** monthly to check ecosystem health
 - **Share agents** with team or across projects
 
-### Improvement Ideas
-- Add metrics tracking (which agents most useful?)
-- Create agent for API design (OpenAPI/Swagger focus)
-- Create agent for deployment/DevOps
-- Create agent for writing documentation
+### Future Improvement Ideas
+- Create agent for deployment/DevOps workflows
+- Create agent for database migration management
+- Implement automated usage tracking (metrics collection)
+- Add agent chaining automation (backend-code-reviewer → tech-writer)
 
 ---
 

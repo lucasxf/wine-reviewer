@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-28 (Session 10 - Flutter Dependency Updates & Build Fixes)
+**Last updated:** 2025-10-29 (Session 11 - Custom Agent Suite Expansion)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -120,11 +120,24 @@ This file tracks the current implementation status and next steps for the Wine R
 - GitHub Actions for Mobile (`ci-app.yml`) with path filters
 - Release workflow (`release.yml`)
 
+**Custom Agent Suite:** - ✅ NEW (2025-10-29)
+- 8 specialized agents in `.claude/agents/` with distinct responsibilities
+  - `security-guardian` - Security and secrets management
+  - `test-architect` - Test strategies and TDD workflows
+  - `code-reviewer` - Code quality and CODING_STYLE.md enforcement
+  - `mobile-specialist` - Flutter/Dart expertise with beginner-friendly explanations
+  - `performance-sentinel` - Performance analysis and optimization
+  - `integration-engineer` - System integration and E2E workflows
+  - `tech-writer` - Documentation specialist (ADRs, Javadoc, OpenAPI, Dartdoc) ⭐ NEW
+  - `automation-sentinel` - Meta-agent for automation lifecycle management ⭐ NEW
+- Agent coordination system with README.md (anti-cyclic dependency rules)
+- Automated documentation updates (`/finish-session` delegates to tech-writer and automation-sentinel)
+- Health monitoring with automation metrics and recommendations
+
 ---
 
 ## 🚧 In Progress
 
-### Mobile App (Flutter)
 - None currently
 
 ---
@@ -249,7 +262,9 @@ This file tracks the current implementation status and next steps for the Wine R
 | **Flutter Dependencies** | 10 configured (updated 2025-10-28) |
 | **Flutter Auth Components** | 18 files (models, services, providers, docs) |
 | **Flutter Screens** | 4 (splash, login, home, review details) |
+| **Custom Agents** | 8 (6 existing + 2 new: tech-writer, automation-sentinel) ⬆️ |
 | **CI/CD Pipelines** | 3 (API, Mobile, Release) |
+| **Documentation Files** | ADR-001 (agent architecture) created by tech-writer |
 
 ---
 
