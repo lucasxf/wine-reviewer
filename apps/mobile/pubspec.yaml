@@ -61,6 +61,7 @@ dependencies:
 
   # Utilities
   intl: ^0.20.1  # Internationalization and date formatting
+  logger: ^2.4.0  # Structured logging with severity levels
 
 dev_dependencies:
   flutter_test:

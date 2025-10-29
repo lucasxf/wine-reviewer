@@ -7,6 +7,7 @@ import 'package:wine_reviewer_mobile/core/network/auth_interceptor.dart';
 import 'package:wine_reviewer_mobile/core/network/dio_client.dart';
 import 'package:wine_reviewer_mobile/core/network/network_exception.dart';
 import 'package:wine_reviewer_mobile/core/storage/storage_keys.dart';
+import 'package:wine_reviewer_mobile/core/utils/app_logger.dart';
 import 'package:wine_reviewer_mobile/features/auth/domain/models/auth_response.dart';
 import 'package:wine_reviewer_mobile/features/auth/domain/models/google_sign_in_request.dart';
 import 'package:wine_reviewer_mobile/features/auth/domain/models/user.dart';
@@ -136,8 +137,8 @@ class AuthServiceImpl implements AuthService {
       await _googleSignIn.signOut();
     } catch (e) {
       // Sign out should never fail loudly
-      // Just ignore errors silently
-      // TODO: Use proper logging framework in production (e.g., logger package)
+      // Log error but don't throw exception
+      AppLogger.error('Error during sign out', error: e);
     }
   }
 
@@ -171,12 +172,19 @@ class AuthServiceImpl implements AuthService {
       return user;
     } catch (e, stackTrace) {
       // If any error occurs (JSON parsing, storage read, etc.)
+      // Log the specific error for debugging
+      AppLogger.error(
+        'Error in getCurrentUser',
+        error: e,
+        stackTrace: stackTrace,
+      );
       // Clear token and return null (force re-login)
       try {
         await _authInterceptor.clearToken();
         await _storage.delete(key: StorageKeys.userCache);
-      } catch (_) {
-        // Ignore cleanup errors
+      } catch (cleanupError) {
+        // Log cleanup errors but don't fail
+        AppLogger.error('Error during getCurrentUser cleanup', error: cleanupError);
       }
       return null;
     }
