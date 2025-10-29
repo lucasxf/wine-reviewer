@@ -125,9 +125,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         // Usuário autenticado → vai para home
         // context.go() = navegação sem voltar (substitui tela atual)
         context.go('/home');
+        return;
       case AuthStateUnauthenticated():
         // Usuário não autenticado → vai para login
         context.go('/login');
+        return;
       case AuthStateInitial():
       case AuthStateLoading():
         // Estado ainda não definido (raro) → aguarda e tenta novamente
@@ -136,6 +138,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
         if (mounted) {
           _checkAuthentication(); // Tenta novamente
         }
+        return;
     }
   }
 
