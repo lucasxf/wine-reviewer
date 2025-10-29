@@ -14,12 +14,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+
+      - name: Check for pubspec.yaml
+        id: check_pubspec
+        run: |
+          if [ -f apps/mobile/pubspec.yaml ]; then
+            echo "has_pubspec=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_pubspec=false" >> $GITHUB_OUTPUT
+            echo "No pubspec.yaml found in apps/mobile — skipping Flutter steps."
+          fi
+
+      - name: Setup Flutter
+        if: steps.check_pubspec.outputs.has_pubspec == 'true'
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.0'
+
       - name: Pub get & Analyze & Test
+        if: steps.check_pubspec.outputs.has_pubspec == 'true'
+        working-directory: apps/mobile
         run: |
-          cd apps/mobile
           flutter pub get
           flutter analyze
           flutter test --coverage

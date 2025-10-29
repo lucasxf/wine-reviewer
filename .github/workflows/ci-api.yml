@@ -14,13 +14,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      - name: Check for services/api/pom.xml
+        id: check-pom
+        run: |
+          if [ -f services/api/pom.xml ]; then
+            echo "pom_exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "pom_exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Set up Temurin JDK 21
+        if: steps.check-pom.outputs.pom_exists == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
+
       - name: Build & Test (API)
+        if: steps.check-pom.outputs.pom_exists == 'true'
         run: |
           cd services/api
           ./mvnw -q -DskipTests=false verify
+
+      - name: Skip API build (no pom)
+        if: steps.check-pom.outputs.pom_exists == 'false'
+        run: echo "No services/api/pom.xml found on this branch; skipping API build."
