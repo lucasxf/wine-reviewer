@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wine_reviewer_mobile/core/router/app_router.dart';
 import 'package:wine_reviewer_mobile/core/theme/app_theme.dart';
+import 'package:wine_reviewer_mobile/features/auth/providers/auth_providers.dart';
 
 /// Entry point da aplicação Wine Reviewer
 ///
@@ -25,7 +26,66 @@ import 'package:wine_reviewer_mobile/core/theme/app_theme.dart';
 /// - Chama runApp() para iniciar o app Flutter
 /// - Pode executar inicializações antes de runApp() (ex: Firebase.initializeApp())
 
-void main() {
+/// main() - Entry point assíncrono com inicialização de autenticação
+///
+/// MUDANÇA (2025-10-29): Tornada assíncrona para verificar auth status antes de runApp()
+///
+/// FLUXO DE INICIALIZAÇÃO:
+/// 1. WidgetsFlutterBinding.ensureInitialized() - inicializa Flutter framework
+/// 2. Cria ProviderContainer - container DI do Riverpod
+/// 3. Chama AuthStateNotifier.checkAuthStatus() - verifica se usuário está logado
+///    - Se token existe → AuthState.authenticated(user)
+///    - Se não existe → AuthState.unauthenticated()
+/// 4. runApp() com UncontrolledProviderScope - inicia app com container pré-configurado
+///
+/// POR QUE ASYNC MAIN?
+/// - ✅ Permite verificar autenticação ANTES de construir UI
+/// - ✅ Evita "flickering" (mostrar tela errada por 1-2 segundos)
+/// - ✅ AuthState já está definido quando SplashScreen monta
+///
+/// ANALOGIA Backend (Spring Boot):
+/// Similar a @PostConstruct ou CommandLineRunner que executa antes do app aceitar requests
+void main() async {
+  // WidgetsFlutterBinding.ensureInitialized() - OBRIGATÓRIO para async main()
+  //
+  // EXPLICAÇÃO:
+  // - Inicializa o framework Flutter antes de código assíncrono
+  // - Necessário quando main() é async
+  // - Garante que plugins nativos (storage, Google Sign-In) funcionem
+  //
+  // SEM ISSO:
+  // - Crash: "ServicesBinding.defaultBinaryMessenger was accessed before binding was initialized"
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ProviderContainer - container DI do Riverpod
+  //
+  // EXPLICAÇÃO:
+  // - Cria container de providers FORA da UI
+  // - Permite acessar providers antes de runApp()
+  // - Usado para inicializações assíncronas
+  //
+  // DIFERENÇA:
+  // - ProviderScope: usado dentro de runApp() (reativo)
+  // - ProviderContainer: usado fora de runApp() (manual)
+  //
+  // ANALOGIA Backend:
+  // - Similar a: ApplicationContext do Spring Boot
+  final container = ProviderContainer();
+
+  // Verifica se usuário já está autenticado (auto-login)
+  //
+  // EXPLICAÇÃO:
+  // - Chama AuthStateNotifier.checkAuthStatus()
+  // - Verifica se JWT token existe no flutter_secure_storage
+  // - Se existe → busca usuário no backend → AuthState.authenticated(user)
+  // - Se não existe → AuthState.unauthenticated()
+  //
+  // POR QUE AQUI (não no SplashScreen)?
+  // - AuthState já está pronto quando SplashScreen monta
+  // - Evita race conditions (SplashScreen tentando ler estado que ainda não foi verificado)
+  // - Segue padrão recomendado pelo Riverpod
+  await container.read(authStateNotifierProvider.notifier).checkAuthStatus();
+
   // runApp() - inicializa e executa a aplicação Flutter
   //
   // EXPLICAÇÃO:
@@ -37,31 +97,30 @@ void main() {
   // - Tudo dentro de runApp() é um Widget
   // - MyApp é o widget root (raiz da árvore de widgets)
   runApp(
-    // ProviderScope = wrapper do Riverpod
+    // UncontrolledProviderScope - wrapper do Riverpod com container pré-configurado
     //
-    // EXPLICAÇÃO - ProviderScope:
-    // - Container que armazena todos os providers (DI)
-    // - Permite que widgets descendentes acessem providers
-    // - Similar a: ApplicationContext do Spring Boot
+    // DIFERENÇA - ProviderScope vs UncontrolledProviderScope:
+    // - ProviderScope: cria container automaticamente (uso normal)
+    // - UncontrolledProviderScope: usa container existente (uso avançado)
     //
-    // QUANDO USAR:
-    // - Sempre no topo da aplicação (wrapper de runApp)
-    // - Em testes (para mockar providers)
+    // POR QUE UncontrolledProviderScope?
+    // - Precisamos do container FORA de runApp() para chamar checkAuthStatus()
+    // - Passamos o mesmo container para dentro da UI
+    // - Garante que AuthState já está inicializado
     //
     // ESTRUTURA:
     // ```
-    // ProviderScope
+    // UncontrolledProviderScope (container pré-configurado)
     //   └── MyApp
     //       └── MaterialApp.router
     //           └── Screen (pode acessar providers)
     // ```
     //
-    // POR QUE PROVIDERSCOPE?
-    // - ✅ Permite injeção de dependência (DI) em toda aplicação
-    // - ✅ Todos os widgets descendentes podem usar ref.watch/read
-    // - ✅ Facilita testes (pode sobrescrever providers)
-    const ProviderScope(
-      child: MyApp(),
+    // ANALOGIA Backend:
+    // - Similar a: passar ApplicationContext configurado para servlet container
+    UncontrolledProviderScope(
+      container: container,
+      child: const MyApp(),
     ),
   );
 }
