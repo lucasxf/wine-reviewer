@@ -66,7 +66,7 @@ dart format .            # Format code
 cd services/api
 ./mvnw spring-boot:run   # Run locally (requires Postgres)
 ./mvnw verify            # Build and run tests
-./mvnw -q -DskipTests=false verify  # Run tests only
+./mvnw test              # Run tests only
 # OpenAPI docs: http://localhost:8080/swagger-ui.html
 ```
 
@@ -232,7 +232,7 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
 ## Development Phases
 
 The project follows a phased approach:
-- **F0 (Setup):** Monorepo, linters, Docker Compose, basic CI/CD ✅
+- **F0 (Setup):** Monorepo, linters, Docker Compose, basic CI/CD
 - **F1 (Domain & API):** Core entities, Review/Comment endpoints, Google login, Flyway, Testcontainers
 - **F2 (Flutter MVP):** Login screen, feed, new review with photo, review details with comments
 - **F3 (Observability):** Logs, metrics, tracing
