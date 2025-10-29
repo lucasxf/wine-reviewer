@@ -115,12 +115,14 @@ final authServiceProvider = Provider<AuthService>((ref) {
   final dioClient = ref.watch(dioClientProvider);
   final googleSignIn = ref.watch(googleSignInProvider);
   final authInterceptor = ref.watch(authInterceptorProvider);
+  final secureStorage = ref.watch(secureStorageProvider); // FIX: Added for user data caching
 
   // Create and return AuthServiceImpl with dependencies
   return AuthServiceImpl(
     client: dioClient,
     googleSignIn: googleSignIn,
     authInterceptor: authInterceptor,
+    storage: secureStorage, // FIX: Inject storage for user data caching
   );
 });
 
