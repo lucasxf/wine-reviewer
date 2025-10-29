@@ -51,6 +51,12 @@ class SplashScreen extends ConsumerStatefulWidget {
 /// 2. build() - chamado toda vez que widget precisa ser desenhado
 /// 3. dispose() - chamado quando widget é removido (cleanup)
 class _SplashScreenState extends ConsumerState<SplashScreen> {
+  /// Maximum number of retry attempts to check authentication status
+  /// Prevents infinite recursion if auth state remains in Initial/Loading
+  static const int _maxRetries = 10;
+
+  /// Current retry counter
+  int _retryCount = 0;
   /// initState - executado UMA VEZ quando tela é criada
   ///
   /// QUANDO USAR:
@@ -74,12 +80,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   /// Verifica AuthState e redireciona para tela apropriada
   ///
   /// MUDANÇA (2025-10-29): Usa AuthState ao invés de authInterceptor
+  /// MUDANÇA (2025-10-29): Adiciona retry counter para prevenir recursão infinita
   ///
   /// FLUXO:
   /// 1. Lê AuthState atual do AuthStateNotifierProvider
   /// 2. Usa pattern matching (switch expression) para determinar redirecionamento
   /// 3. Redireciona para /home (authenticated) ou /login (unauthenticated)
-  /// 4. Se initial → aguarda 500ms e tenta novamente (raro, mas possível)
+  /// 4. Se initial/loading → aguarda 500ms e tenta novamente (máximo 10 vezes)
+  /// 5. Se exceder máximo de tentativas → redireciona para /login como fallback
+  ///
+  /// POR QUE RETRY COUNTER?
+  /// - Previne recursão infinita se auth state nunca for resolvido
+  /// - Evita stack overflow em cenários edge case (ex: falha de rede persistente)
+  /// - Fallback para login garante que usuário não fica preso na splash screen
   ///
   /// POR QUE NÃO TEM DELAY DE 1 SEGUNDO?
   /// - AuthState já foi verificado em main.dart antes de runApp()
@@ -111,12 +124,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     // Redireciona baseado no tipo de AuthState:
     // - AuthStateAuthenticated → /home (usuário logado)
     // - AuthStateUnauthenticated → /login (usuário não logado)
-    // - AuthStateInitial → aguarda 500ms e tenta novamente (raro)
-    // - AuthStateLoading → aguarda 500ms e tenta novamente (raro)
+    // - AuthStateInitial/Loading → aguarda 500ms e tenta novamente (máx 10x)
     //
     // POR QUE initial/loading são raros?
     // - main.dart já chamou checkAuthStatus() antes de runApp()
     // - Quando SplashScreen monta, estado já deve ser authenticated/unauthenticated
+    //
+    // PROTEÇÃO CONTRA RECURSÃO INFINITA:
+    // - Contador de tentativas (_retryCount) limita a 10 tentativas
+    // - Se exceder, redireciona para /login como fallback
+    // - Previne stack overflow em edge cases (ex: auth service offline)
     //
     // ANALOGIA Backend:
     // - Similar a: switch (securityContext.getAuthentication()) { ... }
@@ -134,6 +151,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
       case AuthStateLoading():
         // Estado ainda não definido (raro) → aguarda e tenta novamente
         // Isso pode acontecer se checkAuthStatus() estiver lento
+        _retryCount++;
+        
+        // Previne recursão infinita com contador de tentativas
+        if (_retryCount >= _maxRetries) {
+          // Máximo de tentativas excedido → vai para login como fallback
+          // Isso previne stack overflow se auth state nunca for resolvido
+          context.go('/login');
+          return;
+        }
+        
         await Future.delayed(const Duration(milliseconds: 500));
         if (mounted) {
           _checkAuthentication(); // Tenta novamente
