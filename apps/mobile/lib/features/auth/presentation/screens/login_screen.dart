@@ -112,7 +112,7 @@ class LoginScreen extends ConsumerWidget {
               'Faça login para avaliar e descobrir novos vinhos',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withAlpha(153), // 0.6 opacity = 153/255
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(153), // 0.6 * 255 = 153 alpha
                   ),
             ),
 
