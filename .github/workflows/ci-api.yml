@@ -31,6 +31,9 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
+          
+      - name: Make Maven Wrapper executable
+        run: chmod +x ./mvnw
 
       - name: Build & Test (API)
         if: steps.check-pom.outputs.pom_exists == 'true'
