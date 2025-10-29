@@ -169,8 +169,11 @@ class AuthServiceImpl implements AuthService {
       final user = User.fromJson(userMap);
 
       return user;
-    } catch (e) {
+    } catch (e, stackTrace) {
       // If any error occurs (JSON parsing, storage read, etc.)
+      // Log the specific error for debugging
+      print('Error in getCurrentUser: $e');
+      print('Stack trace: $stackTrace');
       // Clear token and return null (force re-login)
       try {
         await _authInterceptor.clearToken();
