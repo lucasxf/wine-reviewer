@@ -1,4 +1,6 @@
 name: CI - App Flutter
+permissions:
+  contents: read
 on:
   push:
     paths:
