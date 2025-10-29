@@ -127,19 +127,27 @@ void main() async {
 
 /// Widget root da aplicação
 ///
+/// MUDANÇA (2025-10-29): Convertido para ConsumerWidget
+///
 /// EXPLICAÇÃO:
 /// - Widget raiz (root) que configura toda aplicação
 /// - Define: tema, router, título, locale
 /// - Similar a: Application class do Android
 ///
-/// STATELESS WIDGET:
-/// - Imutável (não muda após criado)
-/// - Apropriado para configuração estática
-class MyApp extends StatelessWidget {
+/// CONSUMER WIDGET (novo):
+/// - Necessário para acessar ref e passar para createAppRouter(ref)
+/// - Permite que router acesse authStateNotifierProvider
+/// - ref é usado para verificar autenticação em redirect callback
+///
+/// POR QUE CONSUMER WIDGET (não StatelessWidget)?
+/// - ✅ createAppRouter(ref) precisa de ref para proteção de rotas
+/// - ✅ Permite router acessar AuthState para redirect condicional
+/// - ✅ Mantém router reativo (escuta mudanças de autenticação)
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     // MaterialApp.router = app Material Design com navegação customizada
     //
     // EXPLICAÇÃO - MaterialApp.router:
@@ -222,22 +230,30 @@ class MyApp extends StatelessWidget {
 
       // routerConfig = configuração do router (go_router)
       //
+      // MUDANÇA (2025-10-29): Passa ref para createAppRouter(ref)
+      //
       // EXPLICAÇÃO:
       // - Integra MaterialApp com go_router
       // - Define todas as rotas da aplicação
       // - Importado de app_router.dart
+      // - ref permite router acessar AuthState para proteção de rotas
       //
       // ESTRUTURA DE ROTAS:
       // - / (splash) → verifica autenticação
       // - /login → tela de login
-      // - /home → feed de reviews
-      // - /review/:id → detalhes do review
+      // - /home → feed de reviews (protegida)
+      // - /review/:id → detalhes do review (protegida)
+      //
+      // PROTEÇÃO DE ROTAS:
+      // - Router usa ref.read(authStateNotifierProvider) para verificar autenticação
+      // - Redireciona para /login se usuário não autenticado tentar acessar rota protegida
+      // - Redireciona para /home se usuário autenticado tentar acessar /login
       //
       // POR QUE routerConfig (não routeInformationParser)?
       // - routerConfig = API nova (Go Router 7+)
       // - Mais simples e menos verboso
       // - Recomendado pelo pacote go_router
-      routerConfig: createAppRouter(),
+      routerConfig: createAppRouter(ref),
 
       // ========================================================================
       // Locale & Internacionalização (i18n) - Futuro
