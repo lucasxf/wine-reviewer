@@ -46,7 +46,9 @@
       "Bash(done)",
       "Bash(./mvnw clean:*)",
       "Bash(./mvnw dependency:tree:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(git checkout:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": [],
     "ask": []
