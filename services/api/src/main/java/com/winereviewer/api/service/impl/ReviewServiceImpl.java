@@ -10,6 +10,7 @@ import com.winereviewer.api.domain.User;
 import com.winereviewer.api.domain.Wine;
 import com.winereviewer.api.exception.ResourceNotFoundException;
 import com.winereviewer.api.exception.UnauthorizedAccessException;
+import com.winereviewer.api.repository.CommentRepository;
 import com.winereviewer.api.repository.ReviewRepository;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.repository.WineRepository;
@@ -38,6 +39,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final WineRepository wineRepository;
+    private final CommentRepository commentRepository;
 
     @Override
     @Transactional
@@ -201,8 +203,9 @@ public class ReviewServiceImpl implements ReviewService {
             Review review,
             UserSummaryResponse author,
             WineSummaryResponse wine) {
+        final var reviewId = review.getId().toString();
         return new ReviewResponse(
-                review.getId().toString(),
+                reviewId,
                 review.getRating(),
                 review.getNotes(),
                 review.getImageUrl(),
@@ -210,8 +213,7 @@ public class ReviewServiceImpl implements ReviewService {
                 LocalDateTime.ofInstant(review.getUpdatedAt(), ZoneOffset.UTC),
                 author,
                 wine,
-                // TODO commentCount
-                0);
+                (int) commentRepository.countCommentByReview(reviewId));
     }
 
 }

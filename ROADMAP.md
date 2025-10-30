@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-29 (Session 12 - Authentication UI Integration Completed)
+**Last updated:** 2025-10-30 (Session 13 - Comment System Service Layer WIP)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -152,7 +152,32 @@ This file tracks the current implementation status and next steps for the Wine R
 
 ## 🚧 In Progress
 
-- None currently
+### 💬 Implement Comment System (Backend) - 🚧 PARTIAL
+
+**Status:** In Progress (Step 2 of 6 - Service Layer PARTIAL)
+
+**Progress Breakdown:**
+- ✅ **Step 1:** Comment entity + repository + migration (COMPLETE)
+  - `Comment.java` with JPA lifecycle callbacks
+  - `CommentRepository.java` with custom query methods
+  - Flyway migration V3 (cascade delete on review deletion)
+- 🚧 **Step 2:** DTOs + Service implementation (PARTIAL - 2/5 methods complete)
+  - ✅ `CreateCommentRequest.java`, `UpdateCommentRequest.java`, `CommentResponse.java`
+  - ✅ `CommentService.java` interface (5 methods)
+  - ✅ `CommentServiceImpl.java` - `addComment()` and `updateComment()` COMPLETE
+  - ⏳ `CommentServiceImpl.java` - 3 methods marked TODO WIP (user will complete)
+    - `getCommentsPerUser()`, `getCommentsPerReview()`, `deleteComment()`
+  - ✅ `messages.properties` updated with comment validation messages
+  - ✅ **2 critical bugs fixed** in `updateComment()` (wrong exception UUID + missing content update)
+  - ✅ **1 encoding bug fixed** in `messages.properties` (garbled Portuguese characters)
+  - ✅ `ReviewServiceImpl.java` modified to include comment count
+  - ✅ `ReviewServiceTest.java` fixed to mock CommentRepository
+- ⏳ **Step 3:** CommentService unit tests (PENDING)
+- ⏳ **Step 4:** CommentController + OpenAPI documentation (PENDING)
+- ⏳ **Step 5:** Integration tests (CommentControllerIT) (PENDING)
+- ⏳ **Step 6:** Documentation updates (README.md) (PENDING)
+
+**Next User Action:** Complete remaining 3 methods in CommentServiceImpl, then continue with Step 3.
 
 ---
 
@@ -194,19 +219,6 @@ This file tracks the current implementation status and next steps for the Wine R
 **Pending:**
 - ⏳ Update Review entity to use uploaded image URLs (future work)
 - ⏳ Frontend integration (Flutter image picker → upload flow)
-
----
-
-### 3. 💬 Implement Comment System (Backend)
-
-**Goal:** Enable users to comment on wine reviews
-
-**Tasks:**
-- Complete CRUD endpoints for comments
-- Add OpenAPI/Swagger documentation
-- Create unit tests for comment service
-- Create integration tests for comment endpoints
-- Test cascade delete (comments deleted when review deleted)
 
 ---
 
