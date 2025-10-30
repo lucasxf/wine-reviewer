@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-29 (Session 11 - Custom Agent Suite Expansion)
+**Last updated:** 2025-10-29 (Session 12 - Authentication UI Integration Completed)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -99,6 +99,20 @@ This file tracks the current implementation status and next steps for the Wine R
 - Auto-login support (checkAuthStatus on app startup)
 - Comprehensive documentation with backend analogies
 
+**Authentication UI Integration:** - ✅ NEW (2025-10-29, PR #1)
+- `main.dart` - Async initialization with AuthStateNotifier.checkAuthStatus() before runApp()
+- `login_screen.dart` - Real Google Sign-In integration (replaced mock with AuthStateNotifier)
+- `splash_screen.dart` - AuthState-based routing with retry counter (prevents infinite recursion)
+- `app_router.dart` - Route protection with redirect callback (authenticated/unauthenticated logic)
+- User data caching in secure storage (enables auto-login without backend call)
+- Error handling with SnackBar messages and AppLogger integration
+- Complete authentication flow:
+  - App startup → checkAuthStatus → Splash (300ms) → Auto-login OR Login screen
+  - Google Sign-In → Backend JWT → Storage (token + user) → Home screen
+  - Auto-login: Token exists → Read cached user → AuthState.authenticated → Home screen
+  - Route protection: Unauthenticated users redirected to /login, authenticated users can't access /login
+- CI/CD updates: Flutter 3.35.6 (Dart 3.9.2), conditional test execution, permissions configuration
+
 **Documentation:**
 - `DEPENDENCIES_EXPLAINED.md` - Detailed package explanations
 - `SETUP_INSTRUCTIONS.md` - Development environment setup
@@ -144,33 +158,9 @@ This file tracks the current implementation status and next steps for the Wine R
 
 ## 🎯 Next Steps (Priority Order)
 
-### 1. 📱 PRIORITY 1: Integrate Authentication with UI (Started 2025-10-25)
+### 1. 📱 Implement Flutter Authentication Flow (F2 Phase) - ✅ COMPLETED
 
-**Status:** Ready to start
-
-**Goal:** Connect AuthService with login screen and implement full authentication flow
-
-**Tasks:**
-- Update `main.dart` to initialize AuthStateNotifier (checkAuthStatus on startup)
-- Update `login_screen.dart` to use AuthStateNotifier (replace mock with real Google Sign-In)
-- Update `splash_screen.dart` to handle AuthState (initial → authenticated/unauthenticated)
-- Update `app_router.dart` to protect routes (redirect to login if unauthenticated)
-- Test complete flow: App startup → Auto-login OR Login screen → Home screen → Logout
-- Handle errors gracefully (show SnackBar with error messages)
-
-**Acceptance Criteria:**
-- ✅ App starts with splash screen (checks if token exists)
-- ✅ If token exists → Home screen (auto-login)
-- ✅ If no token → Login screen
-- ✅ Click "Sign in with Google" → Opens Google dialog → Authenticates → Home screen
-- ✅ Click "Logout" → Clears tokens → Login screen
-- ✅ Error handling (cancel login, network error, invalid token)
-
----
-
-### 2. 📱 Implement Flutter Authentication Flow (F2 Phase) - ✅ COMPLETED
-
-**Status:** ✅ Completed (2025-10-25)
+**Status:** ✅ Completed (2025-10-29, PR #1 merged)
 
 **Completed:**
 - ✅ Create auth feature structure (data/domain/presentation/providers)
@@ -179,14 +169,16 @@ This file tracks the current implementation status and next steps for the Wine R
 - ✅ Implement auto-login support (checkAuthStatus method)
 - ✅ Riverpod state management (AuthState, AuthStateNotifier, providers)
 - ✅ Comprehensive documentation (storage README, backend analogies)
-
-**Pending:**
-- ⏳ UI integration (connect AuthService with screens)
-- ⏳ End-to-end testing (full authentication flow)
+- ✅ UI integration (connect AuthService with screens) - **COMPLETED 2025-10-29**
+- ✅ End-to-end testing (full authentication flow) - **COMPLETED 2025-10-29**
+- ✅ Route protection with go_router redirect callbacks
+- ✅ User data caching for auto-login without backend calls
+- ✅ Error handling with SnackBar and AppLogger
+- ✅ CI/CD configuration (Flutter 3.35.6, conditional tests)
 
 ---
 
-### 3. 🖼️ Implement Image Upload with Pre-signed URLs (Backend) - ✅ COMPLETED
+### 2. 🖼️ Implement Image Upload with Pre-signed URLs (Backend) - ✅ COMPLETED
 
 **Status:** ✅ Completed (2025-10-26)
 
@@ -205,7 +197,7 @@ This file tracks the current implementation status and next steps for the Wine R
 
 ---
 
-### 4. 💬 Implement Comment System (Backend)
+### 3. 💬 Implement Comment System (Backend)
 
 **Goal:** Enable users to comment on wine reviews
 
