@@ -111,7 +111,33 @@ After I approve the diff, create a commit with:
 - Reference to what was implemented
 - Claude Code footer
 
-## 8. Session Summary
+## 8. Feature Branch PR Prompt (Optional)
+
+**Detect if on feature branch:**
+```bash
+CURRENT_BRANCH=$(git branch --show-current)
+
+# Check if on a feature branch (not main/develop)
+if [[ "$CURRENT_BRANCH" != "main" && "$CURRENT_BRANCH" != "develop" ]]; then
+  echo "📋 Feature branch detected: $CURRENT_BRANCH"
+fi
+```
+
+**If on feature branch, ask user:**
+"You're on feature branch `$CURRENT_BRANCH`. Is this feature complete and ready for PR? (y/n)"
+
+**If YES:**
+- Invoke `/create-pr` command with current context
+- This will create PR and trigger automation-sentinel analysis
+- Exit after PR creation (don't continue to session summary)
+
+**If NO:**
+- Skip PR creation
+- Continue to Session Summary (step 9)
+
+**Rationale:** Natural checkpoint to create PRs when feature work is complete, with automatic workflow analysis from automation-sentinel.
+
+## 9. Session Summary
 Provide a brief summary:
 - What was accomplished
 - Test results (if tests were run)

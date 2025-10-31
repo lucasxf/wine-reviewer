@@ -148,6 +148,7 @@ wine-reviewer/
 - Caching for dependencies (Maven, Flutter pub)
 - Run tests before build/deploy steps
 - **Branch Separation:** When creating tooling/infrastructure changes (commands, agents, configs) during an active feature branch session, create a separate feature branch for those changes. Keep feature branches focused on single concerns to avoid PR pollution and maintain clean git history. *(Added 2025-10-31)*
+- **PR Target Branch:** Always target `develop` branch for pull requests unless explicitly stated otherwise. The `main` branch is reserved for production releases. Feature branches should merge to `develop` for integration and testing before eventual promotion to `main`. *(Added 2025-10-31)*
 
 ### Docker
 - Multi-stage builds for smaller images
@@ -262,7 +263,8 @@ Type the command in Claude Code CLI to expand it into a full prompt.
 
 **Workflow Commands:**
 - `/start-session [context]` - Load project context (CLAUDE.md, CODING_STYLE.md, ROADMAP.md, README.md) to begin session
-- `/finish-session [commit-context]` - Run tests, prompt for doc updates, show git diff, create commit
+- `/finish-session [commit-context]` - Run tests, prompt for doc updates, show git diff, create commit (auto-detects feature branches and offers PR creation)
+- `/create-pr [title]` - Create pull request with gh CLI, auto-trigger automation-sentinel for feature workflow analysis
 - `/update-roadmap <what-was-completed>` - Update ROADMAP.md (move completed items, reprioritize next steps)
 
 **Development Commands:**
@@ -294,6 +296,42 @@ This project includes **8 custom agents** designed for specific development task
 8. **tech-writer** - Documentation (external + in-code), ADRs, Javadoc, OpenAPI
 
 **Agent Details:** See `.claude/agents/README.md` for comprehensive usage guide, workflows, and best practices.
+
+### Agent Creation Standards
+
+**CRITICAL RULE: Front Matter Required for All Agents** *(Added 2025-10-31)*
+
+When creating new custom agents in `.claude/agents/`, **always include YAML front matter** for Claude Code's agent discovery system:
+
+**Required Front Matter Fields:**
+```yaml
+---
+name: agent-name
+description: Use this agent when [trigger conditions]. Examples - User: "[example 1]" → Use this agent. User: "[example 2]" → Use this agent.
+model: sonnet|haiku|opus
+color: purple|blue|cyan|yellow|etc
+---
+```
+
+**Pre-Commit Quality Checklist:**
+- [ ] Front matter exists with all required fields (`name`, `description`, `model`, `color`)
+- [ ] Description includes clear trigger conditions with examples
+- [ ] Agent body has required sections:
+  - [ ] Purpose statement
+  - [ ] Core Responsibilities
+  - [ ] When to Trigger (Automatic + Manual)
+  - [ ] Integration with other agents (if applicable)
+  - [ ] Usage examples (minimum 2)
+- [ ] Markdown syntax is valid (no broken links, proper headers)
+- [ ] Code blocks have language specifiers
+- [ ] Agent follows project conventions (CLAUDE.md, CODING_STYLE.md)
+
+**Why This Matters:**
+- Without front matter, agents can't be auto-triggered by Claude Code
+- Missing sections reduce agent effectiveness and discoverability
+- Consistent structure ensures maintainability across agent suite
+
+**Validation:** Before committing new agents, run `automation-sentinel` to validate schema and check for issues.
 
 ## Important Constraints
 
