@@ -16,6 +16,7 @@ import com.winereviewer.api.service.CommentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -34,6 +36,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
+    private static final String COMMENT = "Comment";
+    private static final String REVIEW = "Review";
+    private static final String USER = "User";
+
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
@@ -44,9 +50,10 @@ public class CommentServiceImpl implements CommentService {
         final UUID reviewId = UUID.fromString(request.reviewId());
 
         final var review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ResourceNotFoundException("Review", reviewId));
+                .orElseThrow(() -> new ResourceNotFoundException(REVIEW, reviewId));
         final var user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(USER, userId));
+
         final var content = request.text();
         final var comment = getComment(content, review, user);
         final var author = getAuthor(user);
@@ -63,18 +70,17 @@ public class CommentServiceImpl implements CommentService {
         final UUID commentId = UUID.fromString(request.commentId());
 
         final var comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Comment", commentId));
+                .orElseThrow(() -> new ResourceNotFoundException(COMMENT, commentId));
 
-        if(!comment.getAuthor().getId().equals(userId)) {
-            throw new UnauthorizedAccessException(userId, "Comment");
+        if (!comment.getAuthor().getId().equals(userId)) {
+            throw new UnauthorizedAccessException(userId, COMMENT);
         }
         final var user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User", userId));
+                .orElseThrow(() -> new ResourceNotFoundException(USER, userId));
 
         final var content = request.text();
         final var author = getAuthor(user);
 
-        // UPDATE THE CONTENT BEFORE SAVING
         comment.setContent(content);
 
         commentRepository.save(comment);
@@ -85,19 +91,42 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public Page<CommentResponse> getCommentsPerUser(UUID userId, Pageable pageable) {
-        // TODO WIP
-        return null;
+        final var user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(USER, userId));
+        final List<Comment> commentsPerAuthor =
+                commentRepository.findByAuthorOrderByCreatedAtDesc(user);
+
+        final var author = getAuthor(user);
+
+        log.info("Carregados comentários do usuário {}", author);
+
+        return toPageResponse(commentsPerAuthor, author);
     }
 
     @Override
     public Page<CommentResponse> getCommentsPerReview(UUID reviewId, Pageable pageable) {
-        // TODO WIP
-        return null;
+        final var review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResourceNotFoundException(REVIEW, reviewId));
+        final List<Comment> commentsPerReview =
+                commentRepository.findByReviewOrderByCreatedAtAsc(review);
+
+        final var author = getAuthor(review.getUser());
+
+        log.info("Carregados comentários da avaliação {}", review);
+
+        return toPageResponse(commentsPerReview, author);
     }
 
     @Override
     public void deleteComment(UUID commentId, UUID userId) {
-        // TODO WIP
+        final var comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException(COMMENT, commentId));
+
+        if (!userId.equals(comment.getAuthor().getId())) {
+            throw new UnauthorizedAccessException(userId, COMMENT);
+        }
+        commentRepository.delete(comment);
+        log.info("Comentário \"{}\" excluído com sucesso.", commentId);
     }
 
     private Comment getComment(String content, Review review, User user) {
@@ -124,6 +153,15 @@ public class CommentServiceImpl implements CommentService {
                 LocalDateTime.ofInstant(comment.getCreatedAt(), ZoneOffset.UTC),
                 LocalDateTime.ofInstant(comment.getUpdatedAt(), ZoneOffset.UTC),
                 author);
+    }
+
+    private Page<CommentResponse> toPageResponse(List<Comment> comments, UserSummaryResponse author) {
+        final Pageable pageable = Pageable.ofSize(comments.size());
+        final var commentsResponse = comments.stream()
+                .map(c -> getResponse(c, author))
+                .toList();
+
+        return new PageImpl<>(commentsResponse, pageable, comments.size());
     }
 
 }

@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-30 (Session 13 - Comment System Service Layer WIP)
+**Last updated:** 2025-10-31 (Session 14 - Context Management Commands + Comment System WIP)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -148,6 +148,20 @@ This file tracks the current implementation status and next steps for the Wine R
 - Automated documentation updates (`/finish-session` delegates to tech-writer and automation-sentinel)
 - Health monitoring with automation metrics and recommendations
 
+**Context Management Commands:** - ✅ NEW (2025-10-31)
+- `/save-response [filename]` - Save Claude's responses to `prompts/responses/` for later retrieval
+  - Auto-generated filenames with dates if not provided
+  - Extracts only structured content (plans, specs), no conversational fluff
+  - 191 lines with comprehensive workflow documentation
+- `/resume-session [filename]` - Enhanced to handle no arguments (lists and selects files)
+  - Interactive file selection when no arguments provided
+  - Shows filenames, dates, and first line preview
+  - Options: auto-load latest, select by number, type manually, or skip
+  - 94 lines with smart context loading
+- `.claude/settings.json` - Auto-approval for `prompts/responses/*.md` files (no permission prompts)
+- `prompts/responses/INDEX.md` - Optional catalog of saved responses with dates
+- **Branch Separation Directive** added to CLAUDE.md: Always create separate feature branches for tooling changes during active feature work
+
 ---
 
 ## 🚧 In Progress
@@ -161,23 +175,25 @@ This file tracks the current implementation status and next steps for the Wine R
   - `Comment.java` with JPA lifecycle callbacks
   - `CommentRepository.java` with custom query methods
   - Flyway migration V3 (cascade delete on review deletion)
-- 🚧 **Step 2:** DTOs + Service implementation (PARTIAL - 2/5 methods complete)
+- ✅ **Step 2:** DTOs + Service implementation (COMPLETE - 2025-10-31)
   - ✅ `CreateCommentRequest.java`, `UpdateCommentRequest.java`, `CommentResponse.java`
   - ✅ `CommentService.java` interface (5 methods)
-  - ✅ `CommentServiceImpl.java` - `addComment()` and `updateComment()` COMPLETE
-  - ⏳ `CommentServiceImpl.java` - 3 methods marked TODO WIP (user will complete)
-    - `getCommentsPerUser()`, `getCommentsPerReview()`, `deleteComment()`
+  - ✅ `CommentServiceImpl.java` - ALL 5 methods implemented:
+    - `addComment()`, `updateComment()`, `getCommentsPerUser()`, `getCommentsPerReview()`, `deleteComment()`
   - ✅ `messages.properties` updated with comment validation messages
   - ✅ **2 critical bugs fixed** in `updateComment()` (wrong exception UUID + missing content update)
   - ✅ **1 encoding bug fixed** in `messages.properties` (garbled Portuguese characters)
   - ✅ `ReviewServiceImpl.java` modified to include comment count
   - ✅ `ReviewServiceTest.java` fixed to mock CommentRepository
-- ⏳ **Step 3:** CommentService unit tests (PENDING)
+- ✅ **Step 3:** CommentService unit tests (COMPLETE - 2025-10-31)
+  - ✅ `CommentServiceTest.java` with 9 test methods covering all business logic
+  - ✅ Tests for: addComment (3 tests), updateComment (3 tests), getCommentsPerUser (2 tests), getCommentsPerReview (2 tests), deleteComment (3 tests)
+  - ✅ **All 103 tests passing** (58 unit + 45 integration)
 - ⏳ **Step 4:** CommentController + OpenAPI documentation (PENDING)
 - ⏳ **Step 5:** Integration tests (CommentControllerIT) (PENDING)
 - ⏳ **Step 6:** Documentation updates (README.md) (PENDING)
 
-**Next User Action:** Complete remaining 3 methods in CommentServiceImpl, then continue with Step 3.
+**Next Steps:** Continue with Step 4 (CommentController + OpenAPI documentation) in next session.
 
 ---
 
