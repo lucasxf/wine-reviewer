@@ -76,6 +76,7 @@ wine-reviewer/
   - Release: Manual workflow dispatch with semantic versioning input
 - Caching for dependencies (Maven, Flutter pub)
 - Run tests before build/deploy steps
+- **Branch Separation:** When creating tooling/infrastructure changes (commands, agents, configs) during an active feature branch session, create a separate feature branch for those changes. Keep feature branches focused on single concerns to avoid PR pollution and maintain clean git history. *(Added 2025-10-31)*
 
 ### Docker
 - Multi-stage builds for smaller images
