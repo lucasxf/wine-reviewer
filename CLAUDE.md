@@ -97,6 +97,18 @@ docker compose down -v
 - **Mobile Pipeline:** Triggers on changes to `apps/mobile/**` or `.github/workflows/ci-app.yml`
 - **Release:** Manual workflow dispatch with semantic versioning input
 
+## Custom Slash Commands
+
+This project includes custom slash commands for streamlined workflows:
+
+**Session Management:**
+- `/start-session [context]` - Load project context to begin session
+- `/resume-session [context-file]` - Resume with saved context from `prompts/responses/`
+- `/save-response [filename]` - Save Claude's response to `prompts/responses/` for later retrieval
+- `/finish-session [context]` - Run tests, update docs, create commit
+
+Commands are located in `.claude/commands/`. See individual command files for detailed usage.
+
 ## Architecture & Design
 
 ### Monorepo Structure
