@@ -251,4 +251,46 @@ public class CommentController {
         return ResponseEntity.ok(commentsPerReview);
     }
 
+    /**
+     * Exclui um comentário existente.
+     *
+     * @param commentId ID do comentário a ser excluído
+     * @param authentication contexto de autenticação Spring Security
+     * @return status 204 No Content se excluído com sucesso
+     */
+    @Operation(
+            summary = "Excluir comentário",
+            description = "Remove um comentário existente. Apenas o autor do comentário pode excluí-lo."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Comentário excluído com sucesso"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Token de autenticação inválido ou expirado"
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "Acesso negado - usuário não é o autor do comentário"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Comentário não encontrado"
+            )
+    })
+    @DeleteMapping("/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @Parameter(description = "ID do comentário a ser excluído", required = true)
+            @PathVariable UUID commentId,
+            Authentication authentication) {
+        final var userId = UUID.fromString(authentication.getName());
+        log.info("Received request to delete comment {} by user {}", commentId, userId);
+
+        commentService.deleteComment(commentId, userId);
+        log.info("Successfully deleted comment {}", commentId);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -394,6 +394,70 @@ class CommentControllerIT extends AbstractIntegrationTest {
     }
 
     // =========================================================================
+    // DELETE /comments/{commentId} - Delete Comment
+    // =========================================================================
+
+    @Test
+    void shouldDeleteCommentWhenUserIsAuthor() throws Exception {
+        // Given - create a comment
+        final var comment = createTestComment(testReview, testUser, "Comentário a ser deletado");
+        final var commentId = comment.getId();
+
+        // When & Then - delete comment
+        mockMvc.perform(delete("/comments/{commentId}", commentId)
+                        .with(authenticated(testUser.getId())))
+                .andDo(print())
+                .andExpect(status().isNoContent());
+
+        // Verify comment was deleted from database
+        assertThat(commentRepository.findById(commentId)).isEmpty();
+    }
+
+    @Test
+    void shouldReturnForbiddenWhenDeletingCommentFromAnotherUser() throws Exception {
+        // Given - comment created by testUser, but anotherUser tries to delete
+        final var comment = createTestComment(testReview, testUser, "Comentário do João");
+        final var commentId = comment.getId();
+
+        // When & Then - anotherUser cannot delete testUser's comment
+        mockMvc.perform(delete("/comments/{commentId}", commentId)
+                        .with(authenticated(anotherUser.getId())))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+
+        // Verify comment was NOT deleted
+        assertThat(commentRepository.findById(commentId)).isPresent();
+        final var unchangedComment = commentRepository.findById(commentId).orElseThrow();
+        assertThat(unchangedComment.getContent()).isEqualTo("Comentário do João");
+    }
+
+    @Test
+    void shouldReturnNotFoundWhenDeletingNonExistentComment() throws Exception {
+        // Given - non-existent comment ID
+        final var nonExistentId = UUID.randomUUID();
+
+        // When & Then
+        mockMvc.perform(delete("/comments/{commentId}", nonExistentId)
+                        .with(authenticated(testUser.getId())))
+                .andDo(print())
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldReturnForbiddenWhenDeletingWithoutAuthentication() throws Exception {
+        // Given - create a comment
+        final var comment = createTestComment(testReview, testUser, "Comentário sem autenticação");
+
+        // When & Then - NO authentication provided
+        mockMvc.perform(delete("/comments/{commentId}", comment.getId()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+
+        // Verify comment was NOT deleted
+        assertThat(commentRepository.findById(comment.getId())).isPresent();
+    }
+
+    // =========================================================================
     // Database Constraints Tests
     // =========================================================================
 
