@@ -22,6 +22,6 @@ public interface CommentRepository extends JpaRepository<Comment, UUID> {
     List<Comment> findByAuthorOrderByCreatedAtDesc(User author);
 
     @Query("SELECT COUNT(c) FROM Comment c JOIN c.review r WHERE r.id = :reviewId")
-    long countCommentByReview(String reviewId);
+    long countCommentByReview(UUID reviewId);
 
 }

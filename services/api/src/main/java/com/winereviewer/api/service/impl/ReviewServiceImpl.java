@@ -203,9 +203,9 @@ public class ReviewServiceImpl implements ReviewService {
             Review review,
             UserSummaryResponse author,
             WineSummaryResponse wine) {
-        final var reviewId = review.getId().toString();
+        final var reviewId = review.getId();
         return new ReviewResponse(
-                reviewId,
+                reviewId.toString(),
                 review.getRating(),
                 review.getNotes(),
                 review.getImageUrl(),

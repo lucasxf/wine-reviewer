@@ -68,7 +68,8 @@ class ReviewServiceTest {
 
         // Mock comment count (default to 0, tests can override if needed)
         // Using lenient() because not all tests will use this mock
-        lenient().when(commentRepository.countCommentByReview(any(String.class))).thenReturn(0L);
+        lenient().when(commentRepository.countCommentByReview(any(UUID.class)))
+                .thenReturn(0L);
     }
 
     @Test
