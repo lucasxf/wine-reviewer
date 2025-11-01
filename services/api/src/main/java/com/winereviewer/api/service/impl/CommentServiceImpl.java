@@ -156,10 +156,12 @@ public class CommentServiceImpl implements CommentService {
     }
 
     private Page<CommentResponse> toPageResponse(List<Comment> comments, UserSummaryResponse author) {
-        final Pageable pageable = Pageable.ofSize(comments.size());
         final var commentsResponse = comments.stream()
                 .map(c -> getResponse(c, author))
                 .toList();
+
+        // Use unpaged() for empty lists to avoid IllegalArgumentException from ofSize(0)
+        final Pageable pageable = comments.isEmpty() ? Pageable.unpaged() : Pageable.ofSize(comments.size());
 
         return new PageImpl<>(commentsResponse, pageable, comments.size());
     }

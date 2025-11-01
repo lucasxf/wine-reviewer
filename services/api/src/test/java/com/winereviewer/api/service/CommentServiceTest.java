@@ -246,6 +246,28 @@ class CommentServiceTest {
     }
 
     @Test
+    void givenGetCommentsPerUser_whenNoComments_thenReturnEmptyPage() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        user = getUser(userId);
+        final List<Comment> emptyComments = List.of();
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(commentRepository.findByAuthorOrderByCreatedAtDesc(user)).thenReturn(emptyComments);
+
+        // when
+        final Page<CommentResponse> responsePage = commentService.getCommentsPerUser(userId, pageable);
+
+        // then
+        assertFalse(responsePage.hasContent());
+        assertEquals(0, responsePage.getContent().size());
+        assertEquals(0, responsePage.getTotalElements());
+
+        verify(userRepository, times(1)).findById(userId);
+        verify(commentRepository, times(1)).findByAuthorOrderByCreatedAtDesc(user);
+    }
+
+    @Test
     void givenGetCommentsPerReview_whenGetComments_thenReturnComments() {
         // given
         Pageable pageable = PageRequest.of(0, 10);
@@ -289,6 +311,29 @@ class CommentServiceTest {
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(commentRepository, never()).findByReviewOrderByCreatedAtAsc(review);
+    }
+
+    @Test
+    void givenGetCommentsPerReview_whenNoComments_thenReturnEmptyPage() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        user = getUser(userId);
+        review = getReview(reviewId, user);
+        final List<Comment> emptyComments = List.of();
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(commentRepository.findByReviewOrderByCreatedAtAsc(review)).thenReturn(emptyComments);
+
+        // when
+        final Page<CommentResponse> responsePage = commentService.getCommentsPerReview(reviewId, pageable);
+
+        // then
+        assertFalse(responsePage.hasContent());
+        assertEquals(0, responsePage.getContent().size());
+        assertEquals(0, responsePage.getTotalElements());
+
+        verify(reviewRepository, times(1)).findById(reviewId);
+        verify(commentRepository, times(1)).findByReviewOrderByCreatedAtAsc(review);
     }
 
     @Test
