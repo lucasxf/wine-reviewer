@@ -36,8 +36,10 @@ echo "Current branch: $CURRENT_BRANCH"
 
 **Check which base branch to target:**
 ```bash
-# Default to 'develop' if it exists, otherwise 'main'
+# Default to 'develop' if it exists locally or remotely, otherwise 'main'
 if git show-ref --verify --quiet refs/heads/develop; then
+  BASE_BRANCH="develop"
+elif git show-ref --verify --quiet refs/remotes/origin/develop; then
   BASE_BRANCH="develop"
 else
   BASE_BRANCH="main"
