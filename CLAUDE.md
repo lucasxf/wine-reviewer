@@ -147,7 +147,7 @@ wine-reviewer/
   - Release: Manual workflow dispatch with semantic versioning input
 - Caching for dependencies (Maven, Flutter pub)
 - Run tests before build/deploy steps
-- **Branch Separation:** When creating tooling/infrastructure changes (commands, agents, configs) during an active feature branch session, create a separate feature branch for those changes. Keep feature branches focused on single concerns to avoid PR pollution and maintain clean git history. *(Added 2025-10-31)*
+- **Branch Separation:** When creating tooling/infrastructure changes (commands, agents, configs) during an active feature branch session, **always checkout from `develop`** (not from current feature branch) to create a clean automation branch. This prevents inheriting unrelated commits and avoids PR pollution. Keep feature branches focused on single concerns to maintain clean git history. *(Added 2025-10-31, updated 2025-10-31)*
 - **PR Target Branch:** Always target `develop` branch for pull requests unless explicitly stated otherwise. The `main` branch is reserved for production releases. Feature branches should merge to `develop` for integration and testing before eventual promotion to `main`. *(Added 2025-10-31)*
 
 ### Docker
