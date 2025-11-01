@@ -86,7 +86,7 @@ PR_TITLE="feat: $FEATURE_NAME"
 **Auto-generate description from commit history:**
 ```bash
 # Get commits unique to this branch (not in base branch)
-git log $BASE_BRANCH..HEAD --oneline --pretty=format:"- %s" > /tmp/pr_commits.txt
+git log $BASE_BRANCH..HEAD --pretty=format:"- %s" > /tmp/pr_commits.txt
 
 # Show preview
 echo "Commits in this branch:"
@@ -103,7 +103,7 @@ fi
 [Brief description of what this feature implements]
 
 ## Changes
-$(cat /tmp/pr_commits.txt)
+$(if [[ -s /tmp/pr_commits.txt ]]; then cat /tmp/pr_commits.txt; else echo "(No commit messages found or failed to generate commit list.)"; fi)
 
 ## Testing
 - [ ] Unit tests passing (backend: 103 tests)
