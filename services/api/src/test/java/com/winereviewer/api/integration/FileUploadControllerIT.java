@@ -2,13 +2,11 @@ package com.winereviewer.api.integration;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.http.SdkHttpResponse;
-import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 
@@ -42,9 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @DisplayName("FileUploadController - Integration Tests")
 class FileUploadControllerIT extends AbstractIntegrationTest {
-
-    @MockBean
-    private S3Client s3Client; // Mock S3Client to avoid real AWS calls
 
     @Test
     @DisplayName("POST /files/upload - Should upload valid JPEG file (200 OK)")

@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-29 (Session 12 - Authentication UI Integration Completed)
+**Last updated:** 2025-11-01 (Session 16 - Comment System Complete - All 6 Steps)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -148,11 +148,66 @@ This file tracks the current implementation status and next steps for the Wine R
 - Automated documentation updates (`/finish-session` delegates to tech-writer and automation-sentinel)
 - Health monitoring with automation metrics and recommendations
 
+**Context Management Commands:** - ✅ NEW (2025-10-31)
+- `/save-response [filename]` - Save Claude's responses to `prompts/responses/` for later retrieval
+  - Auto-generated filenames with dates if not provided
+  - Extracts only structured content (plans, specs), no conversational fluff
+  - 191 lines with comprehensive workflow documentation
+- `/resume-session [filename]` - Enhanced to handle no arguments (lists and selects files)
+  - Interactive file selection when no arguments provided
+  - Shows filenames, dates, and first line preview
+  - Options: auto-load latest, select by number, type manually, or skip
+  - 94 lines with smart context loading
+- `.claude/settings.json` - Auto-approval for `prompts/responses/*.md` files (no permission prompts)
+- `prompts/responses/INDEX.md` - Optional catalog of saved responses with dates
+- **Branch Separation Directive** added to CLAUDE.md: Always create separate feature branches for tooling changes during active feature work
+
+---
+
+## ✅ Implemented (Recent Additions)
+
+### 💬 Comment System (Backend) - ✅ COMPLETE (2025-11-01)
+
+**Status:** Complete - All 6 steps finished
+
+**Implementation Summary:**
+- ✅ **Step 1:** Comment entity + repository + migration (COMPLETE)
+  - `Comment.java` with JPA lifecycle callbacks
+  - `CommentRepository.java` with custom query methods
+  - Flyway migration V3 (cascade delete on review deletion)
+- ✅ **Step 2:** DTOs + Service implementation (COMPLETE)
+  - `CreateCommentRequest.java`, `UpdateCommentRequest.java`, `CommentResponse.java`
+  - `CommentService.java` interface (5 methods)
+  - `CommentServiceImpl.java` - ALL 5 methods implemented
+- ✅ **Step 3:** CommentService unit tests (COMPLETE)
+  - `CommentServiceTest.java` with 13 test methods covering all business logic
+- ✅ **Step 4:** CommentController + OpenAPI documentation (COMPLETE)
+  - `CommentController.java` with 5 REST endpoints (POST, PUT, GET, GET/{reviewId}, DELETE)
+  - Comprehensive OpenAPI/Swagger annotations
+  - All HTTP status codes documented (200, 201, 204, 400, 401, 403, 404)
+- ✅ **Step 5:** Integration tests (COMPLETE)
+  - `CommentControllerIT.java` with 19 comprehensive integration tests
+  - Full CRUD coverage with authentication, ownership, pagination, cascade delete
+- ✅ **Step 6:** Documentation + GlobalExceptionHandler verification (COMPLETE)
+  - README.md updated with all comment endpoints
+  - ROADMAP.md updated
+  - Verified GlobalExceptionHandler handles all comment exceptions polymorphically
+
+**API Endpoints:**
+- `POST /comments` - Create comment (201 Created)
+- `PUT /comments` - Update comment (200 OK, ownership required)
+- `GET /comments` - List user's comments (200 OK, paginated)
+- `GET /comments/{reviewId}` - List review's comments (200 OK, paginated)
+- `DELETE /comments/{commentId}` - Delete comment (204 No Content, ownership required)
+
+**Test Coverage:**
+- 135 tests total (71 unit + 64 integration) - 100% passing
+- CommentServiceTest: 13 unit tests
+- CommentControllerIT: 19 integration tests
+
 ---
 
 ## 🚧 In Progress
-
-- None currently
 
 ---
 
@@ -197,19 +252,6 @@ This file tracks the current implementation status and next steps for the Wine R
 
 ---
 
-### 3. 💬 Implement Comment System (Backend)
-
-**Goal:** Enable users to comment on wine reviews
-
-**Tasks:**
-- Complete CRUD endpoints for comments
-- Add OpenAPI/Swagger documentation
-- Create unit tests for comment service
-- Create integration tests for comment endpoints
-- Test cascade delete (comments deleted when review deleted)
-
----
-
 ## 📍 Future Backlog (Post-MVP)
 
 ### Observability
@@ -248,9 +290,9 @@ This file tracks the current implementation status and next steps for the Wine R
 
 | Metric | Value |
 |--------|-------|
-| **Backend Tests** | 103 (58 unit + 45 integration) ⬆️ |
+| **Backend Tests** | 135 (71 unit + 64 integration) ⬆️ |
 | **Test Pass Rate** | 100% ✅ |
-| **Backend Endpoints** | Review CRUD + Auth + File Upload |
+| **Backend Endpoints** | Review CRUD + Auth + File Upload + **Comment System (5 endpoints)** ⬆️ |
 | **Flutter Dependencies** | 10 configured (updated 2025-10-28) |
 | **Flutter Auth Components** | 18 files (models, services, providers, docs) |
 | **Flutter Screens** | 4 (splash, login, home, review details) |

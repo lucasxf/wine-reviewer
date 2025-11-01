@@ -7,6 +7,7 @@ import com.winereviewer.api.domain.User;
 import com.winereviewer.api.domain.Wine;
 import com.winereviewer.api.exception.ResourceNotFoundException;
 import com.winereviewer.api.exception.UnauthorizedAccessException;
+import com.winereviewer.api.repository.CommentRepository;
 import com.winereviewer.api.repository.ReviewRepository;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.repository.WineRepository;
@@ -43,6 +44,9 @@ class ReviewServiceTest {
     @Mock
     private WineRepository wineRepository;
 
+    @Mock
+    private CommentRepository commentRepository;
+
     @InjectMocks
     private ReviewServiceImpl reviewService;
 
@@ -61,6 +65,11 @@ class ReviewServiceTest {
         user = getUser(userId);
         wine = getWine(wineId);
         review = getReview(reviewId, user, wine);
+
+        // Mock comment count (default to 0, tests can override if needed)
+        // Using lenient() because not all tests will use this mock
+        lenient().when(commentRepository.countCommentByReview(any(UUID.class)))
+                .thenReturn(0L);
     }
 
     @Test

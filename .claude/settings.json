@@ -15,6 +15,16 @@
         "docker compose ps",
         "docker compose logs --tail=50"
       ]
+    },
+    "write": {
+      "autoApprove": [
+        "prompts/responses/*.md"
+      ]
+    },
+    "edit": {
+      "autoApprove": [
+        "prompts/responses/*.md"
+      ]
     }
   },
   "preferences": {

@@ -46,8 +46,79 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Storage: S3 Free Tier or Supabase Storage Free (pre-signed URLs)
   - Observability: Grafana Cloud Free or CloudWatch Free Tier
 
-## Monorepo Structure
+## Development Commands
 
+### Mobile App
+```bash
+cd apps/mobile
+
+# Install dependencies
+flutter pub get
+
+# Run app (select Android device)
+flutter run
+
+# Lint and analyze
+flutter analyze
+
+# Run tests with coverage
+flutter test --coverage
+
+# Format code
+dart format .
+```
+
+### Backend API
+```bash
+cd services/api
+
+# Run locally (requires local Postgres or use docker-compose)
+./mvnw spring-boot:run
+
+# Build and run tests
+./mvnw verify
+
+# Run tests only
+./mvnw -q -DskipTests=false verify
+
+# Access OpenAPI docs when running
+# http://localhost:8080/swagger-ui.html
+```
+
+### Infrastructure
+```bash
+cd infra
+
+# Start all services (Postgres + API)
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# Stop services and remove volumes
+docker compose down -v
+```
+
+### CI/CD
+- **API Pipeline:** Triggers on changes to `services/api/**` or `.github/workflows/ci-api.yml`
+- **Mobile Pipeline:** Triggers on changes to `apps/mobile/**` or `.github/workflows/ci-app.yml`
+- **Release:** Manual workflow dispatch with semantic versioning input
+
+## Custom Slash Commands
+
+This project includes custom slash commands for streamlined workflows:
+
+**Session Management:**
+- `/start-session [context]` - Load project context to begin session
+- `/resume-session [context-file]` - Resume with saved context from `prompts/responses/`
+- `/save-response [filename]` - Save Claude's response to `prompts/responses/` for later retrieval
+- `/finish-session [context]` - Run tests, update docs, create commit
+
+Commands are located in `.claude/commands/`. See individual command files for detailed usage.
+
+## Architecture & Design
+
+### Monorepo Structure
 ```
 wine-reviewer/
 ├── apps/mobile/          # Flutter mobile app
@@ -70,12 +141,18 @@ wine-reviewer/
 - **Auto-add new commands to JSON config files** - When creating new slash commands or custom commands, automatically add them to the appropriate JSON configuration files (e.g., `.claude/commands.json`, VSCode settings, etc.) without requiring explicit user request. This ensures commands are immediately available for use. *(Added 2025-10-22)*
 
 ### Git & CI/CD
+- **Git Flow - Branch Strategy:** *(Added 2025-11-01)*
+  - **Feature branches** → `develop` branch (ALL feature PRs target develop by default)
+  - **Develop branch** → `main` branch (ONLY develop can PR to main)
+  - **Exception:** Hotfixes or emergency patches may skip develop if explicitly declared
+  - **Rationale:** Maintain stable main branch, all integration happens in develop first
 - **CI/CD Pipelines:** Path filters to avoid unnecessary runs
   - API Pipeline: Triggers on `services/api/**` or `.github/workflows/ci-api.yml`
   - Mobile Pipeline: Triggers on `apps/mobile/**` or `.github/workflows/ci-app.yml`
   - Release: Manual workflow dispatch with semantic versioning input
 - Caching for dependencies (Maven, Flutter pub)
 - Run tests before build/deploy steps
+- **Branch Separation:** When creating tooling/infrastructure changes (commands, agents, configs) during an active feature branch session, create a separate feature branch for those changes. Keep feature branches focused on single concerns to avoid PR pollution and maintain clean git history. *(Added 2025-10-31)*
 
 ### Docker
 - Multi-stage builds for smaller images

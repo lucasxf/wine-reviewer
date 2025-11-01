@@ -6,6 +6,136 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## Session 2025-10-31 (Session 14): Context Management Commands + Git Branch Separation
+
+**Session Goal:** Create efficient context loading/saving system (`/save-response`, enhanced `/resume-session`) and learn proper git branch separation for tooling changes during feature work
+
+### 🐳 Infrastructure
+
+**Context:** User wanted to solve the problem of efficiently loading context from previous sessions without loading excessive text or manually asking "do you remember...". User proposed creating `/save-response` and enhancing `/resume-session` commands with auto-approval for `prompts/responses/` files.
+
+**What Was Done:**
+
+1. **Created `/save-response` Command (191 lines)**
+   - **Purpose:** Save Claude's immediate response (plans, specifications) to reusable context files
+   - **Key features:**
+     - Auto-generated filenames with dates if not provided (e.g., `{feature-name}-{action}-{YYYY-MM-DD}.md`)
+     - Extracts only structured content (plans, specs), no conversational fluff
+     - Supports optional manual filename via `$ARGUMENTS`
+     - Updates `prompts/responses/INDEX.md` catalog automatically
+   - **File location:** `.claude/commands/save-response.md`
+
+2. **Enhanced `/resume-session` Command (94 lines)**
+   - **New capability:** Handles no arguments (lists and selects files interactively)
+   - **Interactive workflow when `$ARGUMENTS` empty:**
+     1. List all files in `prompts/responses/` (sorted by modification date, newest first)
+     2. Show each file with: filename, date, and first line preview
+     3. Offer options:
+        - Auto-load latest file (most recent by modification date)
+        - Select by number from list
+        - Type filename manually
+        - Skip and continue without specific context
+   - **Backward compatible:** Still supports direct filename argument
+   - **File location:** `.claude/commands/resume-session.md`
+
+3. **Auto-approval Configuration**
+   - **Modified:** `.claude/settings.json`
+   - **Added:** Write and Edit tool auto-approval for `prompts/responses/*.md` files
+   - **Benefit:** No permission prompts when saving/editing context files (frictionless workflow)
+
+4. **Context Catalog Created**
+   - **File:** `prompts/responses/INDEX.md` (26 lines)
+   - **Purpose:** Optional catalog of saved responses with dates and descriptions
+   - **Auto-updated:** By `/save-response` command when saving new contexts
+
+5. **Critical Git Workflow Error & Fix**
+   - **Problem:** Committed tooling changes (`/save-response`, `/resume-session`) to `feature/comment-system` branch instead of creating separate feature branch
+   - **User feedback:** "did you create a new branch to commit this directive?" → Explicitly asked to fix with "Option A" (proper branch separation)
+   - **Fix executed:**
+     1. `git reset HEAD~1` - Reverted commit (kept changes unstaged)
+     2. `git stash push` - Stashed workflow changes
+     3. `git checkout main` - Switched to main branch
+     4. `git checkout -b feat/save-response-command` - Created proper feature branch
+     5. `git stash apply` - Applied workflow changes
+     6. Resolved CLAUDE.md merge conflict (kept main version, manually added commands section)
+     7. `git commit` - Committed to proper branch with message "feat: Add /save-response command and enhance /resume-session with interactive file selection"
+     8. `git merge feat/save-response-command` - Merged to main (fast-forward)
+     9. `git checkout feature/comment-system` - Returned to original branch
+   - **Files involved:** `.claude/settings.local.json` was blocking branch switch (untracked) - temporarily renamed instead of deleting (user said "stash it. That file is important")
+
+6. **Git Branch Separation Directive Added**
+   - **Action:** User ran `/directive` to add rule to CLAUDE.md
+   - **Directive:** "ALWAYS create a new git feature branch whenever creating new commands during a session that already has feature/context-specific staged files"
+   - **Commit decision:** Committed on `feature/comment-system` branch (documentation change, not functional tooling)
+   - **Rationale:** Documentation updates can be committed on active feature branch since they're contextually related and not functional changes that pollute PRs
+
+### ☕ Backend
+
+**Context:** Continued work on Comment System (Step 2-3 of 6-step plan).
+
+**What Was Done:**
+
+1. **Completed CommentServiceImpl (All 5 methods)**
+   - ✅ `addComment()` - Create comment with validation
+   - ✅ `updateComment()` - Update comment with authorization check
+   - ✅ `getCommentsPerUser()` - Paginated comments by user (desc order)
+   - ✅ `getCommentsPerReview()` - Paginated comments by review (asc order)
+   - ✅ `deleteComment()` - Delete comment with authorization check
+
+2. **Completed CommentServiceTest (9 test methods)**
+   - **addComment:** 3 tests (success, review not found, user not found)
+   - **updateComment:** 3 tests (success, comment not found, unauthorized user)
+   - **getCommentsPerUser:** 2 tests (success, user not found)
+   - **getCommentsPerReview:** 2 tests (success, review not found)
+   - **deleteComment:** 3 tests (success, comment not found, unauthorized user)
+   - **All 103 tests passing** (58 unit + 45 integration)
+
+**Key Insights:**
+
+**1. Context Management Pattern: Save Narrow, Specific Context (Not Entire Conversations)**
+- **Problem:** Loading entire conversation history wastes tokens, asking "do you remember..." requires manual prompting
+- **Solution:** Save only structured content (plans, specifications) to `prompts/responses/` files
+- **Why effective:** Token-efficient (loads 100-500 lines instead of 10k+ lines), no manual prompting required
+- **Pattern:** Use `/save-response` immediately after receiving important plans/specs, then use `/resume-session` in next session
+- **Example:** Saved backend comment system plan (6-step implementation) → Loaded in next session without re-explaining
+
+**2. Git Branch Separation: Tooling vs Feature Work (Clean PR Strategy)**
+- **Problem:** Committing tooling changes (commands, agents, configs) on feature branches pollutes PRs and mixes concerns
+- **Solution:** Create separate feature branch for tooling changes even during active feature work
+- **Workflow:**
+  1. Working on `feature/comment-system`
+  2. Need to create `/save-response` command
+  3. Stash feature work
+  4. Create `feat/save-response-command` branch from main
+  5. Commit tooling changes
+  6. Merge to main
+  7. Return to `feature/comment-system`
+- **Why important:** Keeps feature PRs focused (single concern), maintains clean git history, easier code review
+- **Exception:** Documentation updates (directives, learnings) can be committed on active feature branch (contextually related)
+
+**3. Auto-approval Configuration: Reduce Friction for Routine Operations**
+- **Pattern:** Use `.claude/settings.json` to auto-approve file operations in specific directories
+- **Example:** Auto-approve Write/Edit for `prompts/responses/*.md` files
+- **Why effective:** Saves 1-2 permission prompts per file operation (5-10 prompts per session)
+- **Safety:** Still protected by path restriction (`prompts/responses/` only, not entire repo)
+- **Trade-off:** Less explicit control, but much faster workflow for known-safe operations
+
+**4. Stash Management: Preserve Important Files During Branch Operations**
+- **Problem:** `.claude/settings.local.json` (untracked) was blocking branch switch
+- **Initial mistake:** Tried to `rm` the file
+- **User correction:** "stash it. That file is important"
+- **Solution:** Temporarily rename file, switch branch, restore file
+- **Lesson:** Always ask about untracked files before deleting (may be important local configuration)
+- **Alternative pattern:** Add important local files to `.gitignore` + document in README
+
+**5. Command Delegation Pattern: Commands Call Agents (Never Reverse)**
+- **Architecture rule:** Commands ✅ CAN call Agents, Agents ❌ MUST NEVER call Commands
+- **Why:** Prevents cyclic loops (command → agent → command → infinite recursion)
+- **Example:** `/finish-session` calls tech-writer agent (correct), tech-writer calling `/finish-session` would be cyclic (wrong)
+- **Applied in this session:** `/save-response` and `/resume-session` are entry points (commands), not agent responsibilities
+
+---
+
 ## Session 2025-10-29 (Session 11): Custom Agent Suite Expansion - tech-writer & automation-sentinel
 
 **Session Goal:** Create documentation agent (tech-writer) and meta-agent for automation lifecycle management (automation-sentinel) based on improvement ideas in agents/README.md

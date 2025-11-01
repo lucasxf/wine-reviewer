@@ -13,6 +13,5 @@ public record CommentResponse(
         String text,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        UserSummaryResponse author
-) {
+        UserSummaryResponse author) {
 }
