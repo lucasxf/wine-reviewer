@@ -87,12 +87,15 @@ PR_TITLE="feat: $FEATURE_NAME"
 
 **Auto-generate description from commit history:**
 ```bash
+# Remove any existing file to avoid stale data
+rm -f /tmp/pr_commits.txt
+
 # Get commits unique to this branch (not in base branch)
 git log $BASE_BRANCH..HEAD --pretty=format:"- %s" > /tmp/pr_commits.txt
 
 # Show preview
 echo "Commits in this branch:"
-if [[ -f /tmp/pr_commits.txt ]]; then
+if [[ -f /tmp/pr_commits.txt && -s /tmp/pr_commits.txt ]]; then
   cat /tmp/pr_commits.txt
 else
   echo "(No commit messages found or failed to generate commit list.)"
