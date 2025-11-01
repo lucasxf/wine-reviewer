@@ -242,7 +242,6 @@ public class CommentController {
             Authentication authentication,
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.ASC)
             Pageable pageable) {
-        final var userId = UUID.fromString(authentication.getName());
         log.info("Received request to get all comments for review {}", reviewId);
 
         final Page<CommentResponse> commentsPerReview =

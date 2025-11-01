@@ -120,7 +120,7 @@ public class CommentServiceImpl implements CommentService {
         final Page<Comment> commentsPage =
                 commentRepository.findByReviewOrderByCreatedAtAsc(review, pagination);
 
-        log.info("Carregados comentários da avaliação {}", review);
+        log.info("Carregados comentários da avaliação {}", review.getId());
 
         return commentsPage.map(c -> getResponse(c, getAuthor(c.getAuthor())));
     }
