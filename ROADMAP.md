@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-31 (Session 14 - Context Management Commands + Comment System WIP)
+**Last updated:** 2025-11-01 (Session 15 - Comment System Steps 3-4 Complete)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -168,7 +168,7 @@ This file tracks the current implementation status and next steps for the Wine R
 
 ### 💬 Implement Comment System (Backend) - 🚧 PARTIAL
 
-**Status:** In Progress (Step 2 of 6 - Service Layer PARTIAL)
+**Status:** In Progress (Step 4 of 6 - Controller & Integration Tests COMPLETE)
 
 **Progress Breakdown:**
 - ✅ **Step 1:** Comment entity + repository + migration (COMPLETE)
@@ -188,12 +188,23 @@ This file tracks the current implementation status and next steps for the Wine R
 - ✅ **Step 3:** CommentService unit tests (COMPLETE - 2025-10-31)
   - ✅ `CommentServiceTest.java` with 9 test methods covering all business logic
   - ✅ Tests for: addComment (3 tests), updateComment (3 tests), getCommentsPerUser (2 tests), getCommentsPerReview (2 tests), deleteComment (3 tests)
-  - ✅ **All 103 tests passing** (58 unit + 45 integration)
-- ⏳ **Step 4:** CommentController + OpenAPI documentation (PENDING)
-- ⏳ **Step 5:** Integration tests (CommentControllerIT) (PENDING)
+- ✅ **Step 4:** CommentController + OpenAPI documentation (COMPLETE - 2025-11-01)
+  - ✅ `CommentController.java` with 4 REST endpoints (POST, PUT, GET, GET/{reviewId})
+  - ✅ Comprehensive OpenAPI/Swagger annotations (@Tag, @Operation, @ApiResponses, @Parameter)
+  - ✅ All HTTP status codes documented (200, 201, 400, 401, 403, 404)
+  - ✅ Javadoc added to all layers (Controller, Service, ServiceImpl, Repository)
+- ✅ **Step 5:** Integration tests (CommentControllerIT) (COMPLETE - 2025-11-01)
+  - ✅ `CommentControllerIT.java` with 15 comprehensive integration tests
+  - ✅ POST /comments tests (5 tests) - Create, validation, error scenarios
+  - ✅ PUT /comments tests (4 tests) - Update, ownership validation, errors
+  - ✅ GET /comments tests (2 tests) - List by user, pagination
+  - ✅ GET /comments/{reviewId} tests (3 tests) - List by review, pagination, 404
+  - ✅ Database constraints test (1 test) - Cascade delete on review deletion
+  - ✅ **Critical bugs fixed:** Pagination (List → Page), cascade delete (EntityManager.clear()), unit test mocks
+  - ✅ **All 131 tests passing** (71 unit + 60 integration)
 - ⏳ **Step 6:** Documentation updates (README.md) (PENDING)
 
-**Next Steps:** Continue with Step 4 (CommentController + OpenAPI documentation) in next session.
+**Next Steps:** Continue with Step 6 (README.md updates) and consider Step 5 (DELETE /comments/{id} endpoint) for full CRUD.
 
 ---
 
@@ -276,7 +287,7 @@ This file tracks the current implementation status and next steps for the Wine R
 
 | Metric | Value |
 |--------|-------|
-| **Backend Tests** | 103 (58 unit + 45 integration) ⬆️ |
+| **Backend Tests** | 131 (71 unit + 60 integration) ⬆️ |
 | **Test Pass Rate** | 100% ✅ |
 | **Backend Endpoints** | Review CRUD + Auth + File Upload |
 | **Flutter Dependencies** | 10 configured (updated 2025-10-28) |

@@ -2,12 +2,12 @@ package com.winereviewer.api.integration;
 
 import com.winereviewer.api.application.dto.request.CreateReviewRequest;
 import com.winereviewer.api.application.dto.request.UpdateReviewRequest;
+import com.winereviewer.api.domain.Review;
 import com.winereviewer.api.domain.User;
 import com.winereviewer.api.domain.Wine;
-import com.winereviewer.api.domain.Review;
+import com.winereviewer.api.repository.ReviewRepository;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.repository.WineRepository;
-import com.winereviewer.api.repository.ReviewRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -68,6 +68,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     void setupTestData() {
         // Create test user
         testUser = new User();
+        testUser.setId(UUID.randomUUID());
         testUser.setDisplayName("João Silva");
         testUser.setEmail("joao.silva@example.com");
         testUser.setGoogleId("google-id-123");

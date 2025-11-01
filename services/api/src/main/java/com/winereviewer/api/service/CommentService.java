@@ -18,9 +18,9 @@ public interface CommentService {
 
     CommentResponse updateComment(UpdateCommentRequest request, UUID userId);
 
-    Page<CommentResponse> getCommentsPerUser(UUID userId, Pageable pageable);
+    Page<CommentResponse> getCommentsPerUser(UUID userId, Pageable pagination);
 
-    Page<CommentResponse> getCommentsPerReview(UUID reviewId, Pageable pageable);
+    Page<CommentResponse> getCommentsPerReview(UUID reviewId, Pageable pagination);
 
     void deleteComment(UUID commentId, UUID userId);
 
