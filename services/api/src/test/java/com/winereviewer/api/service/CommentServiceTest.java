@@ -292,6 +292,45 @@ class CommentServiceTest {
     }
 
     @Test
+    void givenGetCommentsPerReview_whenMultipleAuthors_thenReturnCommentsWithCorrectAuthors() {
+        // given
+        Pageable pageable = PageRequest.of(0, 10);
+        final UUID reviewOwnerId = UUID.randomUUID();
+        final UUID commenter1Id = UUID.randomUUID();
+        final UUID commenter2Id = UUID.randomUUID();
+        
+        final User reviewOwner = getUser(reviewOwnerId);
+        final User commenter1 = getUser(commenter1Id);
+        final User commenter2 = getUser(commenter2Id);
+        
+        review = getReview(reviewId, reviewOwner);
+        
+        final Comment comment1 = getComment(UUID.randomUUID(), review, commenter1);
+        final Comment comment2 = getComment(UUID.randomUUID(), review, commenter2);
+        final Comment comment3 = getComment(UUID.randomUUID(), review, reviewOwner);
+        
+        final List<Comment> comments = List.of(comment1, comment2, comment3);
+
+        when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+        when(commentRepository.findByReviewOrderByCreatedAtAsc(review)).thenReturn(comments);
+
+        // when
+        final Page<CommentResponse> responsePage = commentService.getCommentsPerReview(reviewId, pageable);
+
+        // then
+        assertTrue(responsePage.hasContent());
+        assertEquals(3, responsePage.getContent().size());
+        
+        // Verify each comment has the correct author
+        assertEquals(commenter1Id.toString(), responsePage.getContent().get(0).author().id());
+        assertEquals(commenter2Id.toString(), responsePage.getContent().get(1).author().id());
+        assertEquals(reviewOwnerId.toString(), responsePage.getContent().get(2).author().id());
+
+        verify(reviewRepository, times(1)).findById(reviewId);
+        verify(commentRepository, times(1)).findByReviewOrderByCreatedAtAsc(review);
+    }
+
+    @Test
     void givenDeleteComment_whenDeleteComment_thenDeleteComment() {
         // given
         user = getUser(userId);

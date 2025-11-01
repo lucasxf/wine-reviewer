@@ -96,11 +96,9 @@ public class CommentServiceImpl implements CommentService {
         final List<Comment> commentsPerAuthor =
                 commentRepository.findByAuthorOrderByCreatedAtDesc(user);
 
-        final var author = getAuthor(user);
+        log.info("Carregados comentários do usuário {}", userId);
 
-        log.info("Carregados comentários do usuário {}", author);
-
-        return toPageResponse(commentsPerAuthor, author);
+        return toPageResponse(commentsPerAuthor);
     }
 
     @Override
@@ -110,11 +108,9 @@ public class CommentServiceImpl implements CommentService {
         final List<Comment> commentsPerReview =
                 commentRepository.findByReviewOrderByCreatedAtAsc(review);
 
-        final var author = getAuthor(review.getUser());
+        log.info("Carregados comentários da avaliação {}", reviewId);
 
-        log.info("Carregados comentários da avaliação {}", review);
-
-        return toPageResponse(commentsPerReview, author);
+        return toPageResponse(commentsPerReview);
     }
 
     @Override
@@ -155,10 +151,13 @@ public class CommentServiceImpl implements CommentService {
                 author);
     }
 
-    private Page<CommentResponse> toPageResponse(List<Comment> comments, UserSummaryResponse author) {
+    private Page<CommentResponse> toPageResponse(List<Comment> comments) {
         final Pageable pageable = Pageable.ofSize(comments.size());
         final var commentsResponse = comments.stream()
-                .map(c -> getResponse(c, author))
+                .map(c -> {
+                    final var author = getAuthor(c.getAuthor());
+                    return getResponse(c, author);
+                })
                 .toList();
 
         return new PageImpl<>(commentsResponse, pageable, comments.size());
