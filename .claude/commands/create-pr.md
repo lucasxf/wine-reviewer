@@ -77,7 +77,7 @@ fi
 **Auto-generate title from branch name:**
 ```bash
 # Extract feature name from branch (e.g., feature/comment-system → Comment System)
-FEATURE_NAME=$(echo "$CURRENT_BRANCH" | sed 's|feature/||' | sed 's|-| |g' | sed 's/\b\w/\u&/g')
+FEATURE_NAME=$(echo "$CURRENT_BRANCH" | sed 's|feature/||' | sed 's|-| |g' | awk '{for(i=1;i<=NF;i++){$i=toupper(substr($i,1,1)) substr($i,2)}}1')
 
 # Default title format
 PR_TITLE="feat: $FEATURE_NAME"
@@ -90,7 +90,11 @@ git log $BASE_BRANCH..HEAD --oneline --pretty=format:"- %s" > /tmp/pr_commits.tx
 
 # Show preview
 echo "Commits in this branch:"
-cat /tmp/pr_commits.txt
+if [[ -f /tmp/pr_commits.txt ]]; then
+  cat /tmp/pr_commits.txt
+else
+  echo "(No commit messages found or failed to generate commit list.)"
+fi
 ```
 
 **Create description template:**
