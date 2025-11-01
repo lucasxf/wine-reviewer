@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-11-01 (Session 15 - Comment System Steps 3-4 Complete)
+**Last updated:** 2025-11-01 (Session 16 - Comment System Complete - All 6 Steps)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -164,47 +164,50 @@ This file tracks the current implementation status and next steps for the Wine R
 
 ---
 
-## 🚧 In Progress
+## ✅ Implemented (Recent Additions)
 
-### 💬 Implement Comment System (Backend) - 🚧 PARTIAL
+### 💬 Comment System (Backend) - ✅ COMPLETE (2025-11-01)
 
-**Status:** In Progress (Step 4 of 6 - Controller & Integration Tests COMPLETE)
+**Status:** Complete - All 6 steps finished
 
-**Progress Breakdown:**
+**Implementation Summary:**
 - ✅ **Step 1:** Comment entity + repository + migration (COMPLETE)
   - `Comment.java` with JPA lifecycle callbacks
   - `CommentRepository.java` with custom query methods
   - Flyway migration V3 (cascade delete on review deletion)
-- ✅ **Step 2:** DTOs + Service implementation (COMPLETE - 2025-10-31)
-  - ✅ `CreateCommentRequest.java`, `UpdateCommentRequest.java`, `CommentResponse.java`
-  - ✅ `CommentService.java` interface (5 methods)
-  - ✅ `CommentServiceImpl.java` - ALL 5 methods implemented:
-    - `addComment()`, `updateComment()`, `getCommentsPerUser()`, `getCommentsPerReview()`, `deleteComment()`
-  - ✅ `messages.properties` updated with comment validation messages
-  - ✅ **2 critical bugs fixed** in `updateComment()` (wrong exception UUID + missing content update)
-  - ✅ **1 encoding bug fixed** in `messages.properties` (garbled Portuguese characters)
-  - ✅ `ReviewServiceImpl.java` modified to include comment count
-  - ✅ `ReviewServiceTest.java` fixed to mock CommentRepository
-- ✅ **Step 3:** CommentService unit tests (COMPLETE - 2025-10-31)
-  - ✅ `CommentServiceTest.java` with 9 test methods covering all business logic
-  - ✅ Tests for: addComment (3 tests), updateComment (3 tests), getCommentsPerUser (2 tests), getCommentsPerReview (2 tests), deleteComment (3 tests)
-- ✅ **Step 4:** CommentController + OpenAPI documentation (COMPLETE - 2025-11-01)
-  - ✅ `CommentController.java` with 4 REST endpoints (POST, PUT, GET, GET/{reviewId})
-  - ✅ Comprehensive OpenAPI/Swagger annotations (@Tag, @Operation, @ApiResponses, @Parameter)
-  - ✅ All HTTP status codes documented (200, 201, 400, 401, 403, 404)
-  - ✅ Javadoc added to all layers (Controller, Service, ServiceImpl, Repository)
-- ✅ **Step 5:** Integration tests (CommentControllerIT) (COMPLETE - 2025-11-01)
-  - ✅ `CommentControllerIT.java` with 15 comprehensive integration tests
-  - ✅ POST /comments tests (5 tests) - Create, validation, error scenarios
-  - ✅ PUT /comments tests (4 tests) - Update, ownership validation, errors
-  - ✅ GET /comments tests (2 tests) - List by user, pagination
-  - ✅ GET /comments/{reviewId} tests (3 tests) - List by review, pagination, 404
-  - ✅ Database constraints test (1 test) - Cascade delete on review deletion
-  - ✅ **Critical bugs fixed:** Pagination (List → Page), cascade delete (EntityManager.clear()), unit test mocks
-  - ✅ **All 131 tests passing** (71 unit + 60 integration)
-- ⏳ **Step 6:** Documentation updates (README.md) (PENDING)
+- ✅ **Step 2:** DTOs + Service implementation (COMPLETE)
+  - `CreateCommentRequest.java`, `UpdateCommentRequest.java`, `CommentResponse.java`
+  - `CommentService.java` interface (5 methods)
+  - `CommentServiceImpl.java` - ALL 5 methods implemented
+- ✅ **Step 3:** CommentService unit tests (COMPLETE)
+  - `CommentServiceTest.java` with 13 test methods covering all business logic
+- ✅ **Step 4:** CommentController + OpenAPI documentation (COMPLETE)
+  - `CommentController.java` with 5 REST endpoints (POST, PUT, GET, GET/{reviewId}, DELETE)
+  - Comprehensive OpenAPI/Swagger annotations
+  - All HTTP status codes documented (200, 201, 204, 400, 401, 403, 404)
+- ✅ **Step 5:** Integration tests (COMPLETE)
+  - `CommentControllerIT.java` with 19 comprehensive integration tests
+  - Full CRUD coverage with authentication, ownership, pagination, cascade delete
+- ✅ **Step 6:** Documentation + GlobalExceptionHandler verification (COMPLETE)
+  - README.md updated with all comment endpoints
+  - ROADMAP.md updated
+  - Verified GlobalExceptionHandler handles all comment exceptions polymorphically
 
-**Next Steps:** Continue with Step 6 (README.md updates) and consider Step 5 (DELETE /comments/{id} endpoint) for full CRUD.
+**API Endpoints:**
+- `POST /comments` - Create comment (201 Created)
+- `PUT /comments` - Update comment (200 OK, ownership required)
+- `GET /comments` - List user's comments (200 OK, paginated)
+- `GET /comments/{reviewId}` - List review's comments (200 OK, paginated)
+- `DELETE /comments/{commentId}` - Delete comment (204 No Content, ownership required)
+
+**Test Coverage:**
+- 135 tests total (71 unit + 64 integration) - 100% passing
+- CommentServiceTest: 13 unit tests
+- CommentControllerIT: 19 integration tests
+
+---
+
+## 🚧 In Progress
 
 ---
 
@@ -287,9 +290,9 @@ This file tracks the current implementation status and next steps for the Wine R
 
 | Metric | Value |
 |--------|-------|
-| **Backend Tests** | 131 (71 unit + 60 integration) ⬆️ |
+| **Backend Tests** | 135 (71 unit + 64 integration) ⬆️ |
 | **Test Pass Rate** | 100% ✅ |
-| **Backend Endpoints** | Review CRUD + Auth + File Upload |
+| **Backend Endpoints** | Review CRUD + Auth + File Upload + **Comment System (5 endpoints)** ⬆️ |
 | **Flutter Dependencies** | 10 configured (updated 2025-10-28) |
 | **Flutter Auth Components** | 18 files (models, services, providers, docs) |
 | **Flutter Screens** | 4 (splash, login, home, review details) |
