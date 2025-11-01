@@ -194,8 +194,7 @@ class FileUploadControllerIT extends AbstractIntegrationTest {
         mockMvc.perform(MockMvcRequestBuilders.multipart("/files/upload")
                         .file(execFile))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("application/x-executable"
-                )));
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("application/x-executable")));
     }
 
     @Test

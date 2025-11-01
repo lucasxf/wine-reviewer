@@ -237,7 +237,6 @@ public class CommentController {
     public ResponseEntity<Page<CommentResponse>> getCommentsPerReview(
             @Parameter(description = "ID da avaliação", required = true)
             @PathVariable UUID reviewId,
-            Authentication authentication,
             @PageableDefault(page = 0, size = 20, sort = "createdAt", direction = Sort.Direction.ASC)
             Pageable pageable) {
         log.info("Received request to get all comments for review {}", reviewId);

@@ -127,8 +127,7 @@ class AuthControllerIT extends AbstractIntegrationTest {
         assertThat(updatedUser).isPresent();
         assertThat(updatedUser.get().getId()).isEqualTo(existingUser.getId());  // same ID (not duplicated)
         assertThat(updatedUser.get().getDisplayName()).isEqualTo("João Silva");  // updated
-        assertThat(updatedUser.get().getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  //
-        // updated
+        assertThat(updatedUser.get().getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  // updated
     }
 
     @Test
