@@ -16,7 +16,6 @@ import com.winereviewer.api.service.CommentService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +23,23 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.UUID;
 
 /**
+ * Implementação do serviço de gerenciamento de comentários.
+ * <p>
+ * Responsável por executar operações de negócio relacionadas a comentários:
+ * - Criação de novos comentários em avaliações
+ * - Atualização de comentários existentes (com validação de ownership)
+ * - Busca de comentários por usuário ou por avaliação
+ * - Exclusão de comentários (com validação de ownership)
+ * <p>
+ * Todas as operações validam existência de recursos (usuário, avaliação, comentário)
+ * e garantem que apenas autores podem modificar seus próprios comentários.
+ *
  * @author lucas
- * @date 30/10/2025 07:52
+ * @date 30/10/2025
+ * @since 0.1.0
  */
 @Slf4j
 @Service
@@ -90,31 +100,29 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Page<CommentResponse> getCommentsPerUser(UUID userId, Pageable pageable) {
+    public Page<CommentResponse> getCommentsPerUser(UUID userId, Pageable pagination) {
         final var user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(USER, userId));
-        final List<Comment> commentsPerAuthor =
-                commentRepository.findByAuthorOrderByCreatedAtDesc(user);
+        final Page<Comment> commentsPage =
+                commentRepository.findByAuthorOrderByCreatedAtDesc(user, pagination);
 
         final var author = getAuthor(user);
 
         log.info("Carregados comentários do usuário {}", author);
 
-        return toPageResponse(commentsPerAuthor, author);
+        return commentsPage.map(c -> getResponse(c, author));
     }
 
     @Override
-    public Page<CommentResponse> getCommentsPerReview(UUID reviewId, Pageable pageable) {
+    public Page<CommentResponse> getCommentsPerReview(UUID reviewId, Pageable pagination) {
         final var review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new ResourceNotFoundException(REVIEW, reviewId));
-        final List<Comment> commentsPerReview =
-                commentRepository.findByReviewOrderByCreatedAtAsc(review);
+        final Page<Comment> commentsPage =
+                commentRepository.findByReviewOrderByCreatedAtAsc(review, pagination);
 
-        final var author = getAuthor(review.getUser());
+        log.info("Carregados comentários da avaliação {}", review.getId());
 
-        log.info("Carregados comentários da avaliação {}", review);
-
-        return toPageResponse(commentsPerReview, author);
+        return commentsPage.map(c -> getResponse(c, getAuthor(c.getAuthor())));
     }
 
     @Override
@@ -153,15 +161,6 @@ public class CommentServiceImpl implements CommentService {
                 LocalDateTime.ofInstant(comment.getCreatedAt(), ZoneOffset.UTC),
                 LocalDateTime.ofInstant(comment.getUpdatedAt(), ZoneOffset.UTC),
                 author);
-    }
-
-    private Page<CommentResponse> toPageResponse(List<Comment> comments, UserSummaryResponse author) {
-        final Pageable pageable = Pageable.ofSize(comments.size());
-        final var commentsResponse = comments.stream()
-                .map(c -> getResponse(c, author))
-                .toList();
-
-        return new PageImpl<>(commentsResponse, pageable, comments.size());
     }
 
 }

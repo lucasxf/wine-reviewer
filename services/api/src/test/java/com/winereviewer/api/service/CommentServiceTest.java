@@ -19,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -207,9 +208,10 @@ class CommentServiceTest {
         review = getReview(reviewId, user);
         comment = getComment(commentId, review, user);
         final List<Comment> comments = List.of(comment);
+        final Page<Comment> commentsPage = new PageImpl<>(comments, pageable, comments.size());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(commentRepository.findByAuthorOrderByCreatedAtDesc(user)).thenReturn(comments);
+        when(commentRepository.findByAuthorOrderByCreatedAtDesc(user, pageable)).thenReturn(commentsPage);
 
         // when
         final Page<CommentResponse> responsePage = commentService.getCommentsPerUser(userId, pageable);
@@ -220,7 +222,7 @@ class CommentServiceTest {
         assertEquals(responsePage.getContent().getFirst().id(), comments.getFirst().getId().toString());
 
         verify(userRepository, times(1)).findById(userId);
-        verify(commentRepository, times(1)).findByAuthorOrderByCreatedAtDesc(user);
+        verify(commentRepository, times(1)).findByAuthorOrderByCreatedAtDesc(user, pageable);
     }
 
     @Test
@@ -242,7 +244,7 @@ class CommentServiceTest {
         assertTrue(exception.getMessage().contains(userId.toString()));
 
         verify(userRepository, times(1)).findById(userId);
-        verify(commentRepository, never()).findByAuthorOrderByCreatedAtDesc(user);
+        verify(commentRepository, never()).findByAuthorOrderByCreatedAtDesc(user, pageable);
     }
 
     @Test
@@ -253,9 +255,10 @@ class CommentServiceTest {
         review = getReview(reviewId, user);
         comment = getComment(commentId, review, user);
         final List<Comment> comments = List.of(comment);
+        final Page<Comment> commentsPage = new PageImpl<>(comments, pageable, comments.size());
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
-        when(commentRepository.findByReviewOrderByCreatedAtAsc(review)).thenReturn(comments);
+        when(commentRepository.findByReviewOrderByCreatedAtAsc(review, pageable)).thenReturn(commentsPage);
 
         // when
         final Page<CommentResponse> responsePage = commentService.getCommentsPerReview(reviewId, pageable);
@@ -266,7 +269,7 @@ class CommentServiceTest {
         assertEquals(responsePage.getContent().getFirst().id(), comments.getFirst().getId().toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
-        verify(commentRepository, times(1)).findByReviewOrderByCreatedAtAsc(review);
+        verify(commentRepository, times(1)).findByReviewOrderByCreatedAtAsc(review, pageable);
     }
 
     @Test
@@ -288,7 +291,7 @@ class CommentServiceTest {
         assertTrue(exception.getMessage().contains(reviewId.toString()));
 
         verify(reviewRepository, times(1)).findById(reviewId);
-        verify(commentRepository, never()).findByReviewOrderByCreatedAtAsc(review);
+        verify(commentRepository, never()).findByReviewOrderByCreatedAtAsc(review, pageable);
     }
 
     @Test
@@ -397,6 +400,10 @@ class CommentServiceTest {
                 user.getId().toString(),
                 user.getDisplayName(),
                 user.getAvatarUrl());
+    }
+
+    private Pageable getPagination() {
+        return Pageable.ofSize(1);
     }
 
 }

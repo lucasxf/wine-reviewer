@@ -141,6 +141,11 @@ wine-reviewer/
 - **Auto-add new commands to JSON config files** - When creating new slash commands or custom commands, automatically add them to the appropriate JSON configuration files (e.g., `.claude/commands.json`, VSCode settings, etc.) without requiring explicit user request. This ensures commands are immediately available for use. *(Added 2025-10-22)*
 
 ### Git & CI/CD
+- **Git Flow - Branch Strategy:** *(Added 2025-11-01)*
+  - **Feature branches** → `develop` branch (ALL feature PRs target develop by default)
+  - **Develop branch** → `main` branch (ONLY develop can PR to main)
+  - **Exception:** Hotfixes or emergency patches may skip develop if explicitly declared
+  - **Rationale:** Maintain stable main branch, all integration happens in develop first
 - **CI/CD Pipelines:** Path filters to avoid unnecessary runs
   - API Pipeline: Triggers on `services/api/**` or `.github/workflows/ci-api.yml`
   - Mobile Pipeline: Triggers on `apps/mobile/**` or `.github/workflows/ci-app.yml`

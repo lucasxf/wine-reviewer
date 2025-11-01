@@ -27,17 +27,22 @@
 
 ## ✨ Features
 
-### Current (v0.1.0 - Updated 2025-10-25)
+### Current (v0.1.0 - Updated 2025-11-01)
 **Backend API:**
 - ✅ Complete Review CRUD API endpoints
-- ✅ Comment system for reviews
+- ✅ **Complete Comment System** (POST, PUT, GET, DELETE endpoints with full CRUD operations)
+  - Create comments on reviews
+  - Update own comments (ownership validation)
+  - List comments by user or review (with pagination)
+  - Delete own comments (ownership validation)
+  - Database cascade delete (comments deleted when review is deleted)
 - ✅ JWT authentication structure (JJWT 0.12.6)
 - ✅ **Google OAuth authentication** (AuthService, GoogleTokenValidator)
 - ✅ **Domain exception hierarchy** with proper HTTP status mapping
 - ✅ PostgreSQL with Flyway migrations
 - ✅ OpenAPI/Swagger documentation
 - ✅ Docker Compose setup for local development
-- ✅ **Comprehensive test suite** (82 total tests: 46 unit + 36 integration, 100% passing)
+- ✅ **Comprehensive test suite** (135 total tests: 71 unit + 64 integration, 100% passing)
 - ✅ **Integration tests with Testcontainers** (Real PostgreSQL testing with production parity)
   - Shared container pattern for performance (static @Container with reuse)
   - Proper authentication helpers (authenticated(userId) method)
@@ -67,7 +72,6 @@
 
 ### In Progress
 - 🚧 Flutter UI integration with AuthService (connect providers to screens)
-- 🚧 Image upload with pre-signed URLs
 
 ### Planned
 - 📍 Observability (metrics, distributed tracing)
@@ -271,8 +275,21 @@ cd services/api
 - `DELETE /api/reviews/{id}` - Delete review (204 No Content, 404 Not Found, 403 Forbidden)
 
 ### Comments
-- `POST /api/reviews/{id}/comments` - Add comment - ⚠️ Not fully implemented yet
-- `GET /api/reviews/{id}/comments` - List comments - ⚠️ Not fully implemented yet
+- `POST /comments` - Create comment (201 Created, 400 Bad Request, 403 Forbidden, 404 Not Found)
+  - Request: `{ "reviewId": "...", "text": "..." }`
+  - Response: `{ "id": "...", "text": "...", "author": {...}, "createdAt": "...", "updatedAt": "..." }`
+- `PUT /comments` - Update comment (200 OK, 400 Bad Request, 403 Forbidden, 404 Not Found)
+  - Request: `{ "commentId": "...", "text": "..." }`
+  - Response: `{ "id": "...", "text": "...", "author": {...}, "createdAt": "...", "updatedAt": "..." }`
+- `GET /comments` - List comments by authenticated user (200 OK, 403 Forbidden, 404 Not Found)
+  - Query params: `page`, `size`, `sort` (default: createdAt DESC)
+  - Response: Paginated list of comments
+- `GET /comments/{reviewId}` - List comments by review (200 OK, 403 Forbidden, 404 Not Found)
+  - Query params: `page`, `size`, `sort` (default: createdAt ASC)
+  - Response: Paginated list of comments
+- `DELETE /comments/{commentId}` - Delete comment (204 No Content, 401 Unauthorized, 403 Forbidden, 404 Not Found)
+  - Ownership check: Only the comment author can delete their own comment
+  - Response: No content (empty body)
 
 ### Health & Monitoring
 - `GET /health` - Health check (200 OK)
@@ -322,12 +339,20 @@ cd services/api
 
 ### Current Test Coverage
 
-- **46 tests, 100% passing**
-- `ReviewControllerTest` - 4 tests (REST endpoint validation)
-- `ReviewServiceTest` - 20 tests (business logic)
-- `AuthServiceTest` - 5 tests (Google OAuth authentication)
-- `GoogleTokenValidatorTest` - 5 tests (token validation)
-- `DomainExceptionTest` - 12 tests (exception hierarchy)
+- **135 tests, 100% passing** (71 unit + 64 integration)
+- **Unit Tests (71 tests):**
+  - `ReviewControllerTest` - 4 tests (REST endpoint validation)
+  - `ReviewServiceTest` - 20 tests (business logic)
+  - `CommentServiceTest` - 13 tests (comment CRUD operations)
+  - `AuthServiceTest` - 5 tests (Google OAuth authentication)
+  - `GoogleTokenValidatorTest` - 5 tests (token validation)
+  - `S3ServiceTest` - 12 tests (file upload with S3)
+  - `DomainExceptionTest` - 12 tests (exception hierarchy)
+- **Integration Tests (64 tests):**
+  - `ReviewControllerIT` - 23 tests (Review CRUD, pagination, validation)
+  - `CommentControllerIT` - 19 tests (Comment CRUD, ownership, cascade delete, DELETE endpoint)
+  - `AuthControllerIT` - 13 tests (Google OAuth, user creation)
+  - `FileUploadControllerIT` - 9 tests (Pre-signed URLs, file validation)
 
 ## Backend Code Conventions
 
