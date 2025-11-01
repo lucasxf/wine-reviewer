@@ -138,7 +138,6 @@ class CommentServiceTest {
         comment = getComment(commentId, review, user);
         var author = getAuthor(user);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
         // when
         final var response = commentService.updateComment(request, userId);
@@ -151,7 +150,6 @@ class CommentServiceTest {
         assertEquals(response.author(), author);
 
         verify(commentRepository, times(1)).findById(commentId);
-        verify(userRepository, times(1)).findById(userId);
         verify(commentRepository, times(1)).save(any(Comment.class));
     }
 
@@ -400,10 +398,6 @@ class CommentServiceTest {
                 user.getId().toString(),
                 user.getDisplayName(),
                 user.getAvatarUrl());
-    }
-
-    private Pageable getPagination() {
-        return Pageable.ofSize(1);
     }
 
 }
