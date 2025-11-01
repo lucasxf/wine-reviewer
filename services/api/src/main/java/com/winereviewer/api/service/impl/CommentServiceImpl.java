@@ -85,11 +85,8 @@ public class CommentServiceImpl implements CommentService {
         if (!comment.getAuthor().getId().equals(userId)) {
             throw new UnauthorizedAccessException(userId, COMMENT);
         }
-        final var user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException(USER, userId));
-
         final var content = request.text();
-        final var author = getAuthor(user);
+        final var author = getAuthor(comment.getAuthor());
 
         comment.setContent(content);
 
