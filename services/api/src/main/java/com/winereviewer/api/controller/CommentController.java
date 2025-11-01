@@ -4,7 +4,6 @@ import com.winereviewer.api.application.dto.request.CreateCommentRequest;
 import com.winereviewer.api.application.dto.request.UpdateCommentRequest;
 import com.winereviewer.api.application.dto.response.CommentResponse;
 import com.winereviewer.api.service.CommentService;
-import com.winereviewer.api.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -44,7 +43,6 @@ import java.util.UUID;
 public class CommentController {
 
     private final CommentService commentService;
-    private final ReviewService reviewService;
 
     /**
      * Cria um novo comentário em uma avaliação de vinho.
