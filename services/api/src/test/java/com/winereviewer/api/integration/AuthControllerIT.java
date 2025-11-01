@@ -2,24 +2,23 @@ package com.winereviewer.api.integration;
 
 import com.winereviewer.api.controller.AuthController;
 import com.winereviewer.api.domain.User;
+import com.winereviewer.api.exception.InvalidTokenException;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.service.GoogleTokenValidator;
-import com.winereviewer.api.exception.InvalidTokenException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import software.amazon.awssdk.services.s3.S3Client;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * Integration tests for AuthController with Testcontainers PostgreSQL.
@@ -54,9 +53,6 @@ class AuthControllerIT extends AbstractIntegrationTest {
 
     @MockBean
     private GoogleTokenValidator googleTokenValidator;
-
-    @MockBean
-    private S3Client s3Client; // Mock to avoid AWS configuration in tests
 
     @BeforeEach
     void setupMocks() {
@@ -131,7 +127,8 @@ class AuthControllerIT extends AbstractIntegrationTest {
         assertThat(updatedUser).isPresent();
         assertThat(updatedUser.get().getId()).isEqualTo(existingUser.getId());  // same ID (not duplicated)
         assertThat(updatedUser.get().getDisplayName()).isEqualTo("João Silva");  // updated
-        assertThat(updatedUser.get().getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  // updated
+        assertThat(updatedUser.get().getAvatarUrl()).isEqualTo("https://lh3.googleusercontent.com/avatar123");  //
+        // updated
     }
 
     @Test

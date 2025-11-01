@@ -8,13 +8,12 @@ import com.winereviewer.api.domain.Wine;
 import com.winereviewer.api.repository.ReviewRepository;
 import com.winereviewer.api.repository.UserRepository;
 import com.winereviewer.api.repository.WineRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
-import software.amazon.awssdk.services.s3.S3Client;
 
 import java.util.UUID;
 
@@ -56,10 +55,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
     private ReviewRepository reviewRepository;
 
     @Autowired
-    private jakarta.persistence.EntityManager entityManager;
-
-    @MockBean
-    private S3Client s3Client; // Mock to avoid AWS configuration in tests
+    private EntityManager entityManager;
 
     private User testUser;
     private Wine testWine;
@@ -138,7 +134,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isCreated())
@@ -160,7 +156,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -179,7 +175,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -198,7 +194,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -218,7 +214,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -397,7 +393,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(put("/reviews/{id}", review.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -426,7 +422,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(put("/reviews/{id}", review.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -443,7 +439,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(put("/reviews/{id}", nonExistentId)
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
@@ -462,7 +458,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then
         mockMvc.perform(put("/reviews/{id}", review.getId())
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andDo(print())
                 .andExpect(status().isBadRequest());
@@ -517,7 +513,7 @@ class ReviewControllerIT extends AbstractIntegrationTest {
         // When & Then - should fail with 404 or 422
         mockMvc.perform(post("/reviews")
                         .contentType(MediaType.APPLICATION_JSON)
-                .with(authenticated(testUser.getId()))
+                        .with(authenticated(testUser.getId()))
                         .content(objectMapper.writeValueAsString(request)))
                 .andDo(print())
                 .andExpect(status().isNotFound());
