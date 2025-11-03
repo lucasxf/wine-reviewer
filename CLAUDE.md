@@ -46,8 +46,79 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Storage: S3 Free Tier or Supabase Storage Free (pre-signed URLs)
   - Observability: Grafana Cloud Free or CloudWatch Free Tier
 
-## Monorepo Structure
+## Development Commands
 
+### Mobile App
+```bash
+cd apps/mobile
+
+# Install dependencies
+flutter pub get
+
+# Run app (select Android device)
+flutter run
+
+# Lint and analyze
+flutter analyze
+
+# Run tests with coverage
+flutter test --coverage
+
+# Format code
+dart format .
+```
+
+### Backend API
+```bash
+cd services/api
+
+# Run locally (requires local Postgres or use docker-compose)
+./mvnw spring-boot:run
+
+# Build and run tests
+./mvnw verify
+
+# Run tests only
+./mvnw -q -DskipTests=false verify
+
+# Access OpenAPI docs when running
+# http://localhost:8080/swagger-ui.html
+```
+
+### Infrastructure
+```bash
+cd infra
+
+# Start all services (Postgres + API)
+docker compose up -d --build
+
+# View logs
+docker compose logs -f
+
+# Stop services and remove volumes
+docker compose down -v
+```
+
+### CI/CD
+- **API Pipeline:** Triggers on changes to `services/api/**` or `.github/workflows/ci-api.yml`
+- **Mobile Pipeline:** Triggers on changes to `apps/mobile/**` or `.github/workflows/ci-app.yml`
+- **Release:** Manual workflow dispatch with semantic versioning input
+
+## Custom Slash Commands
+
+This project includes custom slash commands for streamlined workflows:
+
+**Session Management:**
+- `/start-session [context]` - Load project context to begin session
+- `/resume-session [context-file]` - Resume with saved context from `prompts/responses/`
+- `/save-response [filename]` - Save Claude's response to `prompts/responses/` for later retrieval
+- `/finish-session [context]` - Run tests, update docs, create commit
+
+Commands are located in `.claude/commands/`. See individual command files for detailed usage.
+
+## Architecture & Design
+
+### Monorepo Structure
 ```
 wine-reviewer/
 ├── apps/mobile/          # Flutter mobile app
@@ -70,12 +141,19 @@ wine-reviewer/
 - **Auto-add new commands to JSON config files** - When creating new slash commands or custom commands, automatically add them to the appropriate JSON configuration files (e.g., `.claude/commands.json`, VSCode settings, etc.) without requiring explicit user request. This ensures commands are immediately available for use. *(Added 2025-10-22)*
 
 ### Git & CI/CD
+- **Git Flow - Branch Strategy:** *(Added 2025-11-01)*
+  - **Feature branches** → `develop` branch (ALL feature PRs target develop by default)
+  - **Develop branch** → `main` branch (ONLY develop can PR to main)
+  - **Exception:** Hotfixes or emergency patches may skip develop if explicitly declared
+  - **Rationale:** Maintain stable main branch, all integration happens in develop first
 - **CI/CD Pipelines:** Path filters to avoid unnecessary runs
   - API Pipeline: Triggers on `services/api/**` or `.github/workflows/ci-api.yml`
   - Mobile Pipeline: Triggers on `apps/mobile/**` or `.github/workflows/ci-app.yml`
   - Release: Manual workflow dispatch with semantic versioning input
 - Caching for dependencies (Maven, Flutter pub)
 - Run tests before build/deploy steps
+- **Branch Separation:** When creating tooling/infrastructure changes (commands, agents, configs) during an active feature branch session, **always checkout from `develop`** (not from current feature branch) to create a clean automation branch. This prevents inheriting unrelated commits and avoids PR pollution. Keep feature branches focused on single concerns to maintain clean git history. *(Added 2025-10-31, updated 2025-10-31)*
+- **PR Target Branch:** Always target `develop` branch for pull requests unless explicitly stated otherwise. The `main` branch is reserved for production releases. Feature branches should merge to `develop` for integration and testing before eventual promotion to `main`. *(Added 2025-10-31)*
 
 ### Docker
 - Multi-stage builds for smaller images
@@ -181,13 +259,17 @@ All main documentation files (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **mus
 - **CLAUDE.md / CODING_STYLE.md:** Update only for new patterns/conventions, include date
 - **README.md:** Update when features/setup changes, keep current with implementation
 
-## Custom Slash Commands for Productivity
+## Custom Slash Commands & Agents for Productivity
 
-This project includes custom slash commands to streamline common workflows. Type the command in Claude Code CLI to expand it into a full prompt.
+This project includes **custom slash commands** and **8 specialized agents** to streamline common workflows.
+
+### Slash Commands
+Type the command in Claude Code CLI to expand it into a full prompt.
 
 **Workflow Commands:**
 - `/start-session [context]` - Load project context (CLAUDE.md, CODING_STYLE.md, ROADMAP.md, README.md) to begin session
-- `/finish-session [commit-context]` - Run tests, prompt for doc updates, show git diff, create commit
+- `/finish-session [commit-context]` - Run tests, prompt for doc updates, show git diff, create commit (auto-detects feature branches and offers PR creation)
+- `/create-pr [title]` - Create pull request with gh CLI, auto-trigger automation-sentinel for feature workflow analysis
 - `/update-roadmap <what-was-completed>` - Update ROADMAP.md (move completed items, reprioritize next steps)
 
 **Development Commands:**
@@ -204,6 +286,57 @@ This project includes custom slash commands to streamline common workflows. Type
 - `/api-doc` - Open API documentation (Swagger UI)
 
 **Command Templates:** Reusable versions available at `C:\repo\claude-command-templates\` for new projects.
+
+### Custom Agents (8 Specialized Agents)
+
+This project includes **8 custom agents** designed for specific development tasks:
+
+1. **automation-sentinel** - Meta-agent for automation health, metrics, and optimization
+2. **backend-code-reviewer** - Java/Spring Boot code review and best practices enforcement
+3. **cross-project-architect** - Pattern extraction, templates, and new project setup
+4. **flutter-implementation-coach** - Flutter coding, Riverpod, Dio, debugging assistance
+5. **frontend-ux-specialist** - UI/UX design, screen layouts, Material Design
+6. **learning-tutor** - Teaching concepts, structured learning, exercises
+7. **session-optimizer** - Token efficiency, session planning, workflow optimization
+8. **tech-writer** - Documentation (external + in-code), ADRs, Javadoc, OpenAPI
+
+**Agent Details:** See `.claude/agents/README.md` for comprehensive usage guide, workflows, and best practices.
+
+### Agent Creation Standards
+
+**CRITICAL RULE: Front Matter Required for All Agents** *(Added 2025-10-31)*
+
+When creating new custom agents in `.claude/agents/`, **always include YAML front matter** for Claude Code's agent discovery system:
+
+**Required Front Matter Fields:**
+```yaml
+---
+name: agent-name
+description: Use this agent when [trigger conditions]. Examples - User: "[example 1]" → Use this agent. User: "[example 2]" → Use this agent.
+model: sonnet|haiku|opus
+color: purple|blue|cyan|yellow|etc
+---
+```
+
+**Pre-Commit Quality Checklist:**
+- [ ] Front matter exists with all required fields (`name`, `description`, `model`, `color`)
+- [ ] Description includes clear trigger conditions with examples
+- [ ] Agent body has required sections:
+  - [ ] Purpose statement
+  - [ ] Core Responsibilities
+  - [ ] When to Trigger (Automatic + Manual)
+  - [ ] Integration with other agents (if applicable)
+  - [ ] Usage examples (minimum 2)
+- [ ] Markdown syntax is valid (no broken links, proper headers)
+- [ ] Code blocks have language specifiers
+- [ ] Agent follows project conventions (CLAUDE.md, CODING_STYLE.md)
+
+**Why This Matters:**
+- Without front matter, agents can't be auto-triggered by Claude Code
+- Missing sections reduce agent effectiveness and discoverability
+- Consistent structure ensures maintainability across agent suite
+
+**Validation:** Before committing new agents, run `automation-sentinel` to validate schema and check for issues.
 
 ## Important Constraints
 
@@ -709,10 +842,14 @@ Sessions are organized chronologically (newest-first) with subsections for Backe
 **Efficiency & Best Practices:**
 - **`C:\repo\ai\claude-code\tips\EFFICIENCY.md`** - Claude Code efficiency guide (token optimization, workflow strategies, file organization tips) - Optional reference for improving development performance
 
+**Automation & Productivity:**
+- **Custom Agents:** `.claude/agents/README.md` - 8 specialized agents (automation-sentinel, backend-code-reviewer, cross-project-architect, flutter-implementation-coach, frontend-ux-specialist, learning-tutor, session-optimizer, tech-writer)
+- **Slash Commands:** `.claude/commands/` - Custom slash commands for common workflows
+- **Command Templates:** `C:\repo\claude-command-templates\` - Reusable slash commands for new projects
+
 **Other References:**
 - **Prompt Pack:** `prompts/PACK.md` - AI guidance and agent schemas
 - **Stack-specific READMEs:** `apps/mobile/`, `services/api/`, `infra/` - Detailed setup per stack
 - **OpenAPI/Swagger:** `http://localhost:8080/swagger-ui.html` - Live API documentation (when backend running)
 - **GitHub Actions:** `.github/workflows/` - CI/CD pipelines with path filters
 - **Docker Compose:** `infra/docker-compose.yml` - Local development environment
-- **Command Templates:** `C:\repo\claude-command-templates\` - Reusable slash commands for new projects

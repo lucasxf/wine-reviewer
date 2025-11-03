@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-11-03 (Session 11 - Documentation & Tooling Improvements)
+**Last updated:** 2025-11-01 (Session 16 - Comment System Complete - All 6 Steps)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -99,6 +99,20 @@ This file tracks the current implementation status and next steps for the Wine R
 - Auto-login support (checkAuthStatus on app startup)
 - Comprehensive documentation with backend analogies
 
+**Authentication UI Integration:** - ✅ NEW (2025-10-29, PR #1)
+- `main.dart` - Async initialization with AuthStateNotifier.checkAuthStatus() before runApp()
+- `login_screen.dart` - Real Google Sign-In integration (replaced mock with AuthStateNotifier)
+- `splash_screen.dart` - AuthState-based routing with retry counter (prevents infinite recursion)
+- `app_router.dart` - Route protection with redirect callback (authenticated/unauthenticated logic)
+- User data caching in secure storage (enables auto-login without backend call)
+- Error handling with SnackBar messages and AppLogger integration
+- Complete authentication flow:
+  - App startup → checkAuthStatus → Splash (300ms) → Auto-login OR Login screen
+  - Google Sign-In → Backend JWT → Storage (token + user) → Home screen
+  - Auto-login: Token exists → Read cached user → AuthState.authenticated → Home screen
+  - Route protection: Unauthenticated users redirected to /login, authenticated users can't access /login
+- CI/CD updates: Flutter 3.35.6 (Dart 3.9.2), conditional test execution, permissions configuration
+
 **Documentation:**
 - `DEPENDENCIES_EXPLAINED.md` - Detailed package explanations
 - `SETUP_INSTRUCTIONS.md` - Development environment setup
@@ -120,57 +134,88 @@ This file tracks the current implementation status and next steps for the Wine R
 - GitHub Actions for Mobile (`ci-app.yml`) with path filters
 - Release workflow (`release.yml`)
 
-**Development Tooling:** - ✅ NEW (2025-11-03)
-- **Custom Agent Suite** (6 agents) - `.claude/agents/`
-  - frontend-ux-specialist, flutter-implementation-coach, learning-tutor
-  - session-optimizer, cross-project-architect, backend-code-reviewer
-  - Comprehensive README.md (510 lines) with workflows and best practices
-- **Custom Slash Commands** (13 commands) - `.claude/commands/`
-  - Workflow: start-session, finish-session, update-roadmap
-  - Documentation: directive, review-code
-  - Testing: quick-test, test-quick, test-service
-  - Build: build-quiet, verify-quiet
-  - Infrastructure: docker-start, docker-stop, api-doc
-  - **NEW: Comprehensive README.md** (500+ lines) with usage guide, workflows, decision trees
+**Custom Agent Suite:** - ✅ NEW (2025-10-29)
+- 8 specialized agents in `.claude/agents/` with distinct responsibilities
+  - `security-guardian` - Security and secrets management
+  - `test-architect` - Test strategies and TDD workflows
+  - `code-reviewer` - Code quality and CODING_STYLE.md enforcement
+  - `mobile-specialist` - Flutter/Dart expertise with beginner-friendly explanations
+  - `performance-sentinel` - Performance analysis and optimization
+  - `integration-engineer` - System integration and E2E workflows
+  - `tech-writer` - Documentation specialist (ADRs, Javadoc, OpenAPI, Dartdoc) ⭐ NEW
+  - `automation-sentinel` - Meta-agent for automation lifecycle management ⭐ NEW
+- Agent coordination system with README.md (anti-cyclic dependency rules)
+- Automated documentation updates (`/finish-session` delegates to tech-writer and automation-sentinel)
+- Health monitoring with automation metrics and recommendations
+
+**Context Management Commands:** - ✅ NEW (2025-10-31)
+- `/save-response [filename]` - Save Claude's responses to `prompts/responses/` for later retrieval
+  - Auto-generated filenames with dates if not provided
+  - Extracts only structured content (plans, specs), no conversational fluff
+  - 191 lines with comprehensive workflow documentation
+- `/resume-session [filename]` - Enhanced to handle no arguments (lists and selects files)
+  - Interactive file selection when no arguments provided
+  - Shows filenames, dates, and first line preview
+  - Options: auto-load latest, select by number, type manually, or skip
+  - 94 lines with smart context loading
+- `.claude/settings.json` - Auto-approval for `prompts/responses/*.md` files (no permission prompts)
+- `prompts/responses/INDEX.md` - Optional catalog of saved responses with dates
+- **Branch Separation Directive** added to CLAUDE.md: Always create separate feature branches for tooling changes during active feature work
+
+---
+
+## ✅ Implemented (Recent Additions)
+
+### 💬 Comment System (Backend) - ✅ COMPLETE (2025-11-01)
+
+**Status:** Complete - All 6 steps finished
+
+**Implementation Summary:**
+- ✅ **Step 1:** Comment entity + repository + migration (COMPLETE)
+  - `Comment.java` with JPA lifecycle callbacks
+  - `CommentRepository.java` with custom query methods
+  - Flyway migration V3 (cascade delete on review deletion)
+- ✅ **Step 2:** DTOs + Service implementation (COMPLETE)
+  - `CreateCommentRequest.java`, `UpdateCommentRequest.java`, `CommentResponse.java`
+  - `CommentService.java` interface (5 methods)
+  - `CommentServiceImpl.java` - ALL 5 methods implemented
+- ✅ **Step 3:** CommentService unit tests (COMPLETE)
+  - `CommentServiceTest.java` with 13 test methods covering all business logic
+- ✅ **Step 4:** CommentController + OpenAPI documentation (COMPLETE)
+  - `CommentController.java` with 5 REST endpoints (POST, PUT, GET, GET/{reviewId}, DELETE)
+  - Comprehensive OpenAPI/Swagger annotations
+  - All HTTP status codes documented (200, 201, 204, 400, 401, 403, 404)
+- ✅ **Step 5:** Integration tests (COMPLETE)
+  - `CommentControllerIT.java` with 19 comprehensive integration tests
+  - Full CRUD coverage with authentication, ownership, pagination, cascade delete
+- ✅ **Step 6:** Documentation + GlobalExceptionHandler verification (COMPLETE)
+  - README.md updated with all comment endpoints
+  - ROADMAP.md updated
+  - Verified GlobalExceptionHandler handles all comment exceptions polymorphically
+
+**API Endpoints:**
+- `POST /comments` - Create comment (201 Created)
+- `PUT /comments` - Update comment (200 OK, ownership required)
+- `GET /comments` - List user's comments (200 OK, paginated)
+- `GET /comments/{reviewId}` - List review's comments (200 OK, paginated)
+- `DELETE /comments/{commentId}` - Delete comment (204 No Content, ownership required)
+
+**Test Coverage:**
+- 135 tests total (71 unit + 64 integration) - 100% passing
+- CommentServiceTest: 13 unit tests
+- CommentControllerIT: 19 integration tests
 
 ---
 
 ## 🚧 In Progress
 
-### Mobile App (Flutter)
-- None currently
-
 ---
 
 ## 🎯 Next Steps (Priority Order)
 
-### 1. 📱 PRIORITY 1: Integrate Authentication with UI (Started 2025-10-25)
+### 1. 📱 Implement Flutter Authentication Flow (F2 Phase) - ✅ COMPLETED
 
-**Status:** Ready to start
-
-**Goal:** Connect AuthService with login screen and implement full authentication flow
-
-**Tasks:**
-- Update `main.dart` to initialize AuthStateNotifier (checkAuthStatus on startup)
-- Update `login_screen.dart` to use AuthStateNotifier (replace mock with real Google Sign-In)
-- Update `splash_screen.dart` to handle AuthState (initial → authenticated/unauthenticated)
-- Update `app_router.dart` to protect routes (redirect to login if unauthenticated)
-- Test complete flow: App startup → Auto-login OR Login screen → Home screen → Logout
-- Handle errors gracefully (show SnackBar with error messages)
-
-**Acceptance Criteria:**
-- ✅ App starts with splash screen (checks if token exists)
-- ✅ If token exists → Home screen (auto-login)
-- ✅ If no token → Login screen
-- ✅ Click "Sign in with Google" → Opens Google dialog → Authenticates → Home screen
-- ✅ Click "Logout" → Clears tokens → Login screen
-- ✅ Error handling (cancel login, network error, invalid token)
-
----
-
-### 2. 📱 Implement Flutter Authentication Flow (F2 Phase) - ✅ COMPLETED
-
-**Status:** ✅ Completed (2025-10-25)
+**Status:** ✅ Completed (2025-10-29, PR #1 merged)
 
 **Completed:**
 - ✅ Create auth feature structure (data/domain/presentation/providers)
@@ -179,14 +224,16 @@ This file tracks the current implementation status and next steps for the Wine R
 - ✅ Implement auto-login support (checkAuthStatus method)
 - ✅ Riverpod state management (AuthState, AuthStateNotifier, providers)
 - ✅ Comprehensive documentation (storage README, backend analogies)
-
-**Pending:**
-- ⏳ UI integration (connect AuthService with screens)
-- ⏳ End-to-end testing (full authentication flow)
+- ✅ UI integration (connect AuthService with screens) - **COMPLETED 2025-10-29**
+- ✅ End-to-end testing (full authentication flow) - **COMPLETED 2025-10-29**
+- ✅ Route protection with go_router redirect callbacks
+- ✅ User data caching for auto-login without backend calls
+- ✅ Error handling with SnackBar and AppLogger
+- ✅ CI/CD configuration (Flutter 3.35.6, conditional tests)
 
 ---
 
-### 3. 🖼️ Implement Image Upload with Pre-signed URLs (Backend) - ✅ COMPLETED
+### 2. 🖼️ Implement Image Upload with Pre-signed URLs (Backend) - ✅ COMPLETED
 
 **Status:** ✅ Completed (2025-10-26)
 
@@ -202,19 +249,6 @@ This file tracks the current implementation status and next steps for the Wine R
 **Pending:**
 - ⏳ Update Review entity to use uploaded image URLs (future work)
 - ⏳ Frontend integration (Flutter image picker → upload flow)
-
----
-
-### 4. 💬 Implement Comment System (Backend)
-
-**Goal:** Enable users to comment on wine reviews
-
-**Tasks:**
-- Complete CRUD endpoints for comments
-- Add OpenAPI/Swagger documentation
-- Create unit tests for comment service
-- Create integration tests for comment endpoints
-- Test cascade delete (comments deleted when review deleted)
 
 ---
 
@@ -256,13 +290,15 @@ This file tracks the current implementation status and next steps for the Wine R
 
 | Metric | Value |
 |--------|-------|
-| **Backend Tests** | 103 (58 unit + 45 integration) ⬆️ |
+| **Backend Tests** | 135 (71 unit + 64 integration) ⬆️ |
 | **Test Pass Rate** | 100% ✅ |
-| **Backend Endpoints** | Review CRUD + Auth + File Upload |
+| **Backend Endpoints** | Review CRUD + Auth + File Upload + **Comment System (5 endpoints)** ⬆️ |
 | **Flutter Dependencies** | 10 configured (updated 2025-10-28) |
 | **Flutter Auth Components** | 18 files (models, services, providers, docs) |
 | **Flutter Screens** | 4 (splash, login, home, review details) |
+| **Custom Agents** | 8 (6 existing + 2 new: tech-writer, automation-sentinel) ⬆️ |
 | **CI/CD Pipelines** | 3 (API, Mobile, Release) |
+| **Documentation Files** | ADR-001 (agent architecture) created by tech-writer |
 
 ---
 

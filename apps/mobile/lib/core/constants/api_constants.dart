@@ -136,7 +136,7 @@ class ApiConstants {
   /// POST /reviews - Criar novo review
   ///
   /// HEADERS:
-  /// - Authorization: Bearer <jwt-token>
+  /// - Authorization: Bearer {jwt-token}
   ///
   /// REQUEST:
   /// ```json
@@ -161,7 +161,7 @@ class ApiConstants {
   /// PUT /reviews/{id} - Atualizar review
   ///
   /// HEADERS:
-  /// - Authorization: Bearer <jwt-token>
+  /// - Authorization: Bearer {jwt-token}
   ///
   /// REQUEST:
   /// ```json
@@ -185,7 +185,7 @@ class ApiConstants {
   /// DELETE /reviews/{id} - Deletar review
   ///
   /// HEADERS:
-  /// - Authorization: Bearer <jwt-token>
+  /// - Authorization: Bearer {jwt-token}
   ///
   /// RESPONSE (204 No Content)
   static String deleteReview(String id) => '/reviews/$id';

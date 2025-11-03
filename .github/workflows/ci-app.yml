@@ -1,4 +1,6 @@
 name: CI - App Flutter
+permissions:
+  contents: read
 on:
   push:
     paths:
@@ -12,12 +14,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.22.0'
-      - name: Pub get & Analyze & Test
+
+      - name: Check for pubspec.yaml
+        id: check_pubspec
         run: |
-          cd apps/mobile
+          if [ -f apps/mobile/pubspec.yaml ]; then
+            echo "has_pubspec=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_pubspec=false" >> $GITHUB_OUTPUT
+            echo "No pubspec.yaml found in apps/mobile — skipping Flutter steps."
+          fi
+
+      - name: Setup Flutter
+        if: steps.check_pubspec.outputs.has_pubspec == 'true'
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.35.6' # FIX: Updated to match Dart SDK ^3.9.2 requirement
+
+      - name: Pub get & Analyze & Test
+        if: steps.check_pubspec.outputs.has_pubspec == 'true'
+        working-directory: apps/mobile
+        run: |
           flutter pub get
           flutter analyze
-          flutter test --coverage
+      - name: Run tests (if test directory exists)
+        run: |
+          cd apps/mobile
+          if [ -d "test" ]; then
+            flutter test --coverage
+          else
+            echo "No test directory found, skipping tests"
+          fi

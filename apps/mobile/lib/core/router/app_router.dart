@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:wine_reviewer_mobile/features/auth/presentation/screens/login_screen.dart';
+import 'package:wine_reviewer_mobile/features/auth/providers/auth_providers.dart';
+import 'package:wine_reviewer_mobile/features/auth/providers/auth_state.dart';
 import 'package:wine_reviewer_mobile/features/review/presentation/screens/home_screen.dart';
 import 'package:wine_reviewer_mobile/features/review/presentation/screens/review_details_screen.dart';
 import 'package:wine_reviewer_mobile/features/splash/presentation/screens/splash_screen.dart';
@@ -51,20 +54,22 @@ import 'package:wine_reviewer_mobile/features/splash/presentation/screens/splash
 /// - /home → HomeScreen (feed de reviews)
 /// - /review/:id → ReviewDetailsScreen (detalhes do review)
 
-/// Provider do router (Riverpod)
+/// Cria GoRouter com proteção de rotas baseada em AuthState
 ///
-/// IMPORTANTE:
-/// - Por enquanto, retorna GoRouter diretamente
-/// - Futuramente: converter para Provider (Riverpod) para injeção de dependência
+/// MUDANÇA (2025-10-29): Agora aceita WidgetRef para acessar AuthState
 ///
-/// EXEMPLO (futuro):
-/// ```dart
-/// final routerProvider = Provider<GoRouter>((ref) {
-///   final authInterceptor = ref.watch(authInterceptorProvider);
-///   return createRouter(authInterceptor);
-/// });
-/// ```
-GoRouter createAppRouter() {
+/// PARÂMETROS:
+/// - ref: WidgetRef do Riverpod (acesso a providers)
+///
+/// PROTEÇÃO DE ROTAS:
+/// - /home: requer autenticação (redireciona para /login se não autenticado)
+/// - /login: redireciona para /home se já autenticado
+/// - /: splash screen (sempre permitido)
+/// - /review/:id: requer autenticação
+///
+/// ANALOGIA Backend:
+/// - Similar a: SecurityFilterChain com antMatchers() e authenticated()
+GoRouter createAppRouter(WidgetRef ref) {
   return GoRouter(
     // initialLocation = rota inicial do app
     // Sempre começa na splash screen (verifica autenticação)
@@ -73,6 +78,90 @@ GoRouter createAppRouter() {
     // debugLogDiagnostics = mostra logs de navegação no console (debug mode)
     // Útil para debugar problemas de navegação
     debugLogDiagnostics: true,
+
+    // redirect = proteção de rotas baseada em autenticação
+    //
+    // MUDANÇA (2025-10-29): Implementada proteção de rotas
+    //
+    // FLUXO:
+    // 1. Chamado ANTES de cada navegação
+    // 2. Verifica AuthState atual
+    // 3. Retorna nova rota (redirect) ou null (permite navegação)
+    //
+    // REGRAS:
+    // - Se não autenticado E tentando acessar rota protegida → redireciona para /login
+    // - Se autenticado E tentando acessar /login → redireciona para /home
+    // - Caso contrário → permite navegação (retorna null)
+    //
+    // ROTAS PROTEGIDAS:
+    // - /home (requer auth)
+    // - /review/:id (requer auth)
+    //
+    // ROTAS PÚBLICAS:
+    // - / (splash)
+    // - /login
+    //
+    // ANALOGIA Backend:
+    // - Similar a: SecurityFilterChain.authorizeHttpRequests()
+    redirect: (context, state) {
+      // Lê AuthState atual
+      //
+      // ref.read() = lê provider UMA VEZ (não escuta mudanças)
+      // Usamos read() porque queremos apenas verificar estado atual
+      final authState = ref.read(authStateNotifierProvider);
+
+      // Verifica se usuário está autenticado
+      //
+      // Type checking (is operator):
+      // - authState is AuthStateAuthenticated → usuário logado
+      // - authState is AuthStateUnauthenticated → usuário NÃO logado
+      final isAuthenticated = authState is AuthStateAuthenticated;
+
+      // Pega o path da rota que usuário está tentando acessar
+      //
+      // state.uri.toString() = URL completa (ex: "/home", "/review/123")
+      final isGoingToLogin = state.uri.toString() == '/login';
+      final isGoingToSplash = state.uri.toString() == '/';
+
+      // REGRA 1: Usuário NÃO autenticado tentando acessar rota protegida
+      //
+      // Condição:
+      // - !isAuthenticated = usuário não logado
+      // - !isGoingToLogin = não está indo para /login
+      // - !isGoingToSplash = não está indo para / (splash)
+      //
+      // Ação: Redireciona para /login
+      //
+      // ANALOGIA Backend:
+      // - Similar a: .anyRequest().authenticated()
+      if (!isAuthenticated && !isGoingToLogin && !isGoingToSplash) {
+        return '/login';
+      }
+
+      // REGRA 2: Usuário autenticado tentando acessar /login
+      //
+      // Condição:
+      // - isAuthenticated = usuário logado
+      // - isGoingToLogin = está tentando acessar /login
+      //
+      // Ação: Redireciona para /home
+      //
+      // POR QUE?
+      // - Usuário já logado não precisa ver tela de login
+      // - Melhora UX (evita tela desnecessária)
+      if (isAuthenticated && isGoingToLogin) {
+        return '/home';
+      }
+
+      // REGRA 3: Permite navegação
+      //
+      // Casos:
+      // - Usuário autenticado acessando qualquer rota (permitido)
+      // - Usuário não autenticado acessando /login ou / (permitido)
+      //
+      // Ação: return null (permite navegação)
+      return null;
+    },
 
     // routes = lista de rotas do aplicativo
     //

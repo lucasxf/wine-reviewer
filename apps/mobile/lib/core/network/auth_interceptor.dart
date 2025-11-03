@@ -7,7 +7,7 @@ import 'package:wine_reviewer_mobile/core/storage/storage_keys.dart';
 ///
 /// EXPLICAÇÃO (Backend Context):
 /// - Similar a um Filter/Interceptor do Spring Security
-/// - Adiciona header Authorization: Bearer <token> em toda requisição
+/// - Adiciona header Authorization: Bearer {token} em toda requisição
 /// - Lê token do storage seguro (flutter_secure_storage)
 ///
 /// ANALOGIA Backend (Spring Security):
@@ -27,7 +27,7 @@ import 'package:wine_reviewer_mobile/core/storage/storage_keys.dart';
 /// 1. Usuário faz requisição: `dio.get('/reviews')`
 /// 2. AuthInterceptor intercepta ANTES de enviar
 /// 3. Lê JWT token do flutter_secure_storage
-/// 4. Adiciona header: Authorization: Bearer <token>
+/// 4. Adiciona header: Authorization: Bearer {token}
 /// 5. Envia requisição com token
 ///
 /// FLUTTER_SECURE_STORAGE:

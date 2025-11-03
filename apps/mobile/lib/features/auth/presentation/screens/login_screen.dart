@@ -1,40 +1,66 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:wine_reviewer_mobile/features/auth/providers/auth_providers.dart';
+import 'package:wine_reviewer_mobile/features/auth/providers/auth_state.dart';
 
-/// Login Screen - Tela de autenticação
+/// Login Screen - Tela de autenticação com Google Sign-In
+///
+/// MUDANÇA (2025-10-29): Integração completa com AuthStateNotifier
 ///
 /// EXPLICAÇÃO (O que é):
-/// - Tela onde usuário faz login com Google
-/// - Por enquanto é placeholder (botão simulado)
-/// - Futuramente: integrará google_sign_in + AuthService
+/// - Tela onde usuário faz login com Google OAuth
+/// - Integrada com AuthService e AuthStateNotifier
+/// - Gerencia loading states e error handling
 ///
 /// ANALOGIA Backend:
 /// - É como uma página de login HTML com formulário
 /// - Chama endpoint POST /auth/google com ID token
 /// - Recebe JWT token e salva no storage
 ///
-/// STATELESS WIDGET:
-/// - Widget imutável (não tem estado interno)
-/// - build() é chamado toda vez que precisa redesenhar
-/// - Use quando não precisa de initState/dispose ou estado mutável
+/// CONSUMER WIDGET (Riverpod):
+/// - ConsumerWidget = StatelessWidget + acesso a providers
+/// - Permite ler/escrever providers com ref.watch() ou ref.read()
+/// - Use quando precisa acessar state management (Riverpod)
 ///
-/// QUANDO USAR StatelessWidget vs StatefulWidget:
-/// - StatelessWidget: Tela estática, sem formulário, sem animações
-/// - StatefulWidget: Tela com formulário, loading, animações, timers
-class LoginScreen extends StatelessWidget {
+/// QUANDO USAR ConsumerWidget vs StatelessWidget:
+/// - ConsumerWidget: Precisa acessar providers (state, services, etc.)
+/// - StatelessWidget: Tela estática, sem acesso a providers
+///
+/// POR QUE ConsumerWidget (não StatelessWidget)?
+/// - ✅ Precisa chamar AuthStateNotifier.signInWithGoogle()
+/// - ✅ Precisa ler AuthState para mostrar loading/errors
+/// - ✅ Acesso a ref.read() e ref.watch()
+class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   /// build - constrói a UI da tela
   ///
   /// PARÂMETROS:
   /// - context: BuildContext (acesso a tema, navegação, MediaQuery)
+  /// - ref: WidgetRef (acesso a providers do Riverpod)
   ///
   /// BuildContext:
   /// - Representa a localização do widget na árvore de widgets
   /// - Permite acessar: Theme, Navigator, MediaQuery, InheritedWidgets
   /// - Similar a: HttpServletRequest do Java (acesso a contexto da requisição)
+  ///
+  /// WidgetRef (novo):
+  /// - Permite acessar providers com ref.read() e ref.watch()
+  /// - ref.watch() - escuta mudanças no provider (rebuilds widget)
+  /// - ref.read() - lê valor uma vez (usado em callbacks)
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch authState to show loading indicator when loading
+    //
+    // ref.watch() - Observa mudanças no authStateNotifierProvider
+    // Quando AuthState muda (initial → loading → authenticated/unauthenticated),
+    // o widget é reconstruído automaticamente
+    //
+    // ANALOGIA Backend:
+    // - Similar a: @Autowired + observer pattern
+    // - Como se o widget se "inscrevesse" para receber updates do AuthState
+    final authState = ref.watch(authStateNotifierProvider);
     return Scaffold(
       // AppBar = barra superior da tela
       // Material Design: geralmente contém título + ações
@@ -86,14 +112,19 @@ class LoginScreen extends StatelessWidget {
               'Faça login para avaliar e descobrir novos vinhos',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                    color: Theme.of(context).colorScheme.onSurface.withAlpha(153), // 0.6 * 255 = 153 alpha
                   ),
             ),
 
             const SizedBox(height: 48),
 
-            // Botão de login com Google (placeholder)
+            // Botão de login com Google (integrado com AuthStateNotifier)
             // ElevatedButton = botão Material Design (elevado, com sombra)
+            //
+            // MUDANÇA (2025-10-29): Integrado com AuthStateNotifier
+            // - Desabilita botão durante loading (evita múltiplos cliques)
+            // - Mostra spinner durante login
+            // - Chama AuthStateNotifier.signInWithGoogle() ao clicar
             //
             // TIPOS DE BOTÕES (Material Design):
             // - ElevatedButton: botão elevado (sombra) - ação primária
@@ -102,20 +133,38 @@ class LoginScreen extends StatelessWidget {
             // - IconButton: botão apenas com ícone
             // - FloatingActionButton: botão flutuante (geralmente canto inferior direito)
             ElevatedButton.icon(
-              // onPressed = callback quando botão é clicado
+              // onPressed - desabilitado se loading, senão chama _handleGoogleLogin
               //
-              // CALLBACKS (funções como parâmetro):
-              // - onPressed: () { ... } = função anônima (lambda)
-              // - onPressed: _handleLogin = referência para método
-              // - onPressed: null = botão desabilitado
+              // TYPE CHECKING (is operator):
+              // - authState is AuthStateLoading → true se estado é loading
+              // - onPressed: null = botão desabilitado (cinza, sem clique)
+              // - onPressed: () => _handleGoogleLogin(...) = botão habilitado
+              //
+              // POR QUE DESABILITAR DURANTE LOADING?
+              // - Evita múltiplos cliques enquanto login está em andamento
+              // - UX melhor: usuário vê que algo está acontecendo
               //
               // ANALOGIA Backend:
-              // - Similar a: @PostMapping handler, onClick handler (JavaScript)
-              onPressed: () => _handleGoogleLogin(context),
+              // - Similar a: if (status == Status.LOADING) button.setEnabled(false);
+              onPressed: authState is AuthStateLoading
+                  ? null  // Desabilita botão se loading
+                  : () => _handleGoogleLogin(context, ref),  // Habilita botão
 
-              // icon = ícone do botão
-              // Icon widget representa um ícone do Material Design
-              icon: const Icon(Icons.login),
+              // icon - mostra loading spinner se loading, senão ícone de login
+              //
+              // OPERADOR TERNÁRIO (condição ? true : false):
+              // - Se authState é loading → CircularProgressIndicator (spinner)
+              // - Se não → Icon(Icons.login) (ícone normal)
+              icon: authState is AuthStateLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.login),
 
               // label = texto do botão
               label: const Text('Entrar com Google'),
@@ -149,39 +198,79 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  /// Handler de login com Google (futuro)
+  /// Handler de login com Google (implementação real)
   ///
-  /// FLUXO (quando implementado):
-  /// 1. Chama google_sign_in.signIn()
-  /// 2. Obtém Google ID token
-  /// 3. Chama AuthService.loginWithGoogle(idToken)
-  /// 4. AuthService chama POST /auth/google
-  /// 5. Backend valida token e retorna JWT
-  /// 6. Salva JWT no flutter_secure_storage
-  /// 7. Redireciona para /home
+  /// MUDANÇA (2025-10-29): Implementação completa com AuthStateNotifier
   ///
-  /// POR ENQUANTO: apenas mostra mensagem (placeholder)
-  void _handleGoogleLogin(BuildContext context) {
-    // ScaffoldMessenger = gerencia snackbars (mensagens temporárias)
-    // Snackbar = mensagem que aparece na parte inferior da tela
-    //
-    // ANALOGIA Backend:
-    // - Similar a: flash messages (Spring MVC)
-    // - Similar a: toast messages (Android)
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Login com Google será implementado em breve'),
-        duration: Duration(seconds: 2),
-      ),
-    );
+  /// FLUXO:
+  /// 1. Chama AuthStateNotifier.signInWithGoogle()
+  /// 2. AuthStateNotifier chama AuthService.signInWithGoogle()
+  /// 3. AuthService:
+  ///    a. Chama google_sign_in.signIn() (abre dialog do Google)
+  ///    b. Obtém Google ID token
+  ///    c. Chama POST /api/auth/google (backend)
+  ///    d. Backend valida token com Google e retorna JWT
+  ///    e. Salva JWT no flutter_secure_storage
+  ///    f. Retorna User
+  /// 4. AuthStateNotifier atualiza estado para authenticated(user)
+  /// 5. Redireciona para /home
+  ///
+  /// ERROR HANDLING:
+  /// - Se usuário cancela login → mostra SnackBar "Login cancelado"
+  /// - Se ocorre erro (rede, backend, etc.) → mostra SnackBar com mensagem de erro
+  /// - AuthStateNotifier volta estado para unauthenticated() em caso de erro
+  ///
+  /// ANALOGIA Backend:
+  /// - Similar a: controller method que chama service e trata exceções
+  /// - Similar a: @ExceptionHandler (trata erros e mostra mensagens)
+  Future<void> _handleGoogleLogin(BuildContext context, WidgetRef ref) async {
+    try {
+      // Chama AuthStateNotifier.signInWithGoogle()
+      //
+      // EXPLICAÇÃO:
+      // - ref.read() = lê provider UMA VEZ (não escuta mudanças)
+      // - .notifier = acessa o AuthStateNotifier (classe com métodos)
+      // - .signInWithGoogle() = método async que faz o login
+      //
+      // ANALOGIA Backend:
+      // - Similar a: authService.login(email, password) em um controller
+      await ref.read(authStateNotifierProvider.notifier).signInWithGoogle();
 
-    // TODO (futuro): implementar login real
-    // final googleSignIn = GoogleSignIn();
-    // final account = await googleSignIn.signIn();
-    // final auth = await account?.authentication;
-    // final idToken = auth?.idToken;
-    // await authService.loginWithGoogle(idToken);
-    // context.go('/home');
+      // Se chegou aqui, login foi bem-sucedido
+      // Verifica se widget ainda está montado (segurança)
+      if (context.mounted) {
+        // Redireciona para home
+        context.go('/home');
+      }
+    } catch (e) {
+      // Login falhou (usuário cancelou ou erro ocorreu)
+      //
+      // EXCEÇÕES POSSÍVEIS:
+      // - Usuário cancelou login (fechou dialog do Google)
+      // - Erro de rede (sem internet)
+      // - Erro no backend (servidor fora do ar, token inválido)
+      // - Erro no storage (não conseguiu salvar token)
+      //
+      // TRATAMENTO:
+      // - Mostra SnackBar com mensagem de erro
+      // - Usuário pode tentar novamente clicando no botão
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erro ao fazer login: ${e.toString()}'),
+            duration: const Duration(seconds: 4),
+            backgroundColor: Theme.of(context).colorScheme.error,
+            action: SnackBarAction(
+              label: 'OK',
+              textColor: Colors.white,
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              },
+            ),
+          ),
+        );
+      }
+    }
   }
 
   /// Handler de login simples (MVP testing)

@@ -14,6 +14,5 @@ public record CreateCommentRequest(
 
         @NotBlank(message = "{comment.text.blank}")
         @Size(min = 1, max = 500, message = "{comment.text.size}")
-        String text
-) {
+        String text) {
 }
