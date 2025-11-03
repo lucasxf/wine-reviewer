@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-10-28 (Session 10 - Flutter Dependency Updates & Build Fixes)
+**Last updated:** 2025-11-03 (Session 11 - Documentation & Tooling Improvements)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -119,6 +119,19 @@ This file tracks the current implementation status and next steps for the Wine R
 - GitHub Actions for API (`ci-api.yml`) with path filters
 - GitHub Actions for Mobile (`ci-app.yml`) with path filters
 - Release workflow (`release.yml`)
+
+**Development Tooling:** - ✅ NEW (2025-11-03)
+- **Custom Agent Suite** (6 agents) - `.claude/agents/`
+  - frontend-ux-specialist, flutter-implementation-coach, learning-tutor
+  - session-optimizer, cross-project-architect, backend-code-reviewer
+  - Comprehensive README.md (510 lines) with workflows and best practices
+- **Custom Slash Commands** (13 commands) - `.claude/commands/`
+  - Workflow: start-session, finish-session, update-roadmap
+  - Documentation: directive, review-code
+  - Testing: quick-test, test-quick, test-service
+  - Build: build-quiet, verify-quiet
+  - Infrastructure: docker-start, docker-stop, api-doc
+  - **NEW: Comprehensive README.md** (500+ lines) with usage guide, workflows, decision trees
 
 ---
 
