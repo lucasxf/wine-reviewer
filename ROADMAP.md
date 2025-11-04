@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-11-01 (Session 16 - Comment System Complete - All 6 Steps)
+**Last updated:** 2025-11-03 (Session 15 - Documentation & Development Tooling Improvements + Merge Conflict Resolution)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -161,6 +161,22 @@ This file tracks the current implementation status and next steps for the Wine R
 - `.claude/settings.json` - Auto-approval for `prompts/responses/*.md` files (no permission prompts)
 - `prompts/responses/INDEX.md` - Optional catalog of saved responses with dates
 - **Branch Separation Directive** added to CLAUDE.md: Always create separate feature branches for tooling changes during active feature work
+
+**Development Tooling Documentation:** - ✅ NEW (2025-11-03)
+- **Custom Agent Suite Documentation** (6 agents) - `.claude/agents/README.md` (510 lines)
+  - frontend-ux-specialist, flutter-implementation-coach, learning-tutor
+  - session-optimizer, cross-project-architect, backend-code-reviewer
+  - Comprehensive workflows, best practices, decision trees
+- **Custom Slash Commands Documentation** (13 commands) - `.claude/commands/README.md` (500+ lines)
+  - Workflow: start-session, resume-session, finish-session, update-roadmap
+  - Documentation: directive, review-code, save-response
+  - Testing: quick-test, test-quick, test-service
+  - Build: build-quiet, verify-quiet
+  - Infrastructure: docker-start, docker-stop, api-doc
+  - Parallel structure with agents README for consistency
+  - 4 complete workflows (daily development, feature implementation, bug fix, refactoring)
+  - Decision trees for command vs agent selection
+  - Token efficiency patterns and best practices
 
 ---
 
