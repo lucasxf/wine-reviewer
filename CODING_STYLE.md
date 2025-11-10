@@ -37,7 +37,7 @@ The Wine Reviewer project uses **stack-specific coding style guides** to optimiz
 **File:** `services/api/CODING_STYLE_BACKEND.md`
 **Applies to:** `services/api/` (Java 21, Spring Boot 3, PostgreSQL)
 **Contains:** Backend-specific patterns, JPA, REST, testing
-**Load when:** Working on Spring Boot API, controllers, services, repositories
+**Load when:** Working on Backend (Spring Boot API, controllers, services, repositories)
 
 **Topics covered:**
 - Package structure (DDD/CQRS vs CRUD)
