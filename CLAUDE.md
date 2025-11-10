@@ -267,7 +267,14 @@ This project includes **custom slash commands** and **8 specialized agents** to 
 Type the command in Claude Code CLI to expand it into a full prompt.
 
 **Workflow Commands:**
-- `/start-session [context]` - Load project context (CLAUDE.md, CODING_STYLE.md, ROADMAP.md, README.md) to begin session
+- `/start-session [--stack=backend|frontend|infra|docs|full] [context]` - Load stack-specific context to begin session
+  - **Smart loading:** Automatically infers stack from context (40-54% token reduction vs full load)
+  - **Backend:** Loads CLAUDE.md + CODING_STYLE_GENERAL.md + CODING_STYLE_BACKEND.md + ROADMAP.md + README.md (~41% reduction)
+  - **Frontend:** Loads CLAUDE.md + CODING_STYLE_GENERAL.md + CODING_STYLE_FRONTEND.md + ROADMAP.md + README.md (~46% reduction)
+  - **Infrastructure:** Loads CLAUDE.md + CODING_STYLE_GENERAL.md + CODING_STYLE_INFRASTRUCTURE.md + ROADMAP.md + README.md (~47% reduction)
+  - **Documentation:** Loads minimal context (CLAUDE.md + ROADMAP.md + README.md) (~54% reduction)
+  - **Full:** Legacy behavior, loads all files (use sparingly)
+  - If ambiguous, prompts user to select stack interactively
 - `/finish-session [commit-context]` - Run tests, prompt for doc updates, show git diff, create commit (auto-detects feature branches and offers PR creation)
 - `/create-pr [title]` - Create pull request with gh CLI, auto-trigger automation-sentinel for feature workflow analysis
 - `/update-roadmap <what-was-completed>` - Update ROADMAP.md (move completed items, reprioritize next steps)
