@@ -53,22 +53,39 @@ echo "Base branch: $BASE_BRANCH"
 
 If NO → Ask user: "Which base branch should this PR target?"
 
-## 3. Check for Uncommitted Changes
+## 3. Check for Uncommitted Changes (Soft Warning)
 
 ```bash
-# Ensure working directory is clean
-if [[ -n $(git status --porcelain) ]]; then
-  echo "⚠️ WARNING: You have uncommitted changes:"
-  git status --short
+# Check for uncommitted changes (excluding local settings)
+UNCOMMITTED=$(git status --porcelain | grep -v '.claude/settings.local.json' || true)
+
+if [[ -n "$UNCOMMITTED" ]]; then
+  echo "⚠️ WARNING: Uncommitted changes detected"
   echo ""
-  echo "Commit or stash changes before creating PR? (commit/stash/cancel)"
+  git status --short | grep -v '.claude/settings.local.json'
+  echo ""
+  echo "💡 Tip: Consider using /finish-session to commit + test before creating PR"
+  echo ""
+  echo "What would you like to do?"
+  echo "  1. Cancel and use /finish-session first (recommended)"
+  echo "  2. Commit now with manual message"
+  echo "  3. Continue anyway (PR will only include committed work)"
+  echo ""
 fi
 ```
 
-**Handle uncommitted changes:**
-- If user chooses "commit" → Use `/finish-session` workflow to commit first
-- If user chooses "stash" → `git stash` and continue
-- If user chooses "cancel" → Exit without creating PR
+**Handle user choice:**
+- **Option 1 (Cancel):** Exit with message "Run /finish-session, then /create-pr again"
+- **Option 2 (Commit now):**
+  - Prompt: "Enter commit message:"
+  - Stage all changes: `git add -A` (excluding .claude/settings.local.json)
+  - Commit with user's message + Claude Code footer
+  - Continue to PR creation
+- **Option 3 (Continue):**
+  - Warn: "⚠️ Note: Uncommitted changes won't be included in this PR"
+  - Continue to PR creation
+
+**Rationale:** Soft warning educates users about best practices (/finish-session workflow) while maintaining flexibility for alternative workflows (draft PRs, hotfixes, manual commits).
 
 ## 4. Generate PR Title and Description
 
