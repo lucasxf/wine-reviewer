@@ -175,9 +175,32 @@ PR_URL=$(gh pr view --json url --jq .url)
 echo "✅ Pull Request created: $PR_URL"
 ```
 
-## 6. Analyze Feature Development Workflow (Delegate to automation-sentinel)
+## 6. Analyze Feature Development Workflow (Two-Step Process)
 
-**Automatically trigger `automation-sentinel` agent** to analyze this feature's development:
+**CRITICAL:** Invoke agents in correct order to ensure fresh metrics before analysis.
+
+### Step 6A: Collect Metrics (pulse agent)
+
+**Automatically trigger `pulse` agent** (Haiku - fast, cheap) to update automation metrics:
+
+**Mode:** `--mode=delta` (incremental update since last run)
+
+**What pulse does:**
+1. Checks `.claude/metrics/usage-stats.toml` for last metrics checkpoint
+2. Scans git commits since last checkpoint
+3. Counts new agent/command invocations
+4. Updates TOML file with consolidated totals (incremental)
+5. Completes in ~30 seconds, ~500-1000 tokens (Haiku)
+
+**Output:** Updated `.claude/metrics/usage-stats.toml`
+
+---
+
+### Step 6B: Analyze Workflow (automation-sentinel agent)
+
+**Automatically trigger `automation-sentinel` agent** (Sonnet - deep analysis) after pulse completes:
+
+**Mode:** `--mode=delta` (reads pre-collected metrics from TOML file)
 
 **Provide context to automation-sentinel:**
 - **Feature branch:** `$CURRENT_BRANCH`
@@ -186,6 +209,7 @@ echo "✅ Pull Request created: $PR_URL"
 - **Files changed:** Output of `git diff $BASE_BRANCH..HEAD --name-only`
 - **Duration:** First commit date → Last commit date
 - **PR URL:** `$PR_URL`
+- **Metrics file:** `.claude/metrics/usage-stats.toml` (fresh data from pulse)
 
 **Request from automation-sentinel:**
 Generate a **Feature Development Report** with:

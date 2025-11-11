@@ -8,16 +8,17 @@
 
 ## 📚 Agent Overview
 
-This project includes **8 custom agents** designed to address specific needs (alphabetically ordered):
+This project includes **9 custom agents** designed to address specific needs (alphabetically ordered):
 
 | Agent | Purpose | Model | When to Use |
 |-------|---------|-------|-------------|
-| **automation-sentinel** | Meta-agent: automation health, metrics, optimization | Sonnet | Checking automation health, generating reports, finding redundancy |
+| **automation-sentinel** | Meta-agent: automation health, metrics analysis, optimization | Sonnet | Analyzing automation health, generating reports, finding redundancy |
 | **backend-code-reviewer** | Java/Spring Boot code review, best practices | Sonnet | Reviewing backend code after implementation |
 | **cross-project-architect** | Pattern extraction, templates, new projects | Sonnet | Starting new projects, extracting reusable patterns |
 | **flutter-implementation-coach** | Flutter coding, Riverpod, Dio, debugging | Sonnet | Implementing features, state management, API integration |
 | **frontend-ux-specialist** | UI/UX design, screen layouts, Material Design | Sonnet | Designing screens, improving UX, accessibility |
 | **learning-tutor** | Teaching concepts, structured learning, exercises | Sonnet | Learning new topics, understanding patterns |
+| **pulse** | Metrics collection: agent/command usage tracking | Haiku | Auto-triggered before automation-sentinel, updating metrics |
 | **session-optimizer** | Token efficiency, session planning, workflow | Haiku | Starting sessions, optimizing token usage |
 | **tech-writer** | Documentation (external + in-code), ADRs, Javadoc, OpenAPI | Sonnet | Creating ADRs, adding Javadoc, updating docs, OpenAPI annotations |
 
@@ -119,7 +120,42 @@ ls .claude/agents/
 
 ---
 
-### 2. Frontend/UX Specialist
+### 2. Pulse (Metrics Collection)
+
+**⚡ Use when:**
+- Automatically triggered before automation-sentinel (no manual invocation needed)
+- Manually updating automation metrics
+- Resetting metrics baseline
+
+**Example prompts:**
+- "Update automation metrics"
+- "Collect usage data"
+- "Reset metrics baseline"
+
+**What you get:**
+- Updated `.claude/metrics/usage-stats.toml` (TOML format, git-tracked)
+- Delta report showing new activity since last run
+- Consolidated lifetime totals (not just incremental changes)
+- Fast execution (~30 seconds, ~500-1000 tokens using Haiku)
+
+**Strengths:**
+- Uses Haiku model (10x cheaper than Sonnet)
+- Delta mode (50-80% token savings vs full history scans)
+- Git-aware checkpoints (uses commit SHA for synchronization)
+- Feeds data to automation-sentinel (separation of concerns)
+
+**Integration with automation-sentinel:**
+```
+/create-pr workflow:
+  1. pulse --mode=delta (collect metrics, update TOML)
+  2. automation-sentinel --mode=delta (read TOML, analyze)
+
+Result: 75% token reduction vs previous full-scan approach
+```
+
+---
+
+### 3. Frontend/UX Specialist
 
 **🎨 Use when:**
 - Designing new screens
@@ -543,6 +579,12 @@ OR
 - 🎯 **Focus:** Deep understanding + practice
 - 📏 **Output:** Lessons + exercises + assessments
 
+### Pulse
+- ⚡ **Style:** Data collector, metric tracker
+- 💬 **Tone:** Factual, concise, systematic
+- 🎯 **Focus:** Accurate data collection + delta tracking
+- 📏 **Output:** Updated metrics file (TOML) + delta reports
+
 ### Session Optimizer
 - ⚡ **Style:** Efficiency expert, planner
 - 💬 **Tone:** Concise, strategic, practical
@@ -566,6 +608,8 @@ What's your task?
 │
 ├─ Checking automation health / finding redundancy → automation-sentinel
 │
+├─ Collecting automation metrics (usually auto-triggered) → pulse
+│
 ├─ Reviewing backend code → backend-code-reviewer
 │
 ├─ New project / extracting patterns → cross-project-architect
@@ -586,19 +630,18 @@ What's your task?
 ## 🚦 Status & Maintenance
 
 ### Current Status
-- ✅ All 8 agents created (2025-10-29 update: added automation-sentinel + tech-writer)
+- ✅ All 9 agents created (2025-11-11 update: added pulse)
 - ✅ Tailored to your profile (backend expert, frontend novice)
 - ✅ Integrated with project conventions (CLAUDE.md, CODING_STYLE_GENERAL.md + stack-specific files)
 - ✅ Anti-cyclic dependency rule documented and enforced
 - ✅ Alphabetically organized for easy navigation
 - ✅ Ready to use
 
-### Recent Updates (2025-10-29)
-- ✅ **automation-sentinel** - Meta-agent for automation lifecycle management
-- ✅ **tech-writer** - Documentation agent (external + in-code, including OpenAPI)
-- ✅ Added anti-cyclic dependency rule (prevents infinite loops)
-- ✅ Reorganized agents alphabetically
-- ✅ Generated first health report (95/100 ecosystem health score)
+### Recent Updates (2025-11-11)
+- ✅ **pulse** - Metrics collection agent (Haiku model, feeds automation-sentinel)
+- ✅ **Stateful delta tracking** - `.claude/metrics/usage-stats.toml` with git-aware checkpoints
+- ✅ **automation-sentinel refactored** - Now reads pre-collected metrics (50-80% token savings)
+- ✅ **`/create-pr` updated** - Two-step workflow (pulse → sentinel) for efficiency
 
 ### Maintenance
 - **Update agents** when project conventions change
