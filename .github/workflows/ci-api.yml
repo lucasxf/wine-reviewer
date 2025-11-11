@@ -32,6 +32,12 @@ jobs:
           java-version: '21'
           cache: 'maven'
 
+      - name: Make Maven Wrapper executable
+        if: steps.check-pom.outputs.pom_exists == 'true'
+        run: |
+          cd services/api
+          chmod +x ./mvnw
+
       - name: Build & Test (API)
         if: steps.check-pom.outputs.pom_exists == 'true'
         run: |

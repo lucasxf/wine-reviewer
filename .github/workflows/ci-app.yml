@@ -29,7 +29,7 @@ jobs:
         if: steps.check_pubspec.outputs.has_pubspec == 'true'
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0'
+          flutter-version: '3.35.6' # FIX: Updated to match Dart SDK ^3.9.2 requirement
 
       - name: Pub get & Analyze & Test
         if: steps.check_pubspec.outputs.has_pubspec == 'true'
@@ -37,4 +37,11 @@ jobs:
         run: |
           flutter pub get
           flutter analyze
-          flutter test --coverage
+      - name: Run tests (if test directory exists)
+        run: |
+          cd apps/mobile
+          if [ -d "test" ]; then
+            flutter test --coverage
+          else
+            echo "No test directory found, skipping tests"
+          fi
