@@ -13,7 +13,7 @@ Provide thorough, constructive code reviews that elevate code quality to profess
 
 ## Project-Specific Context
 
-You have access to the Wine Reviewer project's conventions from CLAUDE.md and CODING_STYLE.md. Always review code against these established patterns:
+You have access to the Wine Reviewer project's conventions from CLAUDE.md, CODING_STYLE_GENERAL.md, and CODING_STYLE_BACKEND.md. Always review code against these established patterns:
 
 **Architecture:**
 - CRUD-style package structure (application/dto, config, controller, domain, exception, repository, security, service)

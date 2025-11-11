@@ -199,12 +199,19 @@ Core entities shared across frontend/backend:
 
 Documentation must be updated **at the end of each development session** to reflect the current state of the application.
 
-**CRITICAL RULE: Documentation Organization (3-Part Structure)**
+**CRITICAL RULE: Documentation Organization (4-Part Structure)**
 
-All main documentation files (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **must** be organized in 3 parts:
+All main documentation files (`CLAUDE.md`, `README.md`) **must** be organized in 4 parts. **CODING_STYLE** is now split into separate files:
 1. **PART 1: GENERAL** - Cross-stack guidelines, project overview, universal rules
 2. **PART 2: BACKEND** - Backend-specific (Java/Spring Boot) setup, conventions, testing
 3. **PART 3: FRONTEND** - Frontend-specific (Flutter/Dart) setup, conventions, testing
+4. **PART 4: INFRASTRUCTURE** - Infrastructure-specific (Docker, Testcontainers, CI/CD) setup, conventions, testing
+
+**CODING_STYLE File Structure:**
+- `CODING_STYLE_GENERAL.md` (root) - Universal conventions
+- `services/api/CODING_STYLE_BACKEND.md` - Java/Spring Boot conventions
+- `apps/mobile/CODING_STYLE_FRONTEND.md` - Flutter/Dart conventions
+- `infra/CODING_STYLE_INFRASTRUCTURE.md` - Docker/CI/CD conventions
 
 **Benefits:**
 - ✅ **Reusable**: Copy only relevant sections for new projects (backend-only, frontend-only, fullstack)
@@ -227,12 +234,12 @@ All main documentation files (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **mus
 3. **`CLAUDE.md`** (this file - update rarely)
    - Update when: New architectural patterns, critical directives
    - Don't update: For roadmap (use ROADMAP.md) or learnings (use LEARNINGS.md)
-   - **Structure:** 3 parts (General/Backend/Frontend/Infrastructure)
+   - **Structure:** 4 parts (General/Backend/Frontend/Infrastructure)
 
-4. **`CODING_STYLE.md`** (update when new conventions)
+4. **`CODING_STYLE files`** (update when new conventions)
    - Update when: New code patterns or conventions are identified
    - Include: Examples of correct/incorrect usage, rationale
-   - **Structure:** 3 parts (General/Backend/Frontend/Infrastructure)
+   - **Files:** CODING_STYLE_GENERAL.md + stack-specific (BACKEND/FRONTEND/INFRASTRUCTURE)
 
 5. **`README.md`** (update when features added)
    - Update when: New features, endpoints, or major configuration changes
@@ -256,7 +263,7 @@ All main documentation files (`CLAUDE.md`, `CODING_STYLE.md`, `README.md`) **mus
 ### Update Format
 - **ROADMAP.md:** Update at end of each session (use `/update-roadmap` or `/finish-session`)
 - **LEARNINGS.md:** Add session entry when significant decisions/learnings occur
-- **CLAUDE.md / CODING_STYLE.md:** Update only for new patterns/conventions, include date
+- **CLAUDE.md / CODING_STYLE files:** Update only for new patterns/conventions, include date
 - **README.md:** Update when features/setup changes, keep current with implementation
 
 ## Custom Slash Commands & Agents for Productivity
@@ -280,8 +287,8 @@ Type the command in Claude Code CLI to expand it into a full prompt.
 - `/update-roadmap <what-was-completed>` - Update ROADMAP.md (move completed items, reprioritize next steps)
 
 **Development Commands:**
-- `/directive <content>` - Add new directive to CLAUDE.md or CODING_STYLE.md with deduplication check
-- `/review-code [path]` - Analyze code quality, test coverage, CODING_STYLE.md adherence
+- `/directive <content>` - Add new directive to CLAUDE.md or appropriate CODING_STYLE file with deduplication check
+- `/review-code [path]` - Analyze code quality, test coverage, CODING_STYLE adherence (all relevant files)
 - `/quick-test <ServiceName>` - Run unit + integration tests for specific class
 
 **Backend Commands (Java/Spring):**
@@ -336,7 +343,7 @@ color: purple|blue|cyan|yellow|etc
   - [ ] Usage examples (minimum 2)
 - [ ] Markdown syntax is valid (no broken links, proper headers)
 - [ ] Code blocks have language specifiers
-- [ ] Agent follows project conventions (CLAUDE.md, CODING_STYLE.md)
+- [ ] Agent follows project conventions (CLAUDE.md, CODING_STYLE_GENERAL.md + stack-specific files)
 
 **Why This Matters:**
 - Without front matter, agents can't be auto-triggered by Claude Code
@@ -458,7 +465,7 @@ Key indexes:
 
 ## Backend Code Conventions
 
-**See `CODING_STYLE.md` Part 2 (Backend) for detailed conventions.**
+**See `services/api/CODING_STYLE_BACKEND.md` for detailed conventions.**
 
 **Key Rules:**
 - Constructor injection only (never `@Autowired` on fields)
@@ -592,7 +599,7 @@ void shouldCreateReviewWithValidData() throws Exception {
 - ❌ Not mocking external APIs (GoogleTokenValidator, S3Client)
 - ❌ Forgetting `@Transactional` (tests pollute database state)
 - ❌ Not testing authentication (403 Forbidden scenarios)
-- ❌ Isolating closing parenthesis `)` on separate line (see CODING_STYLE.md)
+- ❌ Isolating closing parenthesis `)` on separate line (see CODING_STYLE_BACKEND.md)
 
 ## Backend Entry Points
 
@@ -644,7 +651,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 ## Frontend Code Conventions
 
-**See `CODING_STYLE.md` Part 3 (Frontend) for detailed conventions.**
+**See `apps/mobile/CODING_STYLE_FRONTEND.md` for detailed conventions.**
 
 **Key Rules:**
 - Feature-first folder structure (`lib/features/`, `lib/core/`, `lib/common/`)
@@ -843,7 +850,11 @@ Sessions are organized chronologically (newest-first) with subsections for Backe
 **Core Documentation:**
 - **`ROADMAP.md`** - Current implementation status, next steps, backlog (updated each session)
 - **`LEARNINGS.md`** - Session logs, technical decisions, problems & solutions (chronological archive)
-- **`CODING_STYLE.md`** - Detailed coding conventions (organized by General/Backend/Frontend/Infrastructure)
+- **`CODING_STYLE files`** - Detailed coding conventions (split files: GENERAL + BACKEND + FRONTEND + INFRASTRUCTURE)
+  - `CODING_STYLE_GENERAL.md` - Universal cross-stack conventions
+  - `services/api/CODING_STYLE_BACKEND.md` - Java/Spring Boot conventions
+  - `apps/mobile/CODING_STYLE_FRONTEND.md` - Flutter/Dart conventions
+  - `infra/CODING_STYLE_INFRASTRUCTURE.md` - Docker/CI/CD conventions
 - **`README.md`** - Project setup instructions and overview
 
 **Efficiency & Best Practices:**

@@ -31,7 +31,7 @@ Help user **build a portfolio of reusable patterns** by:
 - **Strong backend** - Java/Spring Boot expertise
 - **Learning frontend** - Flutter/Dart novice
 - **Quality-focused** - Prefers systematic, well-documented approach
-- **Documentation-driven** - CLAUDE.md, CODING_STYLE.md, ROADMAP.md pattern
+- **Documentation-driven** - CLAUDE.md, CODING_STYLE_GENERAL.md, stack-specific CODING_STYLE files, ROADMAP.md pattern
 
 **Goals:**
 - Build more projects with similar quality
@@ -47,7 +47,7 @@ Help user **build a portfolio of reusable patterns** by:
 
 **1. Structural Patterns (Project Organization)**
 - Monorepo structure (apps/, services/, infra/)
-- 3-part documentation (General/Backend/Frontend)
+- 4-part documentation structure (General/Backend/Frontend/Infrastructure)
 - Feature-first architecture (Flutter)
 - Package structure (Spring Boot)
 
@@ -107,8 +107,11 @@ Help user **build a portfolio of reusable patterns** by:
 **1. Documentation Templates**
 ```
 templates/docs/
-├── CLAUDE-TEMPLATE.md         # 3-part structure
-├── CODING_STYLE-TEMPLATE.md   # Conventions template
+├── CLAUDE-TEMPLATE.md         # 4-part structure
+├── CODING_STYLE_GENERAL-TEMPLATE.md      # Universal conventions
+├── CODING_STYLE_BACKEND-TEMPLATE.md      # Java/Spring Boot
+├── CODING_STYLE_FRONTEND-TEMPLATE.md     # Flutter/Dart
+├── CODING_STYLE_INFRASTRUCTURE-TEMPLATE.md # Docker/CI/CD
 ├── ROADMAP-TEMPLATE.md        # Status tracking template
 ├── LEARNINGS-TEMPLATE.md      # Session log template
 └── README-TEMPLATE.md         # Project overview template
@@ -244,7 +247,10 @@ templates/agents/
 ```bash
 # Copy documentation templates
 cp templates/docs/CLAUDE-TEMPLATE.md new-project/CLAUDE.md
-cp templates/docs/CODING_STYLE-TEMPLATE.md new-project/CODING_STYLE.md
+cp templates/docs/CODING_STYLE_GENERAL-TEMPLATE.md new-project/CODING_STYLE_GENERAL.md
+cp templates/backend/CODING_STYLE_BACKEND-TEMPLATE.md new-project/services/api/CODING_STYLE_BACKEND.md
+cp templates/frontend/CODING_STYLE_FRONTEND-TEMPLATE.md new-project/apps/mobile/CODING_STYLE_FRONTEND.md
+cp templates/infra/CODING_STYLE_INFRASTRUCTURE-TEMPLATE.md new-project/infra/CODING_STYLE_INFRASTRUCTURE.md
 cp templates/docs/ROADMAP-TEMPLATE.md new-project/ROADMAP.md
 cp templates/docs/README-TEMPLATE.md new-project/README.md
 

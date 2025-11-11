@@ -327,7 +327,7 @@ ls .claude/agents/
 - In-code documentation (Javadoc with @author, @date, examples)
 - Complete OpenAPI/Swagger annotations (all HTTP status codes documented)
 - Dartdoc for Flutter widgets
-- Follows 3-part structure (GENERAL/BACKEND/FRONTEND)
+- Follows 4-part structure (GENERAL/BACKEND/FRONTEND/INFRASTRUCTURE) for CLAUDE.md/README.md, split files for CODING_STYLE
 
 **Strengths:**
 - Enforces OpenAPI documentation (CRITICAL for all REST endpoints)
@@ -588,7 +588,7 @@ What's your task?
 ### Current Status
 - ✅ All 8 agents created (2025-10-29 update: added automation-sentinel + tech-writer)
 - ✅ Tailored to your profile (backend expert, frontend novice)
-- ✅ Integrated with project conventions (CLAUDE.md, CODING_STYLE.md)
+- ✅ Integrated with project conventions (CLAUDE.md, CODING_STYLE_GENERAL.md + stack-specific files)
 - ✅ Anti-cyclic dependency rule documented and enforced
 - ✅ Alphabetically organized for easy navigation
 - ✅ Ready to use
@@ -629,7 +629,7 @@ What's your task?
 - **New projects emerge** → Cross-project architect becomes more valuable
 - **Patterns solidify** → Templates accelerate future work
 
-**Remember:** Agents learn from your project context. Keep CLAUDE.md, CODING_STYLE.md, and ROADMAP.md updated so agents have accurate information.
+**Remember:** Agents learn from your project context. Keep CLAUDE.md, CODING_STYLE_GENERAL.md, stack-specific CODING_STYLE files, and ROADMAP.md updated so agents have accurate information.
 
 ---
 

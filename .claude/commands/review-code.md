@@ -12,7 +12,7 @@ Scope: $ARGUMENTS
 Perform a comprehensive code quality review focusing on:
 
 ### 1. Code Quality Checks
-- Adherence to CODING_STYLE.md conventions
+- Adherence to CODING_STYLE conventions (GENERAL + stack-specific)
 - Proper use of directives from CLAUDE.md
 - Java 21 features usage (var, records, pattern matching, text blocks)
 - Spring Boot best practices (constructor injection, @Transactional placement, proper stereotype usage)
