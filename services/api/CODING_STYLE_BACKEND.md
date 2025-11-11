@@ -574,19 +574,405 @@ public class AccountController {
 - Preferir código autoexplicativo a comentários excessivos
 - Podem ser em português
 
-## 🧪 Testes (Backend)
+## 🧪 Testing Standards (Backend - Java/Spring Boot)
 
-### Estrutura de Testes
+### TDD Workflow for Backend Development
 
-- JUnit 5
-- Cobertura de caminhos de sucesso e falha
-- Testes de integração com contexto completo
-- Mock apenas quando necessário (preferir testes reais)
+**CRITICAL RULE:** Write tests BEFORE implementation (Red-Green-Refactor).
 
-### Nomenclatura
+**Backend TDD Workflow:**
 
-- `should[ExpectedBehavior]When[StateUnderTest]`
-- Exemplo: `shouldCreateAccountWhenValidCommand()`
+1. **RED** - Write failing test
+   ```java
+   @Test
+   void shouldCreateReviewWhenValidDataProvided() {
+       // Given
+       var request = validReviewRequest();
+
+       // When
+       var result = service.createReview(request, userId);
+
+       // Then
+       assertThat(result.getRating()).isEqualTo(5);
+   }
+   // Test fails - method doesn't exist yet
+   ```
+
+2. **GREEN** - Implement feature
+   ```java
+   public ReviewResponse createReview(CreateReviewRequest request, UUID userId) {
+       // Minimal implementation to pass test
+       var review = new Review();
+       review.setRating(request.rating());
+       repository.save(review);
+       return toResponse(review);
+   }
+   // Test passes
+   ```
+
+3. **REFACTOR** - Clean up
+   ```java
+   public ReviewResponse createReview(CreateReviewRequest request, UUID userId) {
+       // Improved implementation
+       var user = findUserOrThrow(userId);
+       var wine = findWineOrThrow(request.wineId());
+
+       var review = toReview(request, user, wine);
+       repository.save(review);
+       return toReviewResponse(review);
+   }
+   // Test still passes, code is cleaner
+   ```
+
+### Given/When/Then Structure (Backend Examples)
+
+**Unit Test Example (Service Layer):**
+
+```java
+@ExtendWith(MockitoExtension.class)
+class ReviewServiceTest {
+
+    @Mock
+    private ReviewRepository reviewRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private WineRepository wineRepository;
+
+    @InjectMocks
+    private ReviewServiceImpl service;
+
+    @Test
+    void shouldCreateReviewWhenValidDataProvided() {
+        // Given - Arrange test data and mocks
+        final var userId = UUID.randomUUID();
+        final var wineId = UUID.randomUUID();
+        final var user = createTestUser(userId);
+        final var wine = createTestWine(wineId);
+        final var request = new CreateReviewRequest(
+                wineId.toString(),
+                5,
+                "Excelente vinho!",
+                null);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
+        when(reviewRepository.save(any(Review.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When - Execute the behavior
+        final var result = service.createReview(request, userId);
+
+        // Then - Verify outcome
+        assertThat(result).isNotNull();
+        assertThat(result.getRating()).isEqualTo(5);
+        assertThat(result.getNotes()).isEqualTo("Excelente vinho!");
+        assertThat(result.getAuthor().getId()).isEqualTo(userId);
+
+        verify(reviewRepository).save(any(Review.class));
+    }
+
+    @Test
+    void shouldThrowExceptionWhenRatingOutOfRange() {
+        // Given
+        final var userId = UUID.randomUUID();
+        final var wineId = UUID.randomUUID();
+        final var request = new CreateReviewRequest(
+                wineId.toString(),
+                6,  // Invalid rating (must be 1-5)
+                "Notes",
+                null);
+
+        // When/Then - Verify exception
+        assertThatThrownBy(() -> service.createReview(request, userId))
+                .isInstanceOf(InvalidRatingException.class)
+                .hasMessageContaining("Rating deve estar entre 1 e 5");
+
+        verify(reviewRepository, never()).save(any());
+    }
+
+}
+```
+
+**Integration Test Example (Controller + Repository with Testcontainers):**
+
+```java
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("integration")
+@Transactional
+class ReviewControllerIT extends AbstractIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private WineRepository wineRepository;
+
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    private User testUser;
+    private Wine testWine;
+
+    @BeforeEach
+    void setUp() {
+        testUser = userRepository.save(createTestUser());
+        testWine = wineRepository.save(createTestWine());
+    }
+
+    @Test
+    void shouldCreateReviewWhenValidDataProvided() throws Exception {
+        // Given - Prepare request
+        final var request = new CreateReviewRequest(
+                testWine.getId().toString(),
+                5,
+                "Excelente vinho!",
+                null);
+
+        // When - Send HTTP request
+        mockMvc.perform(post("/api/reviews")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(authenticated(testUser.getId()))
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+
+                // Then - Verify HTTP response
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.rating").value(5))
+                .andExpect(jsonPath("$.notes").value("Excelente vinho!"))
+                .andExpect(jsonPath("$.author.displayName")
+                        .value(testUser.getDisplayName()));
+
+        // Then - Verify database persistence
+        final var reviews = reviewRepository.findAll();
+        assertThat(reviews).hasSize(1);
+        assertThat(reviews.get(0).getRating()).isEqualTo(5);
+        assertThat(reviews.get(0).getUser().getId()).isEqualTo(testUser.getId());
+    }
+
+    @Test
+    void shouldReturn400WhenRatingOutOfRange() throws Exception {
+        // Given
+        final var request = new CreateReviewRequest(
+                testWine.getId().toString(),
+                6,  // Invalid
+                "Notes",
+                null);
+
+        // When/Then
+        mockMvc.perform(post("/api/reviews")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .with(authenticated(testUser.getId()))
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isBadRequest());
+
+        // Then - No review created
+        assertThat(reviewRepository.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldReturn403WhenUserIsNotAuthenticated() throws Exception {
+        // Given
+        final var request = validReviewRequest();
+
+        // When/Then - No authentication
+        mockMvc.perform(post("/api/reviews")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+}
+```
+
+### Backend Testing Conventions
+
+**Test Class Organization:**
+```java
+@SpringBootTest  // or @WebMvcTest, @DataJpaTest
+class ReviewServiceTest {
+
+    // 1. Fields (dependencies, test data)
+    @Autowired
+    private ReviewService service;
+
+    private User testUser;
+    private Wine testWine;
+
+    // 2. Setup methods
+    @BeforeEach
+    void setUp() {
+        testUser = createTestUser();
+        testWine = createTestWine();
+    }
+
+    // 3. Happy path tests (grouped)
+    @Test
+    void shouldCreateReviewWhenValidDataProvided() { }
+
+    @Test
+    void shouldUpdateReviewWhenUserIsOwner() { }
+
+    @Test
+    void shouldDeleteReviewWhenUserIsOwner() { }
+
+    // 4. Error path tests (grouped)
+    @Test
+    void shouldThrowExceptionWhenRatingOutOfRange() { }
+
+    @Test
+    void shouldThrowExceptionWhenWineNotFound() { }
+
+    @Test
+    void shouldThrowExceptionWhenUserIsNotOwner() { }
+
+    // 5. Edge case tests
+    @Test
+    void shouldReturnEmptyListWhenNoReviewsExist() { }
+
+    @Test
+    void shouldHandleNullPhotoUrl() { }
+
+    // 6. Helper methods (private)
+    private User createTestUser() { }
+    private Wine createTestWine() { }
+    private CreateReviewRequest validReviewRequest() { }
+
+}
+```
+
+**AssertJ for Fluent Assertions:**
+
+```java
+// ✅ GOOD - Fluent, readable AssertJ
+assertThat(result.getRating()).isEqualTo(5);
+assertThat(reviews).hasSize(3);
+assertThat(reviews)
+        .extracting(Review::getRating)
+        .containsExactly(5, 4, 3);
+assertThat(result).isNotNull();
+assertThatThrownBy(() -> service.doSomething())
+        .isInstanceOf(DomainException.class)
+        .hasMessageContaining("error");
+
+// ❌ BAD - JUnit assertions (less readable)
+assertEquals(5, result.getRating());
+assertEquals(3, reviews.size());
+assertNotNull(result);
+```
+
+**Testcontainers Best Practices:**
+
+```java
+@SpringBootTest
+@ActiveProfiles("integration")
+@Transactional  // Auto-rollback after each test
+public abstract class AbstractIntegrationTest {
+
+    @Container
+    static PostgreSQLContainer<?> postgres =
+            new PostgreSQLContainer<>("postgres:16-alpine")
+                    .withDatabaseName("testdb")
+                    .withUsername("test")
+                    .withPassword("test")
+                    .withReuse(true);  // Reuse container across test classes
+
+    @DynamicPropertySource
+    static void registerPgProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
+    }
+
+}
+```
+
+### Test Smells to Avoid (Backend)
+
+**1. Testing Implementation Details**
+```java
+// ❌ BAD - Tests how (implementation)
+@Test
+void shouldSaveToRepository() {
+    service.createReview(request);
+    verify(repository).save(any());  // Testing internal call
+}
+
+// ✅ GOOD - Tests what (behavior)
+@Test
+void shouldCreateReviewWhenValidDataProvided() {
+    var result = service.createReview(request);
+    assertThat(result.getId()).isNotNull();  // Testing outcome
+}
+```
+
+**2. Multiple Behaviors in One Test**
+```java
+// ❌ BAD - Tests multiple behaviors
+@Test
+void shouldWorkCorrectly() {
+    service.create(request);  // Test 1
+    service.update(updateRequest);  // Test 2
+    service.delete(id);  // Test 3
+}
+
+// ✅ GOOD - One test per behavior
+@Test
+void shouldCreateReviewWhenValidDataProvided() { }
+
+@Test
+void shouldUpdateReviewWhenUserIsOwner() { }
+
+@Test
+void shouldDeleteReviewWhenUserIsOwner() { }
+```
+
+**3. Obscure Test**
+```java
+// ❌ BAD - Unclear what's being tested
+@Test
+void test1() {
+    var result = service.doSomething(1, 2, 3);
+    assertEquals(6, result);
+}
+
+// ✅ GOOD - Clear name and structure
+@Test
+void shouldSumAllParametersWhenAllArePositive() {
+    // Given
+    int a = 1, b = 2, c = 3;
+
+    // When
+    var result = service.sum(a, b, c);
+
+    // Then
+    assertThat(result).isEqualTo(6);
+}
+```
+
+### Backend Test Checklist
+
+- [ ] Test written BEFORE implementation (TDD)
+- [ ] Given/When/Then structure with comments
+- [ ] Test name follows `shouldXWhenY` pattern
+- [ ] Tests behavior, not implementation
+- [ ] One behavior per test
+- [ ] Uses AssertJ for assertions
+- [ ] Integration tests use Testcontainers
+- [ ] Error cases covered (exceptions, edge cases)
+- [ ] No test smells (see above)
+- [ ] Tests are fast (< 1s for unit, < 5s for integration)
 
 ## 🔧 Logging (Backend)
 
