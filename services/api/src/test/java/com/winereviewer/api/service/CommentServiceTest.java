@@ -28,7 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -62,8 +63,8 @@ class CommentServiceTest {
     }
 
     @Test
-    void givenAddCommentRequest_whenAddComment_thenReturnComment() {
-        // given
+    void shouldAddCommentWhenValidDataProvided() {
+        // Given
         final var request = getCreateCommentRequest(reviewId);
         user = getUser(userId);
         review = getReview(reviewId, user);
@@ -71,15 +72,15 @@ class CommentServiceTest {
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        // when
+        // When
         final var response = commentService.addComment(request, userId);
 
-        // then
-        assertNotNull(response.id());
-        assertNotNull(response.text(), request.text());
-        assertNotNull(response.createdAt());
-        assertNotNull(response.updatedAt());
-        assertEquals(response.author(), author);
+        // Then
+        assertThat(response.id()).isNotNull();
+        assertThat(response.text()).isEqualTo(request.text());
+        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.updatedAt()).isNotNull();
+        assertThat(response.author()).isEqualTo(author);
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(userRepository, times(1)).findById(userId);
@@ -87,20 +88,18 @@ class CommentServiceTest {
     }
 
     @Test
-    void givenAddCommentRequest_whenReviewNotFound_thenThrowException() {
-        // given
+    void shouldThrowExceptionWhenReviewNotFoundForAddComment() {
+        // Given
         final var request = getCreateCommentRequest(reviewId);
         final Optional<Review> reviewNotFound = Optional.empty();
 
         when(reviewRepository.findById(reviewId)).thenReturn(reviewNotFound);
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class,
                 () -> commentService.addComment(request, userId));
 
-        // then
-        assertTrue(exception.getMessage().contains("Review"));
-        assertTrue(exception.getMessage().contains(reviewId.toString()));
+        assertThat(exception.getMessage()).contains("Review", reviewId.toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(userRepository, never()).findById(any());
@@ -108,8 +107,8 @@ class CommentServiceTest {
     }
 
     @Test
-    void givenAddCommentRequest_whenUserNotFound_thenThrowException() {
-        // given
+    void shouldThrowExceptionWhenUserNotFoundForAddComment() {
+        // Given
         final var request = getCreateCommentRequest(reviewId);
         review = getReview(reviewId, user);
         final Optional<User> userNotFound = Optional.empty();
@@ -117,12 +116,11 @@ class CommentServiceTest {
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
         when(userRepository.findById(userId)).thenReturn(userNotFound);
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class,
                 () -> commentService.addComment(request, userId));
 
-        assertTrue(exception.getMessage().contains("User"));
-        assertTrue(exception.getMessage().contains(userId.toString()));
+        assertThat(exception.getMessage()).contains("User", userId.toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(userRepository, times(1)).findById(userId);
@@ -130,8 +128,8 @@ class CommentServiceTest {
     }
 
     @Test
-    void givenUpdateCommentRequest_whenUpdateComment_thenReturnComment() {
-        // given
+    void shouldUpdateCommentWhenValidDataProvided() {
+        // Given
         final var request = getUpdateCommentRequest(commentId);
         user = getUser(userId);
         review = getReview(reviewId, user);
@@ -139,35 +137,33 @@ class CommentServiceTest {
         var author = getAuthor(user);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-        // when
+        // When
         final var response = commentService.updateComment(request, userId);
 
-        // then
-        assertNotNull(response.id());
-        assertNotNull(response.text(), request.text());
-        assertNotNull(response.createdAt());
-        assertNotNull(response.updatedAt());
-        assertEquals(response.author(), author);
+        // Then
+        assertThat(response.id()).isNotNull();
+        assertThat(response.text()).isEqualTo(request.text());
+        assertThat(response.createdAt()).isNotNull();
+        assertThat(response.updatedAt()).isNotNull();
+        assertThat(response.author()).isEqualTo(author);
 
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, times(1)).save(any(Comment.class));
     }
 
     @Test
-    void givenUpdateCommentRequest_whenCommentNotFound_thenThrowException() {
-        // given
+    void shouldThrowExceptionWhenCommentNotFoundForUpdate() {
+        // Given
         final var request = getUpdateCommentRequest(reviewId);
         review = getReview(reviewId, user);
         when(commentRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        // when
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 commentService.updateComment(request, userId));
 
-        // then
-        assertTrue(exception.getMessage().contains("Comment"));
         final String commentId = request.commentId();
-        assertTrue(exception.getMessage().contains(commentId));
+        assertThat(exception.getMessage()).contains("Comment", commentId);
 
         verify(commentRepository, times(1)).findById(UUID.fromString(commentId));
         verify(userRepository, never()).findById(userId);
@@ -175,8 +171,8 @@ class CommentServiceTest {
     }
 
     @Test
-    void givenUpdateCommentRequest_whenUnauthorizedUser_thenThrowException() {
-        // given
+    void shouldThrowUnauthorizedExceptionWhenUserNotOwnerOnUpdate() {
+        // Given
         final var request = getUpdateCommentRequest(commentId);
         var storedUser = getUser(UUID.randomUUID());
         user = getUser(userId);
@@ -185,13 +181,11 @@ class CommentServiceTest {
         comment = getComment(commentId, review, storedUser);
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-        // when
+        // When & Then
         final var exception = assertThrows(UnauthorizedAccessException.class,
                 () -> commentService.updateComment(request, userId));
 
-        // then
-        assertTrue(exception.getMessage().contains("Comment"));
-        assertTrue(exception.getMessage().contains(userId.toString()));
+        assertThat(exception.getMessage()).contains("Comment", userId.toString());
 
         verify(commentRepository, times(1)).findById(commentId);
         verify(userRepository, never()).findById(userId);
@@ -199,8 +193,8 @@ class CommentServiceTest {
     }
 
     @Test
-    void givenGetCommentsPerUser_whenGetComments_thenReturnComments() {
-        // given
+    void shouldReturnCommentsPerUserWhenValidUserIdProvided() {
+        // Given
         Pageable pageable = PageRequest.of(0, 10);
         user = getUser(userId);
         review = getReview(reviewId, user);
@@ -211,21 +205,21 @@ class CommentServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(commentRepository.findByAuthorOrderByCreatedAtDesc(user, pageable)).thenReturn(commentsPage);
 
-        // when
+        // When
         final Page<CommentResponse> responsePage = commentService.getCommentsPerUser(userId, pageable);
 
-        // then
-        assertTrue(responsePage.hasContent());
-        assertEquals(responsePage.getContent().size(), comments.size());
-        assertEquals(responsePage.getContent().getFirst().id(), comments.getFirst().getId().toString());
+        // Then
+        assertThat(responsePage.hasContent()).isTrue();
+        assertThat(responsePage.getContent()).hasSize(comments.size());
+        assertThat(responsePage.getContent().getFirst().id()).isEqualTo(comments.getFirst().getId().toString());
 
         verify(userRepository, times(1)).findById(userId);
         verify(commentRepository, times(1)).findByAuthorOrderByCreatedAtDesc(user, pageable);
     }
 
     @Test
-    void givenGetCommentsPerUser_whenUserNotFound_thenThrowException() {
-        // given
+    void shouldThrowExceptionWhenUserNotFoundForGetCommentsPerUser() {
+        // Given
         Pageable pageable = PageRequest.of(0, 10);
         user = getUser(userId);
         review = getReview(reviewId, user);
@@ -233,21 +227,19 @@ class CommentServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class,
                 () -> commentService.getCommentsPerUser(userId, pageable));
 
-        // then
-        assertTrue(exception.getMessage().contains("User"));
-        assertTrue(exception.getMessage().contains(userId.toString()));
+        assertThat(exception.getMessage()).contains("User", userId.toString());
 
         verify(userRepository, times(1)).findById(userId);
         verify(commentRepository, never()).findByAuthorOrderByCreatedAtDesc(user, pageable);
     }
 
     @Test
-    void givenGetCommentsPerReview_whenGetComments_thenReturnComments() {
-        // given
+    void shouldReturnCommentsPerReviewWhenValidReviewIdProvided() {
+        // Given
         Pageable pageable = PageRequest.of(0, 10);
         user = getUser(userId);
         review = getReview(reviewId, user);
@@ -258,21 +250,21 @@ class CommentServiceTest {
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
         when(commentRepository.findByReviewOrderByCreatedAtAsc(review, pageable)).thenReturn(commentsPage);
 
-        // when
+        // When
         final Page<CommentResponse> responsePage = commentService.getCommentsPerReview(reviewId, pageable);
 
-        // then
-        assertTrue(responsePage.hasContent());
-        assertEquals(responsePage.getContent().size(), comments.size());
-        assertEquals(responsePage.getContent().getFirst().id(), comments.getFirst().getId().toString());
+        // Then
+        assertThat(responsePage.hasContent()).isTrue();
+        assertThat(responsePage.getContent()).hasSize(comments.size());
+        assertThat(responsePage.getContent().getFirst().id()).isEqualTo(comments.getFirst().getId().toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(commentRepository, times(1)).findByReviewOrderByCreatedAtAsc(review, pageable);
     }
 
     @Test
-    void givenGetCommentsPerReview_whenReviewNotFound_thenThrowException() {
-        // given
+    void shouldThrowExceptionWhenReviewNotFoundForGetCommentsPerReview() {
+        // Given
         Pageable pageable = PageRequest.of(0, 10);
         user = getUser(userId);
         review = getReview(reviewId, user);
@@ -280,59 +272,55 @@ class CommentServiceTest {
 
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class,
                 () -> commentService.getCommentsPerReview(reviewId, pageable));
 
-        // then
-        assertTrue(exception.getMessage().contains("Review"));
-        assertTrue(exception.getMessage().contains(reviewId.toString()));
+        assertThat(exception.getMessage()).contains("Review", reviewId.toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(commentRepository, never()).findByReviewOrderByCreatedAtAsc(review, pageable);
     }
 
     @Test
-    void givenDeleteComment_whenDeleteComment_thenDeleteComment() {
-        // given
+    void shouldDeleteCommentWhenValidIdAndOwnerProvided() {
+        // Given
         user = getUser(userId);
         review = getReview(reviewId, user);
         comment = getComment(commentId, review, user);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-        // when
+        // When
         commentService.deleteComment(commentId, userId);
 
-        // then
+        // Then
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, times(1)).delete(comment);
     }
 
     @Test
-    void givenDeleteComment_whenCommentNotFound_thenThrowException() {
-        // given
+    void shouldThrowExceptionWhenCommentNotFoundForDelete() {
+        // Given
         user = getUser(userId);
         review = getReview(reviewId, user);
         comment = getComment(commentId, review, user);
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class,
                 () -> commentService.deleteComment(commentId, userId));
 
-        // then
-        assertTrue(exception.getMessage().contains("Comment"));
-        assertTrue(exception.getMessage().contains(commentId.toString()));
+        assertThat(exception.getMessage()).contains("Comment", commentId.toString());
 
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, never()).delete(comment);
     }
 
     @Test
-    void givenDeleteComment_whenUnauthorizedUser_thenThrowException() {
-        // given
+    void shouldThrowUnauthorizedExceptionWhenUserNotOwnerOnDelete() {
+        // Given
         final User author = getUser(UUID.randomUUID());
         user = getUser(userId);
         review = getReview(reviewId, author);
@@ -340,13 +328,11 @@ class CommentServiceTest {
 
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(UnauthorizedAccessException.class,
                 () -> commentService.deleteComment(commentId, userId));
 
-        // then
-        assertTrue(exception.getMessage().contains("Comment"));
-        assertTrue(exception.getMessage().contains(userId.toString()));
+        assertThat(exception.getMessage()).contains("Comment", userId.toString());
 
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, never()).delete(comment);
