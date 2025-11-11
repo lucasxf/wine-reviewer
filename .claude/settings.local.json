@@ -46,7 +46,16 @@
       "Bash(done)",
       "Bash(./mvnw clean:*)",
       "Bash(./mvnw dependency:tree:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "SlashCommand(/create-pr)",
+      "Bash(git rev-parse:*)",
+      "Bash(for agent in \"tech-writer\" \"automation-sentinel\" \"backend-code-reviewer\" \"session-optimizer\" \"pulse\" \"flutter-implementation-coach\" \"frontend-ux-specialist\" \"learning-tutor\" \"cross-project-architect\")",
+      "Bash(do echo -n \"$agent: \")",
+      "Bash(for cmd in \"start-session\" \"finish-session\" \"create-pr\" \"update-roadmap\" \"review-code\" \"quick-test\" \"test-quick\" \"test-service\" \"build-quiet\" \"verify-quiet\" \"docker-start\" \"docker-stop\" \"api-doc\" \"directive\" \"save-response\" \"resume-session\")",
+      "Bash(do echo -n \"$cmd: \")",
+      "WebSearch",
+      "WebFetch(domain:martinfowler.com)",
+      "WebFetch(domain:dannorth.net)"
     ],
     "deny": [],
     "ask": []

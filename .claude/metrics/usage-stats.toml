@@ -1,0 +1,107 @@
+[metadata]
+timestamp = "2025-11-11T22:01:55Z"
+commit_sha = "62ba990850f947d010fcd69ed3066e0eb80aa21f"
+branch = "chore/optimize-commands-further"
+schema_version = "1.0.0"
+updated_by = "pulse"
+mode = "baseline"
+
+[agent_usage.tech_writer]
+invocations = 13
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.automation_sentinel]
+invocations = 21
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.backend_code_reviewer]
+invocations = 4
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.session_optimizer]
+invocations = 5
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.pulse]
+invocations = 4
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.flutter_implementation_coach]
+invocations = 1
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.frontend_ux_specialist]
+invocations = 2
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.learning_tutor]
+invocations = 1
+last_used = "2025-11-11T22:01:55Z"
+
+[agent_usage.cross_project_architect]
+invocations = 2
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.start_session]
+invocations = 7
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.finish_session]
+invocations = 12
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.create_pr]
+invocations = 8
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.update_roadmap]
+invocations = 4
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.review_code]
+invocations = 1
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.quick_test]
+invocations = 1
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.test_quick]
+invocations = 1
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.test_service]
+invocations = 0
+last_used = ""
+
+[command_usage.build_quiet]
+invocations = 1
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.verify_quiet]
+invocations = 0
+last_used = ""
+
+[command_usage.docker_start]
+invocations = 1
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.docker_stop]
+invocations = 0
+last_used = ""
+
+[command_usage.api_doc]
+invocations = 0
+last_used = ""
+
+[command_usage.directive]
+invocations = 3
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.save_response]
+invocations = 5
+last_used = "2025-11-11T22:01:55Z"
+
+[command_usage.resume_session]
+invocations = 5
+last_used = "2025-11-11T22:01:55Z"
