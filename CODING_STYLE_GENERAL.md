@@ -12,7 +12,142 @@
 - **Código em inglês** - Nomes de classes, métodos, variáveis sempre em inglês
 - **Comentários e logs podem ser em português** - Documentação e mensagens de log
 - **Separation of Concerns** - Clara divisão entre camadas
-- **Test-After-Implementation** - Sempre criar testes imediatamente após implementar classe testável
+- **Test-Driven Development (TDD)** - Sempre seguir ciclo Red-Green-Refactor ao criar novas features
+
+---
+
+## 🧪 Testing Standards (Universal)
+
+### Test-Driven Development (TDD) Workflow
+
+**CRITICAL RULE:** ALWAYS follow TDD workflow when implementing new features.
+
+**The TDD Cycle (Red-Green-Refactor):**
+
+1. **RED** - Write a failing test first
+   - Define expected behavior BEFORE implementation
+   - Test should fail because feature doesn't exist yet
+   - Clarifies requirements and API design
+
+2. **GREEN** - Write minimal code to make test pass
+   - Implement simplest solution that passes test
+   - Don't worry about perfection yet
+   - Goal: Get to green quickly
+
+3. **REFACTOR** - Clean up code and tests
+   - **CRITICAL:** Don't skip this step (most common TDD failure)
+   - Remove duplication, improve naming, optimize
+   - Tests should still pass after refactoring
+   - If tests break during refactor, analyze for code smells FIRST
+
+**When Tests Keep Breaking - Critical Analysis Pattern:**
+
+If tests consistently break during refactoring or minor changes, **STOP** and analyze for code smells BEFORE adjusting tests:
+
+**Common Code Smells Indicating Brittle Tests:**
+- **Tight Coupling:** Implementation details leaking into tests
+- **God Objects:** Classes doing too much, tests test multiple concerns
+- **Fragile Base Class:** Inheritance hierarchies causing cascading test failures
+- **Primitive Obsession:** Using primitives instead of domain objects
+- **Shotgun Surgery:** Changing one feature breaks tests in multiple places
+
+**Resolution Process:**
+1. **Identify Smell:** What design issue is causing test brittleness?
+2. **Refactor Code:** Fix underlying design problem (not tests)
+3. **Update Tests:** Only after design is improved
+4. **Validate:** Tests should be more stable and maintainable
+
+### Behavior-Driven Development (BDD) - Given/When/Then Structure
+
+**CRITICAL RULE:** ALL tests must follow Given/When/Then structure for clarity and consistency.
+
+**The Given/When/Then Pattern:**
+
+- **Given (Arrange):** Set up preconditions and initial state
+  - Create test data, mock dependencies, configure system
+  - Establish context for the behavior being tested
+
+- **When (Act):** Execute the specific behavior under test
+  - Call the method, trigger the event, send the request
+  - Single action being tested (not multiple actions)
+
+- **Then (Assert):** Verify expected outcome
+  - Assert results, check state changes, verify interactions
+  - Multiple assertions OK if testing single behavior
+
+**Parallel Patterns:**
+- **Arrange-Act-Assert (AAA):** Same concept, different naming
+- **Setup-Exercise-Verify-Teardown:** Extended version with cleanup
+
+**Test Naming Convention:**
+
+**Format:** `should[ExpectedBehavior]When[StateUnderTest]`
+
+**Examples:**
+- `shouldCreateReviewWhenValidDataProvided`
+- `shouldThrowExceptionWhenRatingOutOfRange`
+- `shouldReturnEmptyListWhenNoReviewsExist`
+- `shouldUpdateReviewWhenUserIsOwner`
+- `shouldReturn403WhenUserIsNotOwner`
+
+**Benefits:**
+- Clear, self-documenting test names
+- Behavior-focused (not implementation-focused)
+- Business language (readable by non-developers)
+- Easy to identify what's being tested
+
+### Test Coverage Strategy
+
+**CRITICAL RULE:** Immediately create tests after implementing testable classes.
+
+**Testable Classes (MUST have tests):**
+- ✅ Services (business logic)
+- ✅ Repositories (data access)
+- ✅ Controllers (API endpoints)
+- ✅ Utilities (helper functions)
+- ✅ Domain logic (aggregates, commands, events)
+
+**Non-Testable Classes (SKIP tests):**
+- ❌ Configuration classes (@Configuration, @ConfigurationProperties)
+- ❌ Simple DTOs (no logic, just data)
+- ❌ Entities (unless complex domain logic)
+
+**Coverage Goals:**
+- Critical paths: 100% (authentication, payments, data integrity)
+- Business logic: 90%+ (services, domain layer)
+- Controllers: 80%+ (happy path + error cases)
+- Overall: 70%+ minimum
+
+**Workflow:**
+1. Write failing test (RED)
+2. Implement class/method (GREEN)
+3. Refactor (REFACTOR)
+4. Run tests, verify pass
+5. Commit code + tests together
+6. **Never defer test writing to "later"**
+
+### Test Organization
+
+**File Naming:**
+- Unit tests: `ClassNameTest.java` or `class_name_test.dart`
+- Integration tests: `ClassNameIT.java` (backend only)
+- Widget tests: `widget_name_test.dart` (frontend only)
+
+**Location:**
+- Mirror production code structure under `src/test/`
+- Example: `src/main/java/com/app/service/ReviewService.java`
+- Test: `src/test/java/com/app/service/ReviewServiceTest.java`
+
+**Test Class Structure:**
+```
+- Setup methods (@BeforeEach, @BeforeAll, setUp())
+- Happy path tests (successful scenarios)
+- Error path tests (failures, exceptions)
+- Edge case tests (boundaries, null, empty)
+- Helper methods (test data creation)
+```
+
+---
 
 ## 📋 Nomenclatura Universal
 
@@ -99,6 +234,7 @@ This file contains **universal cross-stack guidelines**. For stack-specific conv
 
 ## 🔄 Histórico de Atualizações
 
+- **2025-11-11** - Added comprehensive TDD + BDD testing standards (Red-Green-Refactor cycle, Given/When/Then structure, code smell analysis)
 - **2025-11-10** - Split CODING_STYLE.md into stack-specific files for optimized session context loading
 - **2025-10-22 (v6)** - Adicionada PART 4: INFRASTRUCTURE com padrões de Testcontainers, Docker e CI/CD
 - **2025-10-21 (v5)** - Adicionada regra crítica de organização de documentação (estrutura 3 partes)
