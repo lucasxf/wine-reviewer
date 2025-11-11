@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -73,13 +75,13 @@ class ReviewServiceTest {
     }
 
     @Test
-    void givenReviewRequestAndUserId_WhenCreateReview_ThenReturnReview() {
-        // given
+    void shouldCreateReviewWhenValidDataProvided() {
+        // Given
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-        // when
+        // When
         final var response = reviewService.createReview(
                 new CreateReviewRequest(
                         wineId.toString(),
@@ -88,15 +90,15 @@ class ReviewServiceTest {
                         "https://example.com/photo.jpg"),
                 userId);
 
-        // then
+        // Then
         final var author = response.author();
         final var wineResponse = response.wine();
-        assertNotNull(response);
-        assertEquals(5, response.rating());
-        assertEquals("Great wine!", response.notes());
-        assertEquals("https://example.com/photo.jpg", response.imageUrl());
-        assertEquals(userId.toString(), author.id());
-        assertEquals(wineId.toString(), wineResponse.id());
+        assertThat(response).isNotNull();
+        assertThat(response.rating()).isEqualTo(5);
+        assertThat(response.notes()).isEqualTo("Great wine!");
+        assertThat(response.imageUrl()).isEqualTo("https://example.com/photo.jpg");
+        assertThat(author.id()).isEqualTo(userId.toString());
+        assertThat(wineResponse.id()).isEqualTo(wineId.toString());
 
         verify(userRepository, times(1)).findById(userId);
         verify(wineRepository, times(1)).findById(wineId);
@@ -104,150 +106,147 @@ class ReviewServiceTest {
     }
 
     @Test
-    void givenUserNotFound_WhenCreateReview_ThenThrowException() {
-        // given
+    void shouldThrowExceptionWhenUserNotFound() {
+        // Given
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.createReview(
                         new CreateReviewRequest(wineId.toString(), 5, "Great wine!", null),
                         userId));
 
-        assertTrue(exception.getMessage().contains("User"));
-        assertTrue(exception.getMessage().contains(userId.toString()));
+        assertThat(exception.getMessage()).contains("User", userId.toString());
         verify(userRepository, times(1)).findById(userId);
         verify(wineRepository, never()).findById(any());
         verify(reviewRepository, never()).save(any());
     }
 
     @Test
-    void givenWineNotFound_WhenCreateReview_ThenThrowException() {
-        // given
+    void shouldThrowExceptionWhenWineNotFound() {
+        // Given
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(wineRepository.findById(wineId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.createReview(
                         new CreateReviewRequest(wineId.toString(), 5, "Great wine!", null),
                         userId));
 
-        assertTrue(exception.getMessage().contains("Wine"));
-        assertTrue(exception.getMessage().contains(wineId.toString()));
+        assertThat(exception.getMessage()).contains("Wine", wineId.toString());
         verify(userRepository, times(1)).findById(userId);
         verify(wineRepository, times(1)).findById(wineId);
         verify(reviewRepository, never()).save(any());
     }
 
     @Test
-    void givenReviewWithoutImage_WhenCreateReview_ThenReturnReviewWithoutImage() {
-        // given
+    void shouldCreateReviewWithoutImageWhenImageNotProvided() {
+        // Given
         review.setImageUrl(null);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-        // when
+        // When
         final var response = reviewService.createReview(
                 new CreateReviewRequest(wineId.toString(), 4, "Good wine", null),
                 userId);
 
-        // then
-        assertNotNull(response);
-        assertNull(response.imageUrl());
-        assertEquals(4, response.rating());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.imageUrl()).isNull();
+        assertThat(response.rating()).isEqualTo(4);
         verify(reviewRepository, times(1)).save(any(Review.class));
     }
 
     @Test
-    void givenReviewWithoutNotes_WhenCreateReview_ThenReturnReviewWithoutNotes() {
-        // given
+    void shouldCreateReviewWithoutNotesWhenNotesNotProvided() {
+        // Given
         review.setNotes(null);
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-        // when
+        // When
         final var response = reviewService.createReview(
                 new CreateReviewRequest(wineId.toString(), 3, null, "https://example.com/photo.jpg"),
                 userId);
 
-        // then
-        assertNotNull(response);
-        assertNull(response.notes());
-        assertEquals(3, response.rating());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.notes()).isNull();
+        assertThat(response.rating()).isEqualTo(3);
         verify(reviewRepository, times(1)).save(any(Review.class));
     }
 
     @Test
-    void givenValidUpdateRequest_WhenUpdateReview_ThenReturnUpdatedReview() {
-        // given
+    void shouldUpdateReviewWhenValidDataProvided() {
+        // Given
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-        // when
+        // When
         final var response = reviewService.updateReview(
                 reviewId,
                 new UpdateReviewRequest(4, "Updated notes", "https://example.com/new-photo.jpg"),
                 userId);
 
-        // then
-        assertNotNull(response);
-        assertEquals(4, review.getRating());
-        assertEquals("Updated notes", review.getNotes());
-        assertEquals("https://example.com/new-photo.jpg", review.getImageUrl());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(review.getRating()).isEqualTo(4);
+        assertThat(review.getNotes()).isEqualTo("Updated notes");
+        assertThat(review.getImageUrl()).isEqualTo("https://example.com/new-photo.jpg");
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, times(1)).save(review);
     }
 
     @Test
-    void givenPartialUpdateRequest_WhenUpdateReview_ThenUpdateOnlyProvidedFields() {
-        // given
+    void shouldUpdateOnlyProvidedFieldsWhenPartialUpdateRequested() {
+        // Given
         final var originalNotes = review.getNotes();
         final var originalImageUrl = review.getImageUrl();
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
         when(reviewRepository.save(any(Review.class))).thenReturn(review);
 
-        // when
+        // When
         final var response = reviewService.updateReview(
                 reviewId,
                 new UpdateReviewRequest(3, null, null),
                 userId);
 
-        // then
-        assertNotNull(response);
-        assertEquals(3, review.getRating());
-        assertEquals(originalNotes, review.getNotes());
-        assertEquals(originalImageUrl, review.getImageUrl());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(review.getRating()).isEqualTo(3);
+        assertThat(review.getNotes()).isEqualTo(originalNotes);
+        assertThat(review.getImageUrl()).isEqualTo(originalImageUrl);
         verify(reviewRepository, times(1)).save(review);
     }
 
     @Test
-    void givenReviewNotFound_WhenUpdateReview_ThenThrowException() {
-        // given
+    void shouldThrowExceptionWhenReviewNotFoundForUpdate() {
+        // Given
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.updateReview(
                         reviewId,
                         new UpdateReviewRequest(4, "Updated", null),
                         userId));
 
-        assertTrue(exception.getMessage().contains("Review"));
-        assertTrue(exception.getMessage().contains(reviewId.toString()));
+        assertThat(exception.getMessage()).contains("Review", reviewId.toString());
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, never()).save(any());
     }
 
     @Test
-    void givenUserNotOwner_WhenUpdateReview_ThenThrowUnauthorizedAccessException() {
-        // given
+    void shouldThrowUnauthorizedExceptionWhenUserNotOwnerOnUpdate() {
+        // Given
         final var differentUserId = UUID.randomUUID();
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(UnauthorizedAccessException.class, () ->
                 reviewService.updateReview(
                         reviewId,
@@ -255,61 +254,61 @@ class ReviewServiceTest {
                         differentUserId)
         );
 
-        assertTrue(exception.getMessage().contains(differentUserId.toString()));
-        assertTrue(exception.getMessage().contains("não tem permissão"));
+        assertThat(exception.getMessage())
+                .contains(differentUserId.toString())
+                .contains("não tem permissão");
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, never()).save(any());
     }
 
     @Test
-    void givenReviewId_WhenGetReviewById_ThenReturnReview() {
-        // given
+    void shouldReturnReviewWhenValidIdProvided() {
+        // Given
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
-        // when
+        // When
         final var response = reviewService.getReviewById(reviewId);
 
-        // then
-        assertNotNull(response);
-        assertEquals(reviewId.toString(), response.id());
-        assertEquals(5, response.rating());
-        assertEquals("Excellent wine!", response.notes());
-        assertEquals(userId.toString(), response.author().id());
-        assertEquals(wineId.toString(), response.wine().id());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.id()).isEqualTo(reviewId.toString());
+        assertThat(response.rating()).isEqualTo(5);
+        assertThat(response.notes()).isEqualTo("Excellent wine!");
+        assertThat(response.author().id()).isEqualTo(userId.toString());
+        assertThat(response.wine().id()).isEqualTo(wineId.toString());
         verify(reviewRepository, times(1)).findById(reviewId);
     }
 
     @Test
-    void givenReviewNotFound_WhenGetReviewById_ThenThrowException() {
-        // given
+    void shouldThrowExceptionWhenReviewNotFoundForGet() {
+        // Given
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.getReviewById(reviewId)
         );
 
-        assertTrue(exception.getMessage().contains("Review"));
-        assertTrue(exception.getMessage().contains(reviewId.toString()));
+        assertThat(exception.getMessage()).contains("Review", reviewId.toString());
         verify(reviewRepository, times(1)).findById(reviewId);
     }
 
     @Test
-    void givenNoFilters_WhenListReviews_ThenReturnAllReviewsPaginated() {
-        // given
+    void shouldReturnAllReviewsPaginatedWhenNoFiltersProvided() {
+        // Given
         final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         final var reviews = List.of(review);
         final var page = new PageImpl<>(reviews, pageable, reviews.size());
         when(reviewRepository.findAll(pageable)).thenReturn(page);
 
-        // when
+        // When
         final var response = reviewService.listReviews(null, null, pageable);
 
-        // then
-        assertNotNull(response);
-        assertEquals(1, response.getTotalElements());
-        assertEquals(1, response.getContent().size());
-        assertEquals(reviewId.toString(), response.getContent().get(0).id());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent()).hasSize(1);
+        assertThat(response.getContent().get(0).id()).isEqualTo(reviewId.toString());
         verify(reviewRepository, times(1)).findAll(pageable);
         verify(reviewRepository, never()).findByWine(any(), any());
         verify(reviewRepository, never()).findByUser(any(), any());
@@ -317,50 +316,50 @@ class ReviewServiceTest {
     }
 
     @Test
-    void givenWineIdFilter_WhenListReviews_ThenReturnReviewsForWine() {
-        // given
+    void shouldReturnReviewsForWineWhenWineIdFilterProvided() {
+        // Given
         final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         final var reviews = List.of(review);
         final var page = new PageImpl<>(reviews, pageable, reviews.size());
         when(wineRepository.findById(wineId)).thenReturn(Optional.of(wine));
         when(reviewRepository.findByWine(wine, pageable)).thenReturn(page);
 
-        // when
+        // When
         final var response = reviewService.listReviews(wineId, null, pageable);
 
-        // then
-        assertNotNull(response);
-        assertEquals(1, response.getTotalElements());
-        assertEquals(wineId.toString(), response.getContent().get(0).wine().id());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).wine().id()).isEqualTo(wineId.toString());
         verify(wineRepository, times(1)).findById(wineId);
         verify(reviewRepository, times(1)).findByWine(wine, pageable);
         verify(reviewRepository, never()).findAll(any(Pageable.class));
     }
 
     @Test
-    void givenUserIdFilter_WhenListReviews_ThenReturnReviewsForUser() {
-        // given
+    void shouldReturnReviewsForUserWhenUserIdFilterProvided() {
+        // Given
         final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         final var reviews = List.of(review);
         final var page = new PageImpl<>(reviews, pageable, reviews.size());
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(reviewRepository.findByUser(user, pageable)).thenReturn(page);
 
-        // when
+        // When
         final var response = reviewService.listReviews(null, userId, pageable);
 
-        // then
-        assertNotNull(response);
-        assertEquals(1, response.getTotalElements());
-        assertEquals(userId.toString(), response.getContent().get(0).author().id());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).author().id()).isEqualTo(userId.toString());
         verify(userRepository, times(1)).findById(userId);
         verify(reviewRepository, times(1)).findByUser(user, pageable);
         verify(reviewRepository, never()).findAll(any(Pageable.class));
     }
 
     @Test
-    void givenBothFilters_WhenListReviews_ThenReturnReviewsForWineAndUser() {
-        // given
+    void shouldReturnReviewsForWineAndUserWhenBothFiltersProvided() {
+        // Given
         final var pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
         final var reviews = List.of(review);
         final var page = new PageImpl<>(reviews, pageable, reviews.size());
@@ -368,14 +367,14 @@ class ReviewServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(reviewRepository.findByWineAndUser(wine, user, pageable)).thenReturn(page);
 
-        // when
+        // When
         final var response = reviewService.listReviews(wineId, userId, pageable);
 
-        // then
-        assertNotNull(response);
-        assertEquals(1, response.getTotalElements());
-        assertEquals(wineId.toString(), response.getContent().get(0).wine().id());
-        assertEquals(userId.toString(), response.getContent().get(0).author().id());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.getTotalElements()).isEqualTo(1);
+        assertThat(response.getContent().get(0).wine().id()).isEqualTo(wineId.toString());
+        assertThat(response.getContent().get(0).author().id()).isEqualTo(userId.toString());
         verify(wineRepository, times(1)).findById(wineId);
         verify(userRepository, times(1)).findById(userId);
         verify(reviewRepository, times(1)).findByWineAndUser(wine, user, pageable);
@@ -383,83 +382,81 @@ class ReviewServiceTest {
     }
 
     @Test
-    void givenInvalidWineId_WhenListReviews_ThenThrowException() {
-        // given
+    void shouldThrowExceptionWhenInvalidWineIdProvidedForList() {
+        // Given
         final var invalidWineId = UUID.randomUUID();
         final var pageable = PageRequest.of(0, 10);
         when(wineRepository.findById(invalidWineId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.listReviews(invalidWineId, null, pageable)
         );
 
-        assertTrue(exception.getMessage().contains("Wine"));
-        assertTrue(exception.getMessage().contains(invalidWineId.toString()));
+        assertThat(exception.getMessage()).contains("Wine", invalidWineId.toString());
         verify(wineRepository, times(1)).findById(invalidWineId);
         verify(reviewRepository, never()).findByWine(any(), any());
     }
 
     @Test
-    void givenInvalidUserId_WhenListReviews_ThenThrowException() {
-        // given
+    void shouldThrowExceptionWhenInvalidUserIdProvidedForList() {
+        // Given
         final var invalidUserId = UUID.randomUUID();
         final var pageable = PageRequest.of(0, 10);
         when(userRepository.findById(invalidUserId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.listReviews(null, invalidUserId, pageable)
         );
 
-        assertTrue(exception.getMessage().contains("User"));
-        assertTrue(exception.getMessage().contains(invalidUserId.toString()));
+        assertThat(exception.getMessage()).contains("User", invalidUserId.toString());
         verify(userRepository, times(1)).findById(invalidUserId);
         verify(reviewRepository, never()).findByUser(any(), any());
     }
 
     @Test
-    void givenValidReviewIdAndOwner_WhenDeleteReview_ThenDeleteSuccessfully() {
-        // given
+    void shouldDeleteReviewWhenValidIdAndOwnerProvided() {
+        // Given
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
-        // when
+        // When
         reviewService.deleteReview(reviewId, userId);
 
-        // then
+        // Then
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, times(1)).delete(review);
     }
 
     @Test
-    void givenReviewNotFound_WhenDeleteReview_ThenThrowException() {
-        // given
+    void shouldThrowExceptionWhenReviewNotFoundForDelete() {
+        // Given
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(ResourceNotFoundException.class, () ->
                 reviewService.deleteReview(reviewId, userId)
         );
 
-        assertTrue(exception.getMessage().contains("Review"));
-        assertTrue(exception.getMessage().contains(reviewId.toString()));
+        assertThat(exception.getMessage()).contains("Review", reviewId.toString());
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, never()).delete(any());
     }
 
     @Test
-    void givenUserNotOwner_WhenDeleteReview_ThenThrowUnauthorizedAccessException() {
-        // given
+    void shouldThrowUnauthorizedExceptionWhenUserNotOwnerOnDelete() {
+        // Given
         final var differentUserId = UUID.randomUUID();
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
-        // when & then
+        // When & Then
         final var exception = assertThrows(UnauthorizedAccessException.class, () ->
                 reviewService.deleteReview(reviewId, differentUserId)
         );
 
-        assertTrue(exception.getMessage().contains(differentUserId.toString()));
-        assertTrue(exception.getMessage().contains("não tem permissão"));
+        assertThat(exception.getMessage())
+                .contains(differentUserId.toString())
+                .contains("não tem permissão");
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(reviewRepository, never()).delete(any());
     }
