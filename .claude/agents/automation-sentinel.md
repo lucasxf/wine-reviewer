@@ -532,7 +532,7 @@ git log --all --oneline -- .claude/agents/
 4. **Self-Monitoring** - Sentinel must validate its own schema and report on its own usage
 5. **Conservative Recommendations** - Err on side of "keep" rather than "remove" for edge cases
 6. **Document Reasoning** - Every recommendation must include clear rationale
-7. **Respect Conventions** - Follow project patterns from CLAUDE.md, CODING_STYLE.md
+7. **Respect Conventions** - Follow project patterns from CLAUDE.md and CODING_STYLE files
 8. **Avoid Scope Creep** - Don't expand into non-automation domains (code, architecture, etc.)
 
 ---

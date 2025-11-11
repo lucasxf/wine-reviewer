@@ -3,18 +3,23 @@ description: Resume development session with context from previous session
 argument-hint: <feature-or-context-file>
 ---
 
-@CLAUDE.md
-@CODING_STYLE.md
-@ROADMAP.md
-@README.md
-
 **Resuming Session:** $ARGUMENTS
 
 ## Session Context Loading
 
-1. Load standard project context (CLAUDE.md, CODING_STYLE.md, ROADMAP.md, README.md) ✅
+1. **Load Core Documentation:**
+   - @CLAUDE.md
+   - @ROADMAP.md
+   - @README.md
+   - @CODING_STYLE_GENERAL.md (always load universal conventions)
 
-2. **Context File Selection:**
+2. **Infer Stack from Context File:**
+   - If context file contains "controller", "service", "repository", "JPA", "Spring" → Load @services/api/CODING_STYLE_BACKEND.md
+   - If context file contains "widget", "screen", "Riverpod", "Flutter", "Dart" → Load @apps/mobile/CODING_STYLE_FRONTEND.md
+   - If context file contains "Docker", "Testcontainers", "CI/CD", "pipeline" → Load @infra/CODING_STYLE_INFRASTRUCTURE.md
+   - If ambiguous or documentation-focused → Skip stack-specific file (use general only)
+
+3. **Context File Selection:**
 
    **If `$ARGUMENTS` is EMPTY:**
    - List all files in `prompts/responses/` (sorted by modification date, newest first)

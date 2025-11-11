@@ -78,11 +78,12 @@ ls .claude/commands/
 - When context is lost
 
 **What it does:**
-1. Loads core documentation (CLAUDE.md, CODING_STYLE.md, ROADMAP.md, README.md)
-2. Reviews recent git commits
-3. Checks current git status
-4. Summarizes current project state
-5. Identifies next priority tasks
+1. Loads core documentation (CLAUDE.md, ROADMAP.md, README.md)
+2. Loads stack-specific coding styles (CODING_STYLE_GENERAL.md + BACKEND/FRONTEND/INFRASTRUCTURE as needed)
+3. Reviews recent git commits
+4. Checks current git status
+5. Summarizes current project state
+6. Identifies next priority tasks
 
 **Example usage:**
 ```bash
@@ -194,8 +195,8 @@ ls .claude/commands/
 
 **What it does:**
 1. Analyzes proposed directive
-2. Checks for duplicates in CLAUDE.md and CODING_STYLE.md
-3. Determines best location (general/backend/frontend)
+2. Checks for duplicates in CLAUDE.md and all CODING_STYLE files (GENERAL, BACKEND, FRONTEND, INFRASTRUCTURE)
+3. Determines best file location based on directive scope
 4. Adds directive with date stamp
 5. Updates file structure if needed
 
@@ -230,7 +231,7 @@ ls .claude/commands/
 - Learning best practices
 
 **What it does:**
-1. Analyzes code against CODING_STYLE.md
+1. Analyzes code against CODING_STYLE files (GENERAL + stack-specific: BACKEND/FRONTEND/INFRASTRUCTURE)
 2. Checks test coverage
 3. Verifies conventions (OpenAPI, exceptions, etc.)
 4. Identifies improvements
@@ -847,10 +848,14 @@ These commands are designed to be reusable across projects:
 ## 🔗 Related Resources
 
 **Documentation:**
-- **CLAUDE.md** - Custom slash commands section
-- **ROADMAP.md** - Updated by `/update-roadmap`
-- **CODING_STYLE.md** - Referenced by `/directive` and `/review-code`
-- **README.md** - Project overview
+- **CLAUDE.md** - Custom slash commands section, architectural patterns
+- **ROADMAP.md** - Updated by `/update-roadmap`, tracks implementation status
+- **CODING_STYLE Files** - Referenced by `/directive` and `/review-code`
+  - CODING_STYLE_GENERAL.md (universal conventions)
+  - services/api/CODING_STYLE_BACKEND.md (Java/Spring Boot)
+  - apps/mobile/CODING_STYLE_FRONTEND.md (Flutter/Dart)
+  - infra/CODING_STYLE_INFRASTRUCTURE.md (Docker/CI/CD)
+- **README.md** - Project overview and setup instructions
 
 **Agents:**
 - **session-optimizer** - Works with `/start-session` and `/finish-session`

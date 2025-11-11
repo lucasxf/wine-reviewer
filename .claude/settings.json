@@ -1,6 +1,6 @@
 {
   "modelId": "claude-sonnet-4-5-20250929",
-  "instructions": "Always run tests in quiet mode (./mvnw test -q). Always use Portuguese for log messages. Follow CODING_STYLE.md conventions strictly.",
+  "instructions": "Always run tests in quiet mode (./mvnw test -q). Always use Portuguese for log messages. Follow CODING_STYLE conventions (GENERAL + stack-specific files) strictly.",
   "tools": {
     "bash": {
       "autoApprove": [

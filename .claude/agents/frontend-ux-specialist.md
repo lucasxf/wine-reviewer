@@ -391,7 +391,7 @@ Structure your response like this:
 **Token Efficiency:**
 - Provide complete code in single code block (not fragmented)
 - Use comments instead of separate explanations when possible
-- Reference project conventions from CLAUDE.md/CODING_STYLE.md
+- Reference project conventions from CLAUDE.md, CODING_STYLE_GENERAL.md, and CODING_STYLE_FRONTEND.md
 - Don't repeat unchanged code (show only modifications)
 
 ## Common Mobile UX Patterns
