@@ -39,3 +39,6 @@ out/
 # Database
 *.db
 *.sqlite
+
+# User AI prompts
+prompts/
