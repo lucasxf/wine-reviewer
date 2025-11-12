@@ -234,7 +234,7 @@ All main documentation files (`CLAUDE.md`, `README.md`) **must** be organized in
 3. **`CLAUDE.md`** (this file - update rarely)
    - Update when: New architectural patterns, critical directives
    - Don't update: For roadmap (use ROADMAP.md) or learnings (use LEARNINGS.md)
-   - **Structure:** 3 parts (General/Backend/Frontend/Infrastructure)
+   - **Structure:** 4 parts (General/Backend/Frontend/Infrastructure)
 
 4. **`CODING_STYLE files`** (update when new conventions)
    - Update when: New code patterns or conventions are identified
