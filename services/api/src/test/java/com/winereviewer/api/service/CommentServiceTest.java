@@ -29,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -95,10 +96,9 @@ class CommentServiceTest {
         when(reviewRepository.findById(reviewId)).thenReturn(reviewNotFound);
 
         // When & Then
-        final var exception = assertThrows(ResourceNotFoundException.class,
-                () -> commentService.addComment(request, userId));
-
-        assertThat(exception.getMessage()).contains("Review", reviewId.toString());
+        assertThatThrownBy(() -> commentService.addComment(request, userId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Review", reviewNotFound.toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(userRepository, never()).findById(any());
@@ -116,10 +116,9 @@ class CommentServiceTest {
         when(userRepository.findById(userId)).thenReturn(userNotFound);
 
         // When & Then
-        final var exception = assertThrows(ResourceNotFoundException.class,
-                () -> commentService.addComment(request, userId));
-
-        assertThat(exception.getMessage()).contains("User", userId.toString());
+        assertThatThrownBy(() -> commentService.addComment(request, userId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User", userNotFound.toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(userRepository, times(1)).findById(userId);
@@ -155,14 +154,15 @@ class CommentServiceTest {
         // Given
         final var request = getUpdateCommentRequest(reviewId);
         review = getReview(reviewId, user);
-        when(commentRepository.findById(reviewId)).thenReturn(Optional.empty());
+        final Optional<Comment> commentNotFound = Optional.empty();
+        when(commentRepository.findById(reviewId)).thenReturn(commentNotFound);
 
         // When & Then
-        final var exception = assertThrows(ResourceNotFoundException.class, () ->
-                commentService.updateComment(request, userId));
+        assertThatThrownBy(() -> commentService.updateComment(request, userId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Comment", commentNotFound.toString());
 
         final String commentId = request.commentId();
-        assertThat(exception.getMessage()).contains("Comment", commentId);
 
         verify(commentRepository, times(1)).findById(UUID.fromString(commentId));
         verify(userRepository, never()).findById(userId);
@@ -181,10 +181,9 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         // When & Then
-        final var exception = assertThrows(UnauthorizedAccessException.class,
-                () -> commentService.updateComment(request, userId));
-
-        assertThat(exception.getMessage()).contains("Comment", userId.toString());
+        assertThatThrownBy(() -> commentService.updateComment(request, userId))
+                .isInstanceOf(UnauthorizedAccessException.class)
+                .hasMessageContaining("Comment", comment.getId().toString());
 
         verify(commentRepository, times(1)).findById(commentId);
         verify(userRepository, never()).findById(userId);
@@ -227,10 +226,9 @@ class CommentServiceTest {
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // When & Then
-        final var exception = assertThrows(ResourceNotFoundException.class,
-                () -> commentService.getCommentsPerUser(userId, pageable));
-
-        assertThat(exception.getMessage()).contains("User", userId.toString());
+        assertThatThrownBy(() -> commentService.getCommentsPerUser(userId, pageable))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("User", userId.toString());
 
         verify(userRepository, times(1)).findById(userId);
         verify(commentRepository, never()).findByAuthorOrderByCreatedAtDesc(user, pageable);
@@ -272,10 +270,9 @@ class CommentServiceTest {
         when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
 
         // When & Then
-        final var exception = assertThrows(ResourceNotFoundException.class,
-                () -> commentService.getCommentsPerReview(reviewId, pageable));
-
-        assertThat(exception.getMessage()).contains("Review", reviewId.toString());
+        assertThatThrownBy(() -> commentService.getCommentsPerReview(reviewId, pageable))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Review", reviewId.toString());
 
         verify(reviewRepository, times(1)).findById(reviewId);
         verify(commentRepository, never()).findByReviewOrderByCreatedAtAsc(review, pageable);
@@ -308,10 +305,9 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.empty());
 
         // When & Then
-        final var exception = assertThrows(ResourceNotFoundException.class,
-                () -> commentService.deleteComment(commentId, userId));
-
-        assertThat(exception.getMessage()).contains("Comment", commentId.toString());
+        assertThatThrownBy(() -> commentService.deleteComment(commentId, userId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("Comment", commentId.toString());
 
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, never()).delete(comment);
@@ -328,10 +324,9 @@ class CommentServiceTest {
         when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
         // When & Then
-        final var exception = assertThrows(UnauthorizedAccessException.class,
-                () -> commentService.deleteComment(commentId, userId));
-
-        assertThat(exception.getMessage()).contains("Comment", userId.toString());
+        assertThatThrownBy(() -> commentService.deleteComment(commentId, userId))
+                .isInstanceOf(UnauthorizedAccessException.class)
+                .hasMessageContaining("Comment", userId.toString());
 
         verify(commentRepository, times(1)).findById(commentId);
         verify(commentRepository, never()).delete(comment);
