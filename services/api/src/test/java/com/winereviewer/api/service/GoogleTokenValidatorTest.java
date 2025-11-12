@@ -5,7 +5,8 @@ import com.winereviewer.api.exception.InvalidTokenException;
 import com.winereviewer.api.service.impl.GoogleTokenValidatorImpl;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Testes para GoogleTokenValidator.
@@ -35,16 +36,15 @@ class GoogleTokenValidatorTest {
      * com as propriedades fornecidas.
      */
     @Test
-    void givenGoogleOAuthProperties_WhenInitialize_ThenValidatorCreated() {
-        // given
+    void shouldCreateValidatorWhenGoogleOAuthPropertiesProvided() {
+        // Given
         final var properties = new GoogleOAuthProperties("test-client-id.apps.googleusercontent.com");
 
-        // when
+        // When
         final var validator = new GoogleTokenValidatorImpl(properties);
 
-        // then
-        assertNotNull(validator);
-        // Verifica que o validador foi criado sem erros
+        // Then
+        assertThat(validator).isNotNull();
     }
 
     /**
@@ -54,18 +54,16 @@ class GoogleTokenValidatorTest {
      * Este teste verifica que tokens com formato inválido lançam InvalidTokenException.
      */
     @Test
-    void givenInvalidTokenFormat_WhenValidate_ThenThrowInvalidTokenException() {
-        // given
+    void shouldThrowInvalidTokenExceptionWhenTokenFormatIsInvalid() {
+        // Given
         final var properties = new GoogleOAuthProperties("test-client-id.apps.googleusercontent.com");
         final var validator = new GoogleTokenValidatorImpl(properties);
         final var invalidToken = "invalid-token-format";
 
-        // when & then
-        final var exception = assertThrows(InvalidTokenException.class, () -> {
-            validator.validateToken(invalidToken);
-        });
-
-        assertTrue(exception.getMessage().contains("Falha ao validar token do Google"));
+        // When/Then
+        assertThatThrownBy(() -> validator.validateToken(invalidToken))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Falha ao validar token do Google");
     }
 
     /**
@@ -74,17 +72,15 @@ class GoogleTokenValidatorTest {
      * Tokens vazios devem ser rejeitados imediatamente.
      */
     @Test
-    void givenEmptyToken_WhenValidate_ThenThrowInvalidTokenException() {
-        // given
+    void shouldThrowInvalidTokenExceptionWhenTokenIsEmpty() {
+        // Given
         final var properties = new GoogleOAuthProperties("test-client-id.apps.googleusercontent.com");
         final var validator = new GoogleTokenValidatorImpl(properties);
 
-        // when & then
-        final var exception = assertThrows(InvalidTokenException.class, () -> {
-            validator.validateToken("");
-        });
-
-        assertTrue(exception.getMessage().contains("Falha ao validar token do Google"));
+        // When/Then
+        assertThatThrownBy(() -> validator.validateToken(""))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Falha ao validar token do Google");
     }
 
     /**
@@ -93,17 +89,15 @@ class GoogleTokenValidatorTest {
      * Tokens null devem ser rejeitados e lançar InvalidTokenException.
      */
     @Test
-    void givenNullToken_WhenValidate_ThenThrowInvalidTokenException() {
-        // given
+    void shouldThrowInvalidTokenExceptionWhenTokenIsNull() {
+        // Given
         final var properties = new GoogleOAuthProperties("test-client-id.apps.googleusercontent.com");
         final var validator = new GoogleTokenValidatorImpl(properties);
 
-        // when & then
-        final var exception = assertThrows(InvalidTokenException.class, () -> {
-            validator.validateToken(null);
-        });
-
-        assertTrue(exception.getMessage().contains("Falha ao validar token do Google"));
+        // When/Then
+        assertThatThrownBy(() -> validator.validateToken(null))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Falha ao validar token do Google");
     }
 
     /**
@@ -113,20 +107,16 @@ class GoogleTokenValidatorTest {
      * Este token tem formato correto mas assinatura inválida, então o Google rejeitará.
      */
     @Test
-    void givenJWTFormatButInvalidSignature_WhenValidate_ThenThrowInvalidTokenException() {
-        // given
+    void shouldThrowInvalidTokenExceptionWhenJWTSignatureIsInvalid() {
+        // Given
         final var properties = new GoogleOAuthProperties("test-client-id.apps.googleusercontent.com");
         final var validator = new GoogleTokenValidatorImpl(properties);
-        // JWT fake com formato válido mas assinatura inválida
         final var fakeJwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
 
-        // when & then
-        final var exception = assertThrows(InvalidTokenException.class, () -> {
-            validator.validateToken(fakeJwt);
-        });
-
-        assertTrue(exception.getMessage().contains("Falha ao validar token do Google") ||
-                exception.getMessage().contains("Token inválido ou expirado"));
+        // When/Then
+        assertThatThrownBy(() -> validator.validateToken(fakeJwt))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Falha ao validar token do Google");
     }
 
 }

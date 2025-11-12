@@ -184,14 +184,130 @@ Core entities shared across frontend/backend:
 4. Client sends final photo URL to API with review data
 5. Enforce limits: file size, MIME types, expiration
 
-## Testing Strategy (General)
+## Testing Strategy (TDD + BDD)
 
-**CRITICAL RULE: Test-After-Implementation**
-- **Always create tests immediately after implementing testable classes**
-- Testable classes include: Services, Repositories, Controllers, Utilities, Business Logic
-- Non-testable classes (skip tests): Configuration classes, DTOs, Entities (unless complex logic)
-- **Workflow:** Implement class → Write tests → Verify tests pass → Move to next task
-- Never defer test writing to "later" - tests are part of the implementation
+**CRITICAL RULE: Test-Driven Development (TDD) Workflow**
+
+ALL new features MUST follow the TDD Red-Green-Refactor cycle:
+
+### The TDD Cycle
+
+1. **RED - Write Failing Test First**
+   - Define expected behavior BEFORE writing production code
+   - Test should fail because feature doesn't exist yet
+   - Clarifies requirements and API design upfront
+
+2. **GREEN - Write Minimal Code to Pass**
+   - Implement simplest solution that makes test pass
+   - Don't worry about perfection yet
+   - Goal: Get to green status quickly
+
+3. **REFACTOR - Clean Up Code and Tests**
+   - **CRITICAL:** Don't skip this step (most common TDD failure per Martin Fowler)
+   - Remove duplication, improve naming, optimize structure
+   - Tests must still pass after refactoring
+   - If tests break, analyze for code smells BEFORE adjusting tests
+
+### When Tests Keep Breaking - Critical Analysis
+
+**CRITICAL RULE:** If tests consistently break during refactoring or minor changes, **STOP** and analyze implementation for code smells BEFORE adjusting tests.
+
+**Common Code Smells Indicating Brittle Tests:**
+- **Tight Coupling:** Implementation details leaking into tests
+- **God Objects:** Classes doing too much, tests cover multiple concerns
+- **Fragile Base Class:** Inheritance causing cascading failures
+- **Primitive Obsession:** Using primitives instead of domain objects
+- **Shotgun Surgery:** One feature change breaks tests in multiple places
+
+**Resolution Process:**
+1. Identify the underlying design smell in production code
+2. Refactor production code to fix the design problem
+3. Update tests to reflect improved design
+4. Validate that tests are now more stable and maintainable
+
+**Why:** Broken tests are symptoms, not root causes. The implementation is the problem.
+
+### BDD - Given/When/Then Structure
+
+**CRITICAL RULE:** ALL tests MUST follow Given/When/Then structure for clarity and consistency.
+
+**The Pattern:**
+- **Given (Arrange):** Set up preconditions and initial state
+  - Create test data, mock dependencies, configure system
+  - Establish context for the behavior being tested
+
+- **When (Act):** Execute the specific behavior under test
+  - Call the method, trigger the event, send the request
+  - Single action being tested (not multiple actions)
+
+- **Then (Assert):** Verify expected outcome
+  - Assert results, check state changes, verify interactions
+  - Multiple assertions OK if testing single behavior
+
+**Test Naming Convention:** `should[ExpectedBehavior]When[StateUnderTest]`
+
+**Examples:**
+- `shouldCreateReviewWhenValidDataProvided`
+- `shouldThrowExceptionWhenRatingOutOfRange`
+- `shouldReturn403WhenUserIsNotOwner`
+
+**Benefits:**
+- Clear, self-documenting test names
+- Behavior-focused (not implementation-focused)
+- Business language (readable by non-developers)
+- Easy to identify what's being tested
+
+### Test-After-Implementation Rule
+
+**CRITICAL RULE:** Immediately create tests after implementing testable classes (part of GREEN phase in TDD).
+
+**Testable Classes (MUST have tests):**
+- ✅ Services (business logic)
+- ✅ Repositories (data access)
+- ✅ Controllers (REST endpoints)
+- ✅ Utilities (helper functions)
+- ✅ Widgets (Flutter UI components)
+- ✅ Providers (Riverpod state management)
+
+**Non-Testable Classes (SKIP tests):**
+- ❌ Configuration classes (@Configuration, @ConfigurationProperties)
+- ❌ Simple DTOs (no logic, just data)
+- ❌ Entities (unless complex domain logic)
+
+**TDD Workflow:**
+1. Write failing test (RED)
+2. Implement class/method (GREEN)
+3. Refactor and clean up (REFACTOR)
+4. Run tests, verify pass
+5. Commit code + tests together
+6. **Never defer test writing to "later"**
+
+### Test Coverage Goals
+
+- **Critical paths:** 100% coverage (authentication, payments, data integrity)
+- **Business logic:** 90%+ coverage (services, domain layer)
+- **Controllers/UI:** 80%+ coverage (happy path + error cases)
+- **Overall project:** 70%+ minimum coverage
+
+### Stack-Specific Testing
+
+**Backend (Java/Spring Boot):**
+- Unit tests: JUnit 5 + Mockito + AssertJ
+- Integration tests: Testcontainers (real PostgreSQL)
+- See `services/api/CODING_STYLE_BACKEND.md` for detailed conventions
+
+**Frontend (Flutter/Dart):**
+- Unit tests: flutter_test + mocktail
+- Widget tests: flutter_test + WidgetTester
+- Golden tests: golden_toolkit (visual regression)
+- See `apps/mobile/CODING_STYLE_FRONTEND.md` for detailed conventions
+
+**Infrastructure:**
+- Testcontainers for database integration tests
+- Docker health checks for service dependencies
+- CI/CD pipeline validation
+
+For detailed testing conventions, examples, and anti-patterns, see respective CODING_STYLE files.
 
 ## Documentation Strategy
 

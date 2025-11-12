@@ -72,8 +72,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should upload valid JPEG file successfully")
-    void shouldUploadValidJpegFile() throws IOException {
-        // Given: Valid JPEG file
+    void shouldUploadFileSuccessfullyWhenValidJpegProvided() throws IOException {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "wine-photo.jpg",
@@ -81,17 +81,16 @@ class S3ServiceTest {
                 "fake-image-content".getBytes()
         );
 
-        // Mock S3 successful response
         PutObjectResponse putObjectResponse = (PutObjectResponse) PutObjectResponse.builder()
                 .sdkHttpResponse(SdkHttpResponse.builder().statusCode(200).build())
                 .build();
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(putObjectResponse);
 
-        // When: Upload file
+        // When
         FileUploadResponse response = s3Service.upload(file);
 
-        // Then: Response should contain correct data
+        // Then
         assertThat(response).isNotNull();
         assertThat(response.fileName()).isEqualTo("wine-photo.jpg");
         assertThat(response.fileUrl()).startsWith("https://wine-reviewer-bucket-test.s3.sa-east-1.amazonaws.com/");
@@ -113,8 +112,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should upload valid PNG file successfully")
-    void shouldUploadValidPngFile() throws IOException {
-        // Given: Valid PNG file
+    void shouldUploadFileSuccessfullyWhenValidPngProvided() throws IOException {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "wine-label.png",
@@ -122,23 +121,24 @@ class S3ServiceTest {
                 new byte[1024] // 1KB
         );
 
-        // Mock S3 response
         PutObjectResponse putObjectResponse = (PutObjectResponse) PutObjectResponse.builder()
                 .sdkHttpResponse(SdkHttpResponse.builder().statusCode(200).build())
                 .build();
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(putObjectResponse);
 
-        // When & Then
+        // When
         FileUploadResponse response = s3Service.upload(file);
+
+        // Then
         assertThat(response.contentType()).isEqualTo("image/png");
         assertThat(response.fileSizeBytes()).isEqualTo(1024L);
     }
 
     @Test
     @DisplayName("Should upload valid WEBP file successfully")
-    void shouldUploadValidWebpFile() throws IOException {
-        // Given: Valid WEBP file
+    void shouldUploadFileSuccessfullyWhenValidWebpProvided() throws IOException {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "wine-bottle.webp",
@@ -146,22 +146,23 @@ class S3ServiceTest {
                 new byte[2048] // 2KB
         );
 
-        // Mock S3 response
         PutObjectResponse putObjectResponse = (PutObjectResponse) PutObjectResponse.builder()
                 .sdkHttpResponse(SdkHttpResponse.builder().statusCode(200).build())
                 .build();
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(putObjectResponse);
 
-        // When & Then
+        // When
         FileUploadResponse response = s3Service.upload(file);
+
+        // Then
         assertThat(response.contentType()).isEqualTo("image/webp");
     }
 
     @Test
     @DisplayName("Should reject empty file")
-    void shouldRejectEmptyFile() {
-        // Given: Empty file (0 bytes)
+    void shouldThrowInvalidFileExceptionWhenFileIsEmpty() {
+        // Given
         MockMultipartFile emptyFile = new MockMultipartFile(
                 "file",
                 "empty.jpg",
@@ -169,19 +170,18 @@ class S3ServiceTest {
                 new byte[0]
         );
 
-        // When & Then: Should throw InvalidFileException
+        // When/Then
         assertThatThrownBy(() -> s3Service.upload(emptyFile))
                 .isInstanceOf(InvalidFileException.class)
                 .hasMessageContaining("Arquivo vazio");
 
-        // Verify S3Client was never called
         verifyNoInteractions(s3Client);
     }
 
     @Test
     @DisplayName("Should reject file exceeding size limit (10MB)")
-    void shouldRejectFileTooLarge() {
-        // Given: File larger than 10MB
+    void shouldThrowFileTooLargeExceptionWhenFileSizeExceedsLimit() {
+        // Given
         byte[] largeContent = new byte[11 * 1024 * 1024]; // 11MB
         MockMultipartFile largeFile = new MockMultipartFile(
                 "file",
@@ -190,7 +190,7 @@ class S3ServiceTest {
                 largeContent
         );
 
-        // When & Then: Should throw FileTooLargeException
+        // When/Then
         assertThatThrownBy(() -> s3Service.upload(largeFile))
                 .isInstanceOf(FileTooLargeException.class)
                 .hasMessageContaining("10 MB");
@@ -200,8 +200,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should reject unsupported MIME type (PDF)")
-    void shouldRejectUnsupportedMimeType() {
-        // Given: PDF file (not allowed)
+    void shouldThrowUnsupportedFileTypeExceptionWhenMimeTypeIsNotAllowed() {
+        // Given
         MockMultipartFile pdfFile = new MockMultipartFile(
                 "file",
                 "document.pdf",
@@ -209,7 +209,7 @@ class S3ServiceTest {
                 "fake-pdf-content".getBytes()
         );
 
-        // When & Then: Should throw UnsupportedFileTypeException
+        // When/Then
         assertThatThrownBy(() -> s3Service.upload(pdfFile))
                 .isInstanceOf(UnsupportedFileTypeException.class)
                 .hasMessageContaining("application/pdf");
@@ -219,8 +219,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should reject executable file")
-    void shouldRejectExecutableFile() {
-        // Given: Executable file (security risk)
+    void shouldThrowUnsupportedFileTypeExceptionWhenFileIsExecutable() {
+        // Given
         MockMultipartFile execFile = new MockMultipartFile(
                 "file",
                 "malware.exe",
@@ -228,7 +228,7 @@ class S3ServiceTest {
                 "fake-exe-content".getBytes()
         );
 
-        // When & Then: Should throw UnsupportedFileTypeException
+        // When/Then
         assertThatThrownBy(() -> s3Service.upload(execFile))
                 .isInstanceOf(UnsupportedFileTypeException.class)
                 .hasMessageContaining("application/x-executable");
@@ -238,8 +238,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should reject file with null content type")
-    void shouldRejectNullContentType() {
-        // Given: File with null content type
+    void shouldThrowUnsupportedFileTypeExceptionWhenContentTypeIsNull() {
+        // Given
         MockMultipartFile fileWithoutType = new MockMultipartFile(
                 "file",
                 "unknown.file",
@@ -247,7 +247,7 @@ class S3ServiceTest {
                 "content".getBytes()
         );
 
-        // When & Then: Should throw UnsupportedFileTypeException
+        // When/Then
         assertThatThrownBy(() -> s3Service.upload(fileWithoutType))
                 .isInstanceOf(UnsupportedFileTypeException.class)
                 .hasMessageContaining("null");
@@ -257,8 +257,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should handle S3Exception and wrap in FileUploadException")
-    void shouldHandleS3Exception() throws IOException {
-        // Given: Valid file but S3Client throws exception
+    void shouldThrowFileUploadExceptionWhenS3ClientFails() throws IOException {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "test.jpg",
@@ -266,8 +266,6 @@ class S3ServiceTest {
                 "content".getBytes()
         );
 
-        // Mock S3 throwing exception (e.g., invalid credentials, bucket not found)
-        // Note: awsErrorDetails() can be null in real S3Exception, so handle gracefully
         S3Exception s3Exception = (S3Exception) S3Exception.builder()
                 .message("Access Denied - Bucket does not exist or invalid credentials")
                 .statusCode(403)
@@ -275,7 +273,7 @@ class S3ServiceTest {
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenThrow(s3Exception);
 
-        // When & Then: Should wrap S3Exception in FileUploadException
+        // When/Then
         assertThatThrownBy(() -> s3Service.upload(file))
                 .isInstanceOf(FileUploadException.class)
                 .hasMessageContaining("Erro ao fazer upload")
@@ -284,8 +282,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should handle IOException during file read")
-    void shouldHandleIOException() throws IOException {
-        // Given: MultipartFile that throws IOException on getInputStream()
+    void shouldThrowFileUploadExceptionWhenIOExceptionOccurs() throws IOException {
+        // Given
         MultipartFile faultyFile = mock(MultipartFile.class);
         when(faultyFile.isEmpty()).thenReturn(false);
         when(faultyFile.getSize()).thenReturn(1024L);
@@ -293,7 +291,7 @@ class S3ServiceTest {
         when(faultyFile.getOriginalFilename()).thenReturn("test.jpg");
         when(faultyFile.getInputStream()).thenThrow(new IOException("Disk read error"));
 
-        // When & Then: Should wrap IOException in FileUploadException
+        // When/Then
         assertThatThrownBy(() -> s3Service.upload(faultyFile))
                 .isInstanceOf(FileUploadException.class)
                 .hasMessageContaining("Erro ao processar arquivo")
@@ -304,8 +302,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should generate correct S3 URL format")
-    void shouldGenerateCorrectS3Url() throws IOException {
-        // Given: Valid file
+    void shouldGenerateCorrectS3UrlWhenUploadSucceeds() throws IOException {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "test-image.jpg",
@@ -313,7 +311,6 @@ class S3ServiceTest {
                 "content".getBytes()
         );
 
-        // Mock S3 response
         PutObjectResponse putObjectResponse = (PutObjectResponse) PutObjectResponse.builder()
                 .sdkHttpResponse(SdkHttpResponse.builder().statusCode(200).build())
                 .build();
@@ -323,7 +320,7 @@ class S3ServiceTest {
         // When
         FileUploadResponse response = s3Service.upload(file);
 
-        // Then: URL should follow AWS S3 format
+        // Then
         String expectedUrlPattern = String.format(
                 "https://%s.s3.%s.amazonaws.com/",
                 awsProperties.getS3BucketName(),
@@ -335,8 +332,8 @@ class S3ServiceTest {
 
     @Test
     @DisplayName("Should set uploadedAt timestamp close to now")
-    void shouldSetUploadedAtTimestamp() throws IOException {
-        // Given: Valid file
+    void shouldSetUploadedAtTimestampWhenUploadCompletes() throws IOException {
+        // Given
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "test.jpg",
@@ -344,19 +341,19 @@ class S3ServiceTest {
                 "content".getBytes()
         );
 
-        // Mock S3 response
         PutObjectResponse putObjectResponse = (PutObjectResponse) PutObjectResponse.builder()
                 .sdkHttpResponse(SdkHttpResponse.builder().statusCode(200).build())
                 .build();
         when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
                 .thenReturn(putObjectResponse);
 
-        // When
         Instant before = Instant.now();
-        FileUploadResponse response = s3Service.upload(file);
-        Instant after = Instant.now();
 
-        // Then: uploadedAt should be between before and after
+        // When
+        FileUploadResponse response = s3Service.upload(file);
+
+        // Then
+        Instant after = Instant.now();
         assertThat(response.uploadedAt()).isBetween(before, after);
     }
 

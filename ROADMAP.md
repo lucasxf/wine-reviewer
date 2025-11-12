@@ -1,6 +1,6 @@
 # Wine Reviewer - Project Roadmap
 
-**Last updated:** 2025-11-11 (Session 16 - Documentation Consistency Review - Post-CODING_STYLE Split)
+**Last updated:** 2025-11-12 (Session 17 - Testing Standardization - Given/When/Then + AssertJ)
 
 This file tracks the current implementation status and next steps for the Wine Reviewer project.
 
@@ -193,6 +193,29 @@ This file tracks the current implementation status and next steps for the Wine R
   - Commands (4 files): directive, review-code, finish-session, start-session
 - **Commit:** `e5e42d5` - Documentation consistency review (2025-11-11)
 - **Result:** All documentation now accurately reflects 4-part structure and split CODING_STYLE files
+
+**Testing Standardization - Given/When/Then + AssertJ:** - ✅ COMPLETE (2025-11-12)
+- **Standardized all backend unit tests** to follow TDD + BDD conventions (71 tests total)
+- **Refactored 5 test files** to Given/When/Then structure with AssertJ fluent assertions
+  - `AuthServiceTest.java` (5 tests) - Google OAuth authentication flow
+  - `S3ServiceTest.java` (12 tests) - AWS S3 file upload with validation
+  - `GoogleTokenValidatorTest.java` (5 tests) - Token validation (fixed compilation error)
+  - `DomainExceptionTest.java` (12 tests) - Custom exception hierarchy
+  - `ReviewControllerTest.java` (4 tests) - REST controller with Spring Security
+- **Changes applied:**
+  - ✅ Renamed test methods to `shouldXWhenY` pattern
+  - ✅ Capitalized Given/When/Then comments (`// given` → `// Given`)
+  - ✅ Replaced JUnit assertions with AssertJ (`assertEquals` → `assertThat().isEqualTo()`)
+  - ✅ Replaced `assertThrows` with `assertThatThrownBy()`
+  - ✅ Fixed AssertJ bug: Changed non-existent `hasMessageContainingAny()` to `hasMessageContaining()`
+- **Test Results:** 71/71 unit tests passing ✅ (100% pass rate maintained)
+- **Session Context:** Continued from partial completion (commit `47a9311`) where 2/7 files were already refactored
+- **Commits:**
+  - `19b6961` - Refactor CommentServiceTest to Given/When/Then (previous session)
+  - `f2b8883` - Refactor ReviewServiceTest to Given/When/Then (previous session)
+  - `0b735ec` - Add backend testing standards to CODING_STYLE_BACKEND.md (previous session)
+  - `c663249` - Add universal TDD + BDD testing standards to CODING_STYLE_GENERAL.md (previous session)
+  - Pending: Final commit for this session's 5 test file refactorings
 
 ---
 

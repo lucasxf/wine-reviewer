@@ -17,7 +17,8 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -61,8 +62,8 @@ class AuthServiceTest {
     }
 
     @Test
-    void givenValidGoogleToken_WhenAuthenticateNewUser_ThenCreateUserAndReturnJWT() {
-        // given
+    void shouldCreateUserAndReturnJWTWhenAuthenticateNewUserWithValidGoogleToken() {
+        // Given
         final var newUserId = UUID.randomUUID();
         final var newUser = createUser(newUserId, googleUserInfo);
 
@@ -71,16 +72,16 @@ class AuthServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(newUser);
         when(jwtUtil.generateToken(newUserId)).thenReturn(jwtToken);
 
-        // when
+        // When
         final var response = authService.authenticateWithGoogle(googleIdToken);
 
-        // then
-        assertNotNull(response);
-        assertEquals(jwtToken, response.token());
-        assertEquals(newUserId.toString(), response.userId());
-        assertEquals(googleUserInfo.email(), response.email());
-        assertEquals(googleUserInfo.name(), response.displayName());
-        assertEquals(googleUserInfo.picture(), response.avatarUrl());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isEqualTo(jwtToken);
+        assertThat(response.userId()).isEqualTo(newUserId.toString());
+        assertThat(response.email()).isEqualTo(googleUserInfo.email());
+        assertThat(response.displayName()).isEqualTo(googleUserInfo.name());
+        assertThat(response.avatarUrl()).isEqualTo(googleUserInfo.picture());
 
         verify(googleTokenValidator, times(1)).validateToken(googleIdToken);
         verify(userRepository, times(1)).findByGoogleId(googleUserInfo.googleId());
@@ -89,8 +90,8 @@ class AuthServiceTest {
     }
 
     @Test
-    void givenValidGoogleToken_WhenAuthenticateExistingUser_ThenReturnJWT() {
-        // given
+    void shouldReturnJWTWhenAuthenticateExistingUser() {
+        // Given
         final var existingUserId = UUID.randomUUID();
         final var existingUser = createUser(existingUserId, googleUserInfo);
 
@@ -98,14 +99,14 @@ class AuthServiceTest {
         when(userRepository.findByGoogleId(googleUserInfo.googleId())).thenReturn(Optional.of(existingUser));
         when(jwtUtil.generateToken(existingUserId)).thenReturn(jwtToken);
 
-        // when
+        // When
         final var response = authService.authenticateWithGoogle(googleIdToken);
 
-        // then
-        assertNotNull(response);
-        assertEquals(jwtToken, response.token());
-        assertEquals(existingUserId.toString(), response.userId());
-        assertEquals(googleUserInfo.email(), response.email());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isEqualTo(jwtToken);
+        assertThat(response.userId()).isEqualTo(existingUserId.toString());
+        assertThat(response.email()).isEqualTo(googleUserInfo.email());
 
         verify(googleTokenValidator, times(1)).validateToken(googleIdToken);
         verify(userRepository, times(1)).findByGoogleId(googleUserInfo.googleId());
@@ -114,8 +115,8 @@ class AuthServiceTest {
     }
 
     @Test
-    void givenValidGoogleToken_WhenUserInfoChanged_ThenUpdateUserAndReturnJWT() {
-        // given
+    void shouldUpdateUserAndReturnJWTWhenUserInfoChanged() {
+        // Given
         final var existingUserId = UUID.randomUUID();
         final var existingUser = createUser(existingUserId, new GoogleUserInfo(
                 "google-user-123",
@@ -129,37 +130,36 @@ class AuthServiceTest {
         when(userRepository.save(existingUser)).thenReturn(existingUser);
         when(jwtUtil.generateToken(existingUserId)).thenReturn(jwtToken);
 
-        // when
+        // When
         final var response = authService.authenticateWithGoogle(googleIdToken);
 
-        // then
-        assertNotNull(response);
-        assertEquals(jwtToken, response.token());
-        assertEquals(googleUserInfo.email(), response.email());
-        assertEquals(googleUserInfo.name(), response.displayName());
-        assertEquals(googleUserInfo.picture(), response.avatarUrl());
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isEqualTo(jwtToken);
+        assertThat(response.email()).isEqualTo(googleUserInfo.email());
+        assertThat(response.displayName()).isEqualTo(googleUserInfo.name());
+        assertThat(response.avatarUrl()).isEqualTo(googleUserInfo.picture());
 
         // Verifica que o usuário foi atualizado
-        assertEquals(googleUserInfo.email(), existingUser.getEmail());
-        assertEquals(googleUserInfo.name(), existingUser.getDisplayName());
-        assertEquals(googleUserInfo.picture(), existingUser.getAvatarUrl());
+        assertThat(existingUser.getEmail()).isEqualTo(googleUserInfo.email());
+        assertThat(existingUser.getDisplayName()).isEqualTo(googleUserInfo.name());
+        assertThat(existingUser.getAvatarUrl()).isEqualTo(googleUserInfo.picture());
 
         verify(userRepository, times(1)).save(existingUser);
         verify(jwtUtil, times(1)).generateToken(existingUserId);
     }
 
     @Test
-    void givenInvalidGoogleToken_WhenAuthenticate_ThenThrowInvalidTokenException() {
-        // given
+    void shouldThrowInvalidTokenExceptionWhenAuthenticateWithInvalidToken() {
+        // Given
         when(googleTokenValidator.validateToken(googleIdToken))
                 .thenThrow(new InvalidTokenException("Token inválido"));
 
-        // when & then
-        final var exception = assertThrows(InvalidTokenException.class, () ->
-                authService.authenticateWithGoogle(googleIdToken)
-        );
+        // When/Then
+        assertThatThrownBy(() -> authService.authenticateWithGoogle(googleIdToken))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Token inválido");
 
-        assertTrue(exception.getMessage().contains("Token inválido"));
         verify(googleTokenValidator, times(1)).validateToken(googleIdToken);
         verify(userRepository, never()).findByGoogleId(any());
         verify(userRepository, never()).save(any());
@@ -167,17 +167,16 @@ class AuthServiceTest {
     }
 
     @Test
-    void givenExpiredGoogleToken_WhenAuthenticate_ThenThrowInvalidTokenException() {
-        // given
+    void shouldThrowInvalidTokenExceptionWhenAuthenticateWithExpiredToken() {
+        // Given
         when(googleTokenValidator.validateToken(googleIdToken))
                 .thenThrow(new InvalidTokenException("Token expirado"));
 
-        // when & then
-        final var exception = assertThrows(InvalidTokenException.class, () ->
-                authService.authenticateWithGoogle(googleIdToken)
-        );
+        // When/Then
+        assertThatThrownBy(() -> authService.authenticateWithGoogle(googleIdToken))
+                .isInstanceOf(InvalidTokenException.class)
+                .hasMessageContaining("Token expirado");
 
-        assertTrue(exception.getMessage().contains("Token expirado"));
         verify(googleTokenValidator, times(1)).validateToken(googleIdToken);
     }
 

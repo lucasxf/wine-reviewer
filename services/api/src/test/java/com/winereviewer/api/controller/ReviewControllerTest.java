@@ -110,7 +110,7 @@ class ReviewControllerTest {
         when(service.createReview(any(CreateReviewRequest.class), any(UUID.class)))
                 .thenReturn(expectedResponse);
 
-        // When & Then
+        // When/Then
         mockMvc.perform(post("/reviews")
                         .with(csrf())
                         .with(user(userId.toString()))
@@ -131,7 +131,7 @@ class ReviewControllerTest {
     @Test
     @WithMockUser
     void shouldReturnBadRequestWhenRatingIsInvalid() throws Exception {
-        // Given - rating fora do intervalo 1-5
+        // Given
         final var request = new CreateReviewRequest(
                 UUID.randomUUID().toString(),
                 6, // Rating inválido
@@ -139,7 +139,7 @@ class ReviewControllerTest {
                 null
         );
 
-        // When & Then
+        // When/Then
         mockMvc.perform(post("/reviews")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -151,7 +151,7 @@ class ReviewControllerTest {
     @Test
     @WithMockUser
     void shouldReturnBadRequestWhenWineIdIsNull() throws Exception {
-        // Given - wineId nulo
+        // Given
         final var request = new CreateReviewRequest(
                 null, // WineId nulo
                 5,
@@ -159,7 +159,7 @@ class ReviewControllerTest {
                 null
         );
 
-        // When & Then
+        // When/Then
         mockMvc.perform(post("/reviews")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -170,7 +170,7 @@ class ReviewControllerTest {
 
     @Test
     void shouldReturnForbiddenWhenNotAuthenticated() throws Exception {
-        // Given - sem autenticação
+        // Given
         final var request = new CreateReviewRequest(
                 UUID.randomUUID().toString(),
                 5,
@@ -178,7 +178,7 @@ class ReviewControllerTest {
                 null
         );
 
-        // When & Then - Spring Security bloqueia com 403 Forbidden
+        // When/Then
         mockMvc.perform(post("/reviews")
                         .with(csrf())
                         .contentType(MediaType.APPLICATION_JSON)
