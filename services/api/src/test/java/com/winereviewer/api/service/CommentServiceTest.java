@@ -160,7 +160,7 @@ class CommentServiceTest {
         // When & Then
         assertThatThrownBy(() -> commentService.updateComment(request, userId))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Comment", commentNotFound.toString());
+                .hasMessageContaining("Comment", request.commentId());
 
         final String commentId = request.commentId();
 
