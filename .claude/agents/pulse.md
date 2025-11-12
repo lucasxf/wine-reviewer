@@ -70,6 +70,58 @@ done
 - **Medium confidence:** File pattern match (e.g., `*IT.java` modified → backend-code-reviewer)
 - **Low confidence:** Heuristic inference (multiple commits → session-optimizer)
 
+#### D. Lines of Code (LOCs) Metrics *(CRITICAL - Always Collect)*
+**Purpose:** Gather concrete productivity metrics based on code volume
+
+**Current Codebase LOCs:**
+```bash
+# Count current LOCs in production code
+find services/api/src/main/java -name "*.java" -exec wc -l {} + | tail -1
+find apps/mobile/lib -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1
+
+# Count current LOCs in test code
+find services/api/src/test/java -name "*.java" -exec wc -l {} + | tail -1
+find apps/mobile/test -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1
+
+# Calculate test ratio
+# test_ratio = (test_LOCs / production_LOCs) * 100
+```
+
+**Period LOCs Growth:**
+```bash
+# Get LOCs added/deleted in period
+# If delta mode: git log <LAST_COMMIT>..HEAD --numstat
+# If full mode: git log --since=<START_DATE> --numstat
+
+git log --numstat --pretty=format:"" | \
+  awk '{added+=$1; deleted+=$2} END {
+    print "total_locs_added: " added
+    print "total_locs_deleted: " deleted
+    print "net_locs: " (added-deleted)
+  }'
+```
+
+**LOCs per Commit:**
+```bash
+# Average LOCs per commit
+git log --shortstat --oneline | \
+  grep -E "^ [0-9]" | \
+  awk '{files+=$1; inserted+=$4; deleted+=$6; commits++} END {
+    print "avg_locs_changed_per_commit: " int((inserted+deleted)/commits)
+    print "avg_locs_added_per_commit: " int(inserted/commits)
+    print "avg_locs_deleted_per_commit: " int(deleted/commits)
+  }'
+```
+
+**Why LOCs Matter:**
+- ✅ Concrete, measurable productivity proxy (engineers love hard numbers)
+- ✅ Test ratio shows code quality discipline
+- ✅ LOCs/commit shows feature size (50 LOCs = small fix, 400 LOCs = substantial feature)
+- ✅ LOCs/day and LOCs/session enable velocity comparison
+- ✅ Git-native metric (no external tools required)
+
+**CRITICAL:** Always collect LOCs data. Store in `[productivity]` section of TOML file.
+
 ---
 
 ### 2. Metrics Storage (TOML Format)
@@ -91,6 +143,27 @@ last_used = "2025-11-11T12:00:00Z"
 [command_usage.start-session]
 invocations = 45
 last_used = "2025-11-11T09:00:00Z"
+
+[productivity]
+# Current codebase snapshot
+current_total_locs = 15793
+current_production_locs = 11992
+current_test_locs = 3801
+test_ratio_percent = 31.7
+
+# Period metrics
+total_locs_added = 44847
+total_locs_deleted = 8352
+net_locs = 36495
+
+# Averages
+avg_locs_changed_per_commit = 418
+avg_locs_added_per_commit = 355
+avg_locs_deleted_per_commit = 63
+
+# Velocity (calculated by automation-sentinel)
+locs_per_day = 2127
+locs_per_session = 3546
 
 [health]
 schema_errors = 0

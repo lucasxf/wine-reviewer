@@ -10,17 +10,17 @@
 
 This project includes **9 custom agents** designed to address specific needs (alphabetically ordered):
 
-| Agent | Purpose | Model | When to Use |
-|-------|---------|-------|-------------|
-| **automation-sentinel** | Meta-agent: automation health, metrics analysis, optimization | Sonnet | Analyzing automation health, generating reports, finding redundancy |
-| **backend-code-reviewer** | Java/Spring Boot code review, best practices | Sonnet | Reviewing backend code after implementation |
-| **cross-project-architect** | Pattern extraction, templates, new projects | Sonnet | Starting new projects, extracting reusable patterns |
-| **flutter-implementation-coach** | Flutter coding, Riverpod, Dio, debugging | Sonnet | Implementing features, state management, API integration |
-| **frontend-ux-specialist** | UI/UX design, screen layouts, Material Design | Sonnet | Designing screens, improving UX, accessibility |
-| **learning-tutor** | Teaching concepts, structured learning, exercises | Sonnet | Learning new topics, understanding patterns |
-| **pulse** | Metrics collection: agent/command usage tracking | Haiku | Auto-triggered before automation-sentinel, updating metrics |
-| **session-optimizer** | Token efficiency, session planning, workflow | Haiku | Starting sessions, optimizing token usage |
-| **tech-writer** | Documentation (external + in-code), ADRs, Javadoc, OpenAPI | Sonnet | Creating ADRs, adding Javadoc, updating docs, OpenAPI annotations |
+| Agent | Purpose | Model | Created | Last Updated |
+|-------|---------|-------|---------|--------------|
+| **automation-sentinel** | Meta-agent: automation health, metrics analysis, optimization | Sonnet | 2025-10-29 | 2025-11-11 |
+| **backend-code-reviewer** | Java/Spring Boot code review, best practices | Sonnet | 2025-10-28 | 2025-11-11 |
+| **cross-project-architect** | Pattern extraction, templates, new projects | Sonnet | 2025-10-28 | 2025-11-11 |
+| **flutter-implementation-coach** | Flutter coding, Riverpod, Dio, debugging | Sonnet | 2025-10-28 | 2025-10-28 |
+| **frontend-ux-specialist** | UI/UX design, screen layouts, Material Design | Sonnet | 2025-10-28 | 2025-11-11 |
+| **learning-tutor** | Teaching concepts, structured learning, exercises | Sonnet | 2025-10-28 | 2025-10-28 |
+| **pulse** | Metrics collection: agent/command usage tracking | Haiku | 2025-11-11 | 2025-11-12 |
+| **session-optimizer** | Token efficiency, session planning, workflow | Haiku | 2025-10-28 | 2025-11-10 |
+| **tech-writer** | Documentation (external + in-code), ADRs, Javadoc, OpenAPI | Sonnet | 2025-10-29 | 2025-11-11 |
 
 ---
 

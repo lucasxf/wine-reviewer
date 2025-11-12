@@ -10,21 +10,24 @@
 
 This project includes **13 custom slash commands** designed to accelerate development workflows:
 
-| Command | Category | Purpose | When to Use |
-|---------|----------|---------|-------------|
-| **start-session** | Workflow | Load context, plan session | Beginning every work session |
-| **finish-session** | Workflow | Run tests, update docs, commit | Ending work session |
-| **update-roadmap** | Documentation | Update ROADMAP.md status | After completing features |
-| **directive** | Documentation | Add coding rules with deduplication | When new patterns emerge |
-| **review-code** | Quality | Analyze code against standards | Before committing, after refactoring |
-| **quick-test** | Testing | Run tests for specific class | Testing individual components |
-| **test-quick** | Testing | Run all tests quietly | Quick verification |
-| **test-service** | Testing | Run tests for service class | Backend service testing |
-| **build-quiet** | Build | Clean build in quiet mode | Building without noise |
-| **verify-quiet** | Build | Full verification quietly | CI/CD-like local verification |
-| **docker-start** | Infrastructure | Start Docker services | Local development setup |
-| **docker-stop** | Infrastructure | Stop Docker services | Cleanup after development |
-| **api-doc** | Documentation | Open Swagger UI | API documentation review |
+| Command | Category | Purpose | Created | Last Updated |
+|---------|----------|---------|---------|--------------|
+| **start-session** | Workflow | Load context, plan session | 2025-10-22 | 2025-11-10 |
+| **finish-session** | Workflow | Run tests, update docs, commit | 2025-10-22 | 2025-11-10 |
+| **update-roadmap** | Documentation | Update ROADMAP.md status | 2025-10-22 | 2025-10-28 |
+| **directive** | Documentation | Add coding rules with deduplication | 2025-10-22 | 2025-11-11 |
+| **review-code** | Quality | Analyze code against standards | 2025-10-22 | 2025-11-11 |
+| **create-pr** | Workflow | Create PR with workflow analysis | 2025-10-31 | 2025-11-11 |
+| **resume-session** | Workflow | Resume work with saved context | 2025-10-31 | 2025-11-11 |
+| **save-response** | Workflow | Save Claude response for later | 2025-10-31 | 2025-10-31 |
+| **quick-test** | Testing | Run tests for specific class | 2025-10-22 | 2025-10-22 |
+| **test-quick** | Testing | Run all tests quietly | 2025-10-21 | 2025-10-21 |
+| **test-service** | Testing | Run tests for service class | 2025-10-21 | 2025-10-21 |
+| **build-quiet** | Build | Clean build in quiet mode | 2025-10-21 | 2025-10-21 |
+| **verify-quiet** | Build | Full verification quietly | 2025-10-21 | 2025-10-21 |
+| **docker-start** | Infrastructure | Start Docker services | 2025-10-21 | 2025-10-22 |
+| **docker-stop** | Infrastructure | Stop Docker services | 2025-10-21 | 2025-10-21 |
+| **api-doc** | Documentation | Open Swagger UI | 2025-10-21 | 2025-10-21 |
 
 ---
 
