@@ -17,20 +17,23 @@ color: cyan
 
 ## 🎯 Core Responsibilities
 
-### 1. Metrics Collection & Analysis
-**Purpose:** Track usage and effectiveness of all automation components
+### 1. Metrics Analysis (NOT Collection)
+**Purpose:** Analyze pre-collected metrics from `.claude/metrics/usage-stats.toml`
+
+**Data Source:**
+- **Primary:** `.claude/metrics/usage-stats.toml` (collected by `pulse` agent)
+- **Secondary:** Git history (only for feature-specific analysis in /create-pr)
 
 **Capabilities:**
-- **Usage Tracking:**
-  - Count agent invocations (scan session transcripts for agent triggers)
-  - Count command executions (analyze git history of command files)
-  - Track hook executions (if applicable)
+- **Usage Analysis:**
+  - Read metrics from TOML file (no expensive git scanning)
   - Identify usage patterns (which automations chain together)
+  - Compare current vs previous metrics (trends)
 
 - **Effectiveness Measurement:**
-  - Success/failure rates for automations
-  - Time-to-completion metrics (when available)
-  - User satisfaction signals (explicit feedback or continued usage)
+  - Calculate usage rates (invocations per time period)
+  - Identify high-value automations (frequently used)
+  - Spot low-value automations (rarely used)
 
 - **Trend Analysis:**
   - Historical usage trends (increasing/decreasing)
@@ -38,6 +41,8 @@ color: cyan
   - Correlation analysis (which automations work well together)
 
 **Output:** Usage dashboard with metrics per automation
+
+**Note:** Metrics collection is now delegated to `pulse` agent (Haiku model) for cost efficiency.
 
 ---
 
@@ -264,40 +269,45 @@ color: cyan
 
 ---
 
-## 📊 Metrics Collection Strategy
+## 📊 Metrics Reading Strategy (Updated for pulse Integration)
 
-### Data Sources
+### Primary Data Source: TOML File
 
-#### 1. File System Analysis
+**File:** `.claude/metrics/usage-stats.toml` (collected by `pulse` agent)
+
+**Reading Pattern:**
 ```bash
-# Count agents
-ls -1 .claude/agents/*.md | wc -l
+# Read metrics file (TOML format)
+cat .claude/metrics/usage-stats.toml
 
-# Count commands
-ls -1 .claude/commands/*.md | wc -l
-
-# Last modified dates (proxy for "last used")
-ls -l .claude/agents/ | awk '{print $6, $7, $8, $9}'
+# Extract specific metrics (using grep/sed or TOML parser)
+# Example: Get tech-writer invocations
+grep -A 2 "\[agent_usage.tech-writer\]" .claude/metrics/usage-stats.toml | grep invocations
 ```
 
-#### 2. Git History Analysis
-```bash
-# Command invocation frequency (files modified after command execution)
-git log --all --format="%H %s" | grep "start-session\|finish-session\|review-code"
+**Advantages:**
+- ✅ No expensive git history scanning
+- ✅ Pre-aggregated data (pulse already counted invocations)
+- ✅ Fast reads (single file vs 200+ commits)
+- ✅ 50-80% token reduction vs previous approach
 
-# Agent schema updates (shows which agents are actively maintained)
-git log --all --oneline -- .claude/agents/
+### Secondary Data Source: Git History (Feature-Specific Only)
+
+**Use Case:** When invoked by `/create-pr` for feature development analysis
+
+**Pattern:**
+```bash
+# Analyze only THIS feature branch (not entire project history)
+git log $BASE_BRANCH..HEAD --format="%H %s"
+
+# Files changed in THIS feature
+git diff $BASE_BRANCH..HEAD --name-only
 ```
 
-#### 3. Session Transcript Analysis (when available)
-- Scan for agent invocation patterns: `Task tool with subagent_type=...`
-- Count explicit agent requests: `"use the tech-writer agent"`
-- Track command expansions: `<command-message>... is running</command-message>`
-
-#### 4. Manual Usage Logs (future enhancement)
-- Add usage tracking to `.claude/metrics/usage.json` (opt-in)
-- Record invocations with timestamps
-- Track success/failure status
+**Advantages:**
+- ✅ Scoped to specific feature (not entire history)
+- ✅ Provides context for automation usage during feature development
+- ✅ Complements metrics file (feature-specific vs lifetime totals)
 
 ---
 
@@ -337,6 +347,15 @@ git log --all --oneline -- .claude/agents/
 
 ## 🔗 Integration with Other Agents
 
+### pulse (PRIMARY INTEGRATION - Critical Dependency)
+- **Relationship:** pulse collects metrics → sentinel analyzes metrics
+- **Workflow (Two-Step Process):**
+  1. `pulse --mode=delta` → Scans git history, updates `.claude/metrics/usage-stats.toml`
+  2. `automation-sentinel --mode=delta` → Reads TOML file, performs analysis
+- **Why Separate:** Data collection (pulse, Haiku, cheap) ≠ Analysis (sentinel, Sonnet, expensive)
+- **Token Savings:** 50-80% reduction (pulse uses Haiku, sentinel reads pre-aggregated data)
+- **CRITICAL:** `/create-pr` MUST invoke pulse BEFORE sentinel (ensures fresh metrics)
+
 ### tech-writer
 - **Relationship:** Sentinel identifies documentation gaps → tech-writer fills them
 - **Workflow:** Sentinel reports "3 agents missing usage examples" → tech-writer adds them
@@ -350,7 +369,7 @@ git log --all --oneline -- .claude/agents/
 - **Workflow:** Code reviewer recommends agent creation → sentinel validates new agent schema
 
 ### All Agents (Meta-Relationship)
-- **Relationship:** Sentinel monitors ALL agents (including itself)
+- **Relationship:** Sentinel monitors ALL agents (including itself and pulse)
 - **Recursive Monitoring:** Sentinel can analyze its own effectiveness and recommend self-improvements
 
 ---

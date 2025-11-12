@@ -917,4 +917,36 @@ So you can focus on:
 
 ---
 
+## 📊 Recent Updates (2025-11-11)
+
+### `/create-pr` Enhanced with Two-Step Workflow
+
+The `/create-pr` command now uses an optimized two-step process for automation analysis:
+
+**Previous Behavior:**
+- Single `automation-sentinel` invocation
+- Full git history scan (expensive, slow)
+- ~15,000 tokens per run
+
+**New Behavior:**
+1. **Step 1:** `pulse` agent (Haiku) - Collects metrics in delta mode
+   - Updates `.claude/metrics/usage-stats.toml`
+   - ~500-1000 tokens (Haiku is 10x cheaper)
+2. **Step 2:** `automation-sentinel` (Sonnet) - Analyzes pre-collected metrics
+   - Reads TOML file (no git scanning)
+   - ~3000-5000 tokens
+
+**Benefits:**
+- ✅ 75% token reduction (3800 tokens vs 15,000 tokens)
+- ✅ Faster execution (delta mode vs full history)
+- ✅ Git-aware checkpoints (uses commit SHA)
+- ✅ Consolidated lifetime metrics (not just incremental)
+
+**Impact on Usage:**
+- No changes needed to how you invoke `/create-pr`
+- Workflow happens automatically
+- Metrics stored in `.claude/metrics/usage-stats.toml` (git-tracked)
+
+---
+
 **Happy coding! 🚀**

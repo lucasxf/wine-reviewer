@@ -417,20 +417,29 @@ Type the command in Claude Code CLI to expand it into a full prompt.
 
 **Command Templates:** Reusable versions available at `C:\repo\claude-command-templates\` for new projects.
 
-### Custom Agents (8 Specialized Agents)
+### Custom Agents (9 Specialized Agents)
 
-This project includes **8 custom agents** designed for specific development tasks:
+This project includes **9 custom agents** designed for specific development tasks:
 
-1. **automation-sentinel** - Meta-agent for automation health, metrics, and optimization
+1. **automation-sentinel** - Meta-agent for automation health, metrics analysis, and optimization
 2. **backend-code-reviewer** - Java/Spring Boot code review and best practices enforcement
 3. **cross-project-architect** - Pattern extraction, templates, and new project setup
 4. **flutter-implementation-coach** - Flutter coding, Riverpod, Dio, debugging assistance
 5. **frontend-ux-specialist** - UI/UX design, screen layouts, Material Design
 6. **learning-tutor** - Teaching concepts, structured learning, exercises
-7. **session-optimizer** - Token efficiency, session planning, workflow optimization
-8. **tech-writer** - Documentation (external + in-code), ADRs, Javadoc, OpenAPI
+7. **pulse** - Metrics collection: agent/command usage tracking (Haiku model, feeds automation-sentinel)
+8. **session-optimizer** - Token efficiency, session planning, workflow optimization
+9. **tech-writer** - Documentation (external + in-code), ADRs, Javadoc, OpenAPI
 
 **Agent Details:** See `.claude/agents/README.md` for comprehensive usage guide, workflows, and best practices.
+
+**Automation Metrics System (Added 2025-11-11):**
+- **`.claude/metrics/usage-stats.toml`** - Git-tracked automation usage metrics (TOML format)
+- **Delta tracking** - Incremental updates (50-80% token savings vs full history scans)
+- **Git-aware checkpoints** - Uses commit SHA for synchronization
+- **Two-step workflow** - `pulse` (Haiku, data collection) → `automation-sentinel` (Sonnet, analysis)
+- **Automatic integration** - `/create-pr` automatically invokes pulse before sentinel
+- **Benefits** - 75% token reduction per automation analysis (3800 vs 15,000 tokens)
 
 ### Agent Creation Standards
 
