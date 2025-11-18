@@ -441,6 +441,42 @@ This project includes **9 custom agents** designed for specific development task
 - **Automatic integration** - `/create-pr` automatically invokes pulse before sentinel
 - **Benefits** - 75% token reduction per automation analysis (3800 vs 15,000 tokens)
 
+**Metrics Collection & Analysis Best Practices** *(Added 2025-11-18)*
+
+**CRITICAL RULE:** Always work step-by-step and review your math when gathering metrics with `pulse` and generating insights with `automation-sentinel`.
+
+**Why This Matters:**
+- Metrics errors undermine credibility of analysis and articles
+- Incorrect calculations propagate to published content
+- Math mistakes are embarrassing when discovered by code review (human or automated)
+
+**Best Practices:**
+1. **Show your work** - Document calculation steps explicitly (e.g., "12.75 / 35.5 = 0.359 ≈ 36%")
+2. **Double-check formulas** - Verify metric definitions match their names (e.g., "net LOCs" = added - deleted)
+3. **Cross-reference sources** - Compare git log output with TOML file values for consistency
+4. **Validate percentages** - Ensure parts sum to whole (e.g., top 3 agents should be ≤ 100% of total)
+5. **Review before commit** - Re-read all numbers in generated reports for arithmetic errors
+6. **Use examples from data** - Include real calculations from current metrics (not placeholders)
+
+**Example (Good Practice):**
+```markdown
+## ROI Calculation (Step-by-Step)
+
+**Data from usage-stats.toml:**
+- finish-session: 13 invocations × 30 min/session = 390 min = 6.5h saved
+- tech-writer: 15 invocations × 25 min/session = 375 min = 6.25h saved
+- Total savings: 35.5h
+
+**Top 2 percentage:**
+- Combined savings: 6.5h + 6.25h = 12.75h
+- Percentage: 12.75h / 35.5h = 0.3591 = **35.9% ≈ 36%**
+
+**Top 3 percentage (adding backend-code-reviewer):**
+- backend-code-reviewer: 12 invocations × 20 min = 240 min = 4h
+- Combined savings: 12.75h + 4h = 16.75h
+- Percentage: 16.75h / 35.5h = 0.4718 = **47.2% ≈ 47%**
+```
+
 ### Agent Creation Standards
 
 **CRITICAL RULE: Front Matter Required for All Agents** *(Added 2025-10-31)*
