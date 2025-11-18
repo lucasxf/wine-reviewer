@@ -164,6 +164,34 @@ find services/api/src/main/java -name '*.java' -exec wc -l {} + | tail -1
 - Provides sensible fallback (0) instead of empty output
 - Essential for automation scripts that may run in different environments
 
+**Git Numstat Binary File Filtering:** *(Added 2025-11-18)*
+
+When parsing `git log --numstat` output with `awk`, always filter out binary files which show `-` for insertions/deletions.
+
+**Example:**
+```bash
+# ✅ CORRECT - Filters binary files
+git log --numstat --pretty=format:"" | \
+  awk '$1 != "-" && $2 != "-" {added+=$1; deleted+=$2} END {
+    print "total_locs_added: " added
+    print "total_locs_deleted: " deleted
+    print "net_locs: " (added-deleted)
+  }'
+
+# ❌ INCORRECT - Binary files break arithmetic
+git log --numstat --pretty=format:"" | \
+  awk '{added+=$1; deleted+=$2} END {
+    print "total_locs_added: " added
+    print "total_locs_deleted: " deleted
+  }'
+```
+
+**Why:**
+- Binary files show `-` instead of numbers in git numstat output
+- Without filtering, awk treats `-` as a string, breaking arithmetic operations
+- Results in incorrect LOC counts (NaN or 0 instead of actual values)
+- Critical for accurate productivity metrics and code analysis
+
 ## 🚀 CI/CD Standards
 
 ### GitHub Actions Workflows
