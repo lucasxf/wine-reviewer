@@ -141,6 +141,29 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 - Use environment variables for configuration
 - Document all services in README
 
+## 🔧 Bash Scripting Standards
+
+### Error Handling and Robustness
+
+**Find Command Error Handling:** *(Added 2025-11-18)*
+
+Always add error handling when using `find` with `wc -l` to count files. Use `2>/dev/null || echo '0'` to suppress errors and provide fallback.
+
+**Example:**
+```bash
+# ✅ CORRECT - With error handling
+find services/api/src/main/java -name '*.java' -exec wc -l {} + 2>/dev/null | tail -1 || echo '0'
+
+# ❌ INCORRECT - Without error handling (fails if directory doesn't exist)
+find services/api/src/main/java -name '*.java' -exec wc -l {} + | tail -1
+```
+
+**Why:**
+- Prevents script failures when directories don't exist
+- Handles permission denied errors gracefully
+- Provides sensible fallback (0) instead of empty output
+- Essential for automation scripts that may run in different environments
+
 ## 🚀 CI/CD Standards
 
 ### GitHub Actions Workflows
