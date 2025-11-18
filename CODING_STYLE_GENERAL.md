@@ -216,6 +216,48 @@ Todos os arquivos principais de documentação (`CLAUDE.md`, `CODING_STYLE.md`, 
 - Maintains credibility in technical writing
 - Critical for articles, research papers, and audit documentation
 
+### Correction Propagation in Documentation *(Added 2025-11-18)*
+
+**CRITICAL RULE:** When documenting errors found in published content, explicitly list ALL affected files that need correction.
+
+**Bad Example (Vague):**
+```markdown
+## Error Found
+The ROI calculation was incorrect (57% should be 47%). This needs to be fixed in the article.
+```
+
+**Good Example (Explicit Checklist):**
+```markdown
+## Error Found
+The ROI calculation was incorrect. **Correction required:**
+
+**Incorrect value:** "57% of savings from 2 automations"
+**Correct value:** "47% of savings from 3 automations"
+
+**Files requiring correction:**
+1. ✅ `.claude/metrics/article-2-key-insights-summary.md` (Line 83) - ✅ FIXED
+2. ⏳ `.claude/metrics/article-2-metrics-update-2025-11-12.md` (Table 5, Line 336-339)
+3. ⏳ Any published articles referencing "57%" figure
+4. ⏳ Presentation slides or summary documents
+
+**Next action:** Search codebase for "57%" to find all occurrences.
+```
+
+**Guidelines:**
+- Provide exact file paths (not just "the article" or "the docs")
+- Include line numbers or section names when possible
+- Use checkboxes (✅/⏳) to track correction progress
+- List ALL potential locations (articles, slides, summaries, related docs)
+- Suggest search patterns to find other occurrences
+- Don't assume you found all instances - encourage verification
+
+**Why:**
+- Prevents corrections from being missed in derived documents
+- Published articles/presentations may have copied incorrect data
+- Creates accountability trail for error correction
+- Ensures consistency across all documentation
+- Critical for maintaining credibility after publishing errors
+
 ### Arquivos a atualizar após mudanças significativas
 
 1. **`CLAUDE.md`** - Sempre atualizar com novas diretrizes, decisões arquiteturais e aprendizados
