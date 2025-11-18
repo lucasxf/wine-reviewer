@@ -192,6 +192,35 @@ git log --numstat --pretty=format:"" | \
 - Results in incorrect LOC counts (NaN or 0 instead of actual values)
 - Critical for accurate productivity metrics and code analysis
 
+**Git Shortstat Locale Dependencies:** *(Added 2025-11-18)*
+
+The `git log --shortstat` command produces locale-dependent output. For robust parsing, use `git log --numstat` instead.
+
+**Example:**
+```bash
+# ⚠️ LOCALE-DEPENDENT - Breaks on non-English systems
+git log --shortstat --oneline | \
+  grep -E "file.*changed" | \
+  awk '{inserted+=$4; deleted+=$6} END {print inserted, deleted}'
+# English: "3 files changed, 45 insertions(+), 12 deletions(-)"
+# French:  "3 fichiers modifiés, 45 insertions(+), 12 suppressions(-)"
+# Pattern match fails on French systems!
+
+# ✅ LOCALE-INDEPENDENT - Works on all systems
+git log --numstat --pretty=format:"" | \
+  awk '$1 != "-" && $2 != "-" {inserted+=$1; deleted+=$2} END {
+    print "insertions: " inserted
+    print "deletions: " deleted
+  }'
+# Output: "45  12  path/to/file.java" (always numeric, no text)
+```
+
+**Why:**
+- `--shortstat` uses localized strings ("files changed", "fichiers", "arquivos", etc.)
+- Regex patterns like `file.*changed` only work in English
+- `--numstat` produces numeric-only output (locale-independent)
+- When using `--shortstat` in documentation, always note the locale dependency
+
 ## 🚀 CI/CD Standards
 
 ### GitHub Actions Workflows
