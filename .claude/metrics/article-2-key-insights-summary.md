@@ -243,6 +243,12 @@ Completion: 10 PRs / 13 finish = 77%
 
 ## CORRECTION NEEDED IN ARTICLE DOC
 
+**IMPORTANT:** The original article doc incorrectly stated "57% of savings from 2 automations". The correct figures are 36% (top 2) or 47% (top 3). This correction must be propagated to:
+
+1. **Primary target:** `C:\repo\wine-reviewer\.claude\metrics\article-2-metrics-update-2025-11-12.md` (Line 336-339, Table 5)
+2. **Any published articles** referencing the "57%" figure
+3. **Presentation slides or summary documents** that may have copied this statistic
+
 **File:** C:\repo\wine-reviewer\.claude\metrics\article-2-metrics-update-2025-11-12.md
 
 **Line 336-339 (Table 5):**

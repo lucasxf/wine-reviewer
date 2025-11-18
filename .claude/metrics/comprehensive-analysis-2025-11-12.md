@@ -757,7 +757,7 @@ Goal: Maximize (LOCs × Test Ratio) → No rework → Consistent velocity
 **Direct Measurements (Git + Metrics File):**
 - ✅ 198 commits in 25 days (7.92/day average)
 - ✅ 147 automation invocations (5.88/day average)
-- ✅ 36,495 net LOCs added (44,847 added - 8,352 deleted)
+- ✅ 36,495 net LOCs (44,847 added - 8,352 deleted)
 - ✅ 138 @Test methods in 12 test files
 - ✅ 88 test-related commits (44% of total)
 - ✅ 27 documentation commits

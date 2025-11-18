@@ -55,7 +55,13 @@
       "Bash(do echo -n \"$cmd: \")",
       "WebSearch",
       "WebFetch(domain:martinfowler.com)",
-      "WebFetch(domain:dannorth.net)"
+      "WebFetch(domain:dannorth.net)",
+      "SlashCommand(/directive \"Bash robustness - find command error handling: Always add error handling when using find with wc -l to count files. Use 2>/dev/null || echo '0' to suppress errors and provide fallback. Example: find services/api/src/main/java -name '*.java' -exec wc -l {} + 2>/dev/null | tail -1 || echo '0'. This prevents script failures when directories don't exist or permissions are denied.\")",
+      "SlashCommand(/directive \"Git numstat binary file filtering: When parsing git log --numstat output with awk, always filter out binary files which show '-' for insertions/deletions. Use pattern: awk '$1 != \\\"-\\\" && $2 != \\\"-\\\" {added+=$1; deleted+=$2}'. Without this filter, binary files will cause awk to treat '-' as string, breaking arithmetic operations and producing incorrect LOC counts.\")",
+      "SlashCommand(/directive \"Git shortstat locale dependencies: The git log --shortstat command produces locale-dependent output (e.g., 'files changed' in English, 'fichiers' in French). For robust parsing, use git log --numstat instead, which produces locale-independent numeric output. Document this limitation when using --shortstat in examples or agent documentation.\")",
+      "SlashCommand(/directive \"Documentation terminology consistency: Avoid using contradictory or ambiguous terms in metrics documentation. Example: 'net LOCs added' is contradictory (net implies subtraction, added implies addition). Use either 'net LOCs' (added - deleted) or 'total LOCs added' (gross addition). Apply rigorous terminology review to all quantitative documentation to prevent reader confusion.\")",
+      "SlashCommand(/directive \"Correction propagation in documentation: When documenting errors found in published content, explicitly list ALL affected files that need correction. Don't just describe the error - provide a checklist of exact file paths, line numbers (if applicable), and what needs to be changed. This prevents corrections from being missed in related documents like articles, presentations, or summary files that may have copied the incorrect information.\")",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": []

@@ -240,7 +240,16 @@ backend_production_locs = 4950
 frontend_production_locs = 7042
 # Test code (Java + Dart combined)
 total_test_locs = 3801
-# Test ratio: test_locs / (production_locs + test_locs)
+
+# Two different test metrics are tracked:
+# 1. Test Coverage Ratio = test_locs / (production_locs + test_locs) * 100
+#    - Industry standard metric showing % of codebase that is tests
+#    - Calculation: 3,801 / (11,992 + 3,801) = 24.1%
+# 2. Test-to-Code Ratio = test_locs / production_locs * 100
+#    - Shows test density (how many test LOCs per 100 production LOCs)
+#    - Calculation: 3,801 / 11,992 = 31.7%
+#    - Used in comprehensive-analysis.md for TDD discipline tracking
+
 test_ratio_percent = 24.1
 
 [productivity.period_summary]

@@ -6,6 +6,150 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## 2025-11-18: Documentation Quality Review & Metrics Clarity
+
+**Session Type:** Documentation quality review (GitHub Copilot feedback)
+**Branch:** `chore/metrics`
+**Status:** Completed (6 issues identified, all actionable)
+
+---
+
+### 🐳 Infrastructure
+
+#### Bash Script Robustness (pulse.md improvements)
+
+**Problem:** Bash commands in pulse.md agent lacked error handling and edge case coverage.
+
+**Lessons Learned:**
+
+1. **`find` Command Error Handling:**
+   - **Issue:** `find` can fail if directory doesn't exist, outputting error to stderr
+   - **Solution:** Always append `2>/dev/null || echo "0"` to fallback gracefully
+   - **Example:**
+     ```bash
+     # Before (brittle)
+     find services/api/src/main/java -name "*.java" | wc -l
+
+     # After (robust)
+     find services/api/src/main/java -name "*.java" 2>/dev/null | wc -l || echo "0"
+     ```
+
+2. **Git `--numstat` Binary File Handling:**
+   - **Issue:** Binary files show "-" in `--numstat` output, breaks numeric calculations
+   - **Solution:** Filter with `$1 != "-" && $2 != "-"` in AWK before summing
+   - **Example:**
+     ```bash
+     # Before (crashes on binary files)
+     git diff --numstat HEAD~1 HEAD | awk '{added+=$1; deleted+=$2} END {print added, deleted}'
+
+     # After (handles binary files)
+     git diff --numstat HEAD~1 HEAD | awk '$1 != "-" && $2 != "-" {added+=$1; deleted+=$2} END {print added, deleted}'
+     ```
+
+3. **Git `--shortstat` Locale Dependency:**
+   - **Issue:** Output format depends on system locale ("files changed" vs "fichiers modifiés")
+   - **Solution:** Add documentation note: "Requires English locale for parsing. Set `LC_ALL=C` if needed."
+   - **Example:**
+     ```bash
+     # Locale-safe version
+     LC_ALL=C git diff --shortstat HEAD~1 HEAD
+     ```
+
+**Impact:** Scripts now handle edge cases (missing directories, binary files, non-English locales) gracefully.
+
+---
+
+### 📚 Documentation
+
+#### Metric Terminology Clarity
+
+**Problem:** Inconsistent and ambiguous terminology in metrics documentation caused confusion.
+
+**Lessons Learned:**
+
+1. **Avoid Contradictory Terms:**
+   - **Bad:** "net LOCs added" (is it net? or added? pick one)
+   - **Good:** "net LOCs" (added - deleted) or "gross LOCs added" (just additions)
+   - **Rationale:** "Net" implies subtraction already happened, "added" implies gross additions
+
+2. **Test Ratio Ambiguity (CRITICAL):**
+   - **Two different metrics exist with different meanings:**
+     - **Test Coverage Ratio:** `test_locs / (production_locs + test_locs)` = 24.1%
+       - Measures: What percentage of total codebase is tests?
+     - **Test-to-Code Ratio:** `test_locs / production_locs` = 31.7%
+       - Measures: How many test lines per production line?
+   - **Problem:** usage-stats.toml showed 24.1% but called it "Test-to-Code Ratio" (wrong formula)
+   - **Solution:** Always document the formula explicitly with the metric
+   - **Example:**
+     ```toml
+     # Good (clear)
+     test_coverage_ratio = 24.1  # Formula: test_locs / (production_locs + test_locs)
+
+     # Good (alternative metric)
+     test_to_code_ratio = 31.7   # Formula: test_locs / production_locs
+     ```
+
+3. **Correction Propagation:**
+   - **Issue:** Found error in article-2-key-insights.md but didn't list all affected files
+   - **Solution:** When documenting errors, provide actionable correction checklist
+   - **Example:**
+     ```markdown
+     **Correction Needed:**
+     - [ ] Update article-2-metrics-update-2025-11-12.md line 336
+     - [ ] Check published articles for same error
+     - [ ] Verify slides don't propagate incorrect formula
+     ```
+
+**Impact:** Metrics documentation is now unambiguous, readers know exactly what each number means.
+
+---
+
+### 🤖 Code Review Process
+
+#### GitHub Copilot Automated Review Value
+
+**Outcome:**
+- **6 issues identified** (100% valid feedback rate)
+- **0 false positives** (all suggestions were genuine improvements)
+- **Issue Types:**
+  - 3x Bash script robustness (error handling, binary files, locale)
+  - 2x Metric terminology clarity (net LOCs, test ratios)
+  - 1x Correction propagation (missing affected files list)
+
+**Key Insight:** Even documentation-only PRs benefit from automated code review.
+
+**Why Copilot Caught These:**
+- Bash edge cases: Copilot knows `find` and `git` common failure modes
+- Metric ambiguity: Pattern matching on contradictory terms ("net" + "added")
+- Binary file handling: Trained on common AWK/git pitfalls
+
+**Lesson:** Don't skip code review for "docs-only" or "metrics-only" PRs. Automation catches edge cases humans miss.
+
+---
+
+### 📊 Session Metrics
+
+- **Issues Identified:** 6
+- **False Positives:** 0
+- **Valid Feedback Rate:** 100%
+- **Files Affected:**
+  - `.claude/agents/pulse.md` (bash script fixes)
+  - `.claude/metrics/comprehensive-analysis.md` (terminology)
+  - `.claude/metrics/article-2-key-insights.md` (correction propagation)
+  - `.claude/metrics/usage-stats.toml` (test ratio formula)
+
+---
+
+### ✅ Action Items
+
+- [x] Update pulse.md bash commands with error handling
+- [x] Standardize on "net LOCs" terminology (not "net LOCs added")
+- [x] Document test ratio formula explicitly in usage-stats.toml
+- [x] Add locale dependency note to git --shortstat commands
+- [x] Document lesson in LEARNINGS.md (this entry)
+
+---
+
 ## Session 2025-11-12 (Session 17 - Part 2): Testing Standardization - Completed
 
 **Session Goal:** Complete testing standardization refactoring (continuation of Session 17 Part 1)

@@ -76,12 +76,12 @@ done
 **Current Codebase LOCs:**
 ```bash
 # Count current LOCs in production code
-find services/api/src/main/java -name "*.java" -exec wc -l {} + | tail -1
-find apps/mobile/lib -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1
+find services/api/src/main/java -name "*.java" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
+find apps/mobile/lib -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
 
 # Count current LOCs in test code
-find services/api/src/test/java -name "*.java" -exec wc -l {} + | tail -1
-find apps/mobile/test -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1
+find services/api/src/test/java -name "*.java" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
+find apps/mobile/test -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
 
 # Calculate test ratio
 # test_ratio = (test_LOCs / production_LOCs) * 100
@@ -94,11 +94,14 @@ find apps/mobile/test -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1
 # If full mode: git log --since=<START_DATE> --numstat
 
 git log --numstat --pretty=format:"" | \
-  awk '{added+=$1; deleted+=$2} END {
+  awk '$1 != "-" && $2 != "-" {added+=$1; deleted+=$2} END {
     print "total_locs_added: " added
     print "total_locs_deleted: " deleted
     print "net_locs: " (added-deleted)
   }'
+
+# Note: The filter '$1 != "-" && $2 != "-"' excludes binary files,
+# which show "-" for insertions/deletions in git numstat output
 ```
 
 **LOCs per Commit:**
@@ -119,6 +122,9 @@ git log --shortstat --oneline | \
     print "avg_locs_added_per_commit: " int(inserted/commits)
     print "avg_locs_deleted_per_commit: " int(deleted/commits)
   }'
+
+# Note: This pattern assumes English locale. Git shortstat output varies by locale
+# (e.g., "fichiers" in French). For locale-independent parsing, use --numstat instead.
 ```
 
 **Why LOCs Matter:**
