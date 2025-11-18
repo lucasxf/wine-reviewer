@@ -262,7 +262,7 @@
 | 28/10 | 6 agents (backend focus) | 8h | 13h |
 | 29/10 | 2 meta-agents | 3h | 16h |
 | 31/10 | 3 session commands | 2h | 18h |
-| 11/10 | pulse agent + LOCs | 3h | 21h |
+| 11/11 | pulse agent + LOCs | 3h | 21h |
 | 12/11 | automation-sentinel updates | 1.5h | 22.5h |
 
 **Break-even:** Day 16 (Nov 2)
