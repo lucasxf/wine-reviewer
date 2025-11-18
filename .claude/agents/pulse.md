@@ -105,8 +105,16 @@ git log --numstat --pretty=format:"" | \
 ```bash
 # Average LOCs per commit
 git log --shortstat --oneline | \
-  grep -E "^ [0-9]" | \
-  awk '{files+=$1; inserted+=$4; deleted+=$6; commits++} END {
+  grep -E "file.*changed" | \
+  awk '{
+    match($0, /([0-9]+) files changed/, fc);
+    match($0, /([0-9]+) insertions?\(\+\)/, ins);
+    match($0, /([0-9]+) deletions?\(-\)/, del);
+    files += fc[1];
+    inserted += ins[1];
+    deleted += del[1];
+    commits++;
+  } END {
     print "avg_locs_changed_per_commit: " int((inserted+deleted)/commits)
     print "avg_locs_added_per_commit: " int(inserted/commits)
     print "avg_locs_deleted_per_commit: " int(deleted/commits)
