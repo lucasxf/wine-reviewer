@@ -350,7 +350,7 @@ Future runs will use delta mode (incremental updates).
 7. **Atomic Writes** - Write metrics to temp file → rename (avoid corruption)
 8. **Graceful Degradation** - If metrics file missing/corrupted → fallback to full mode
 9. **No Schema Validation** - Leave validation to automation-sentinel (separation of concerns)
-10. **All Agents + All Commands** - Never skip any agents or commands, always collect all 9+15 metrics
+10. **All Agents + All Commands** - Never skip any agents or commands, always collect all 9+16 metrics
 
 ---
 
