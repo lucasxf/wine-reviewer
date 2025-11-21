@@ -93,6 +93,8 @@ find apps/mobile/test -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1 || e
 # If delta mode: git log <LAST_COMMIT>..HEAD --numstat
 # If full mode: git log --since=<START_DATE> --numstat
 
+# Note: Filter out binary files (git log --numstat shows "-" for binary files)
+# This ensures LOC counts only include source code changes, not binary file modifications
 git log --numstat --pretty=format:"" | \
   awk '$1 != "-" && $2 != "-" {added+=$1; deleted+=$2} END {
     print "total_locs_added: " added
