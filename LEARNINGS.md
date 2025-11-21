@@ -452,7 +452,7 @@ This file archives session logs, technical decisions, problems encountered, and 
 **What Was Done:**
 
 1. **Created `.claude/commands/README.md` (500+ lines):**
-   - **Purpose:** Comprehensive slash commands reference guide mirroring `.claude/agents/README.md` structure
+   - **Purpose:** Comprehensive slash commands reference guide mirroring `.claude/agents-readme.md` structure
    - **Structure:** Parallel organization for consistency
      - Command overview table (all 13 commands with descriptions)
      - Usage guide per command category (workflow/documentation/testing/build/infrastructure)
@@ -472,7 +472,7 @@ This file archives session logs, technical decisions, problems encountered, and 
    - Confirmed 3-part documentation structure (GENERAL/BACKEND/FRONTEND/INFRASTRUCTURE) consistently applied across all main files
 
 3. **Tooling Documentation Parity Achieved:**
-   - **`.claude/agents/README.md`:** 510 lines covering 6 specialized agents with workflows, best practices, decision trees
+   - **`.claude/agents-readme.md`:** 510 lines covering 6 specialized agents with workflows, best practices, decision trees
    - **`.claude/commands/README.md`:** 500+ lines covering 13 slash commands with parallel structure
    - **Consistency:** Both use same organization pattern:
      - Overview table → Category breakdown → Usage guide → Complete workflows → Decision support → Best practices
@@ -705,7 +705,7 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ## Session 2025-10-29 (Session 11): Custom Agent Suite Expansion - tech-writer & automation-sentinel
 
-**Session Goal:** Create documentation agent (tech-writer) and meta-agent for automation lifecycle management (automation-sentinel) based on improvement ideas in agents/README.md
+**Session Goal:** Create documentation agent (tech-writer) and meta-agent for automation lifecycle management (automation-sentinel) based on improvement ideas in agents-readme.md
 
 ### 🐳 Infrastructure
 
@@ -872,7 +872,7 @@ This file archives session logs, technical decisions, problems encountered, and 
 **Solutions Applied:**
 
 1. **Agent consolidation:** Merged metrics-tracker + automation-maintainer → automation-sentinel
-2. **Anti-cyclic dependency rule:** Documented in automation-sentinel schema and agents/README.md
+2. **Anti-cyclic dependency rule:** Documented in automation-sentinel schema and agents-readme.md
 3. **Smart delegation:** Updated `/finish-session` to conditionally call automation-sentinel (git diff detection)
 4. **Context awareness:** Commands check `$ARGUMENTS` before asking user
 5. **Alphabetical organization:** Sorted agents alphabetically in README.md

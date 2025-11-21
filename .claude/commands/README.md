@@ -863,7 +863,7 @@ These commands are designed to be reusable across projects:
 **Agents:**
 - **session-optimizer** - Works with `/start-session` and `/finish-session`
 - **backend-code-reviewer** - Works with `/review-code`
-- See `.claude/agents/README.md` for full agent suite
+- See `.claude/agents-readme.md` for full agent suite
 
 ---
 

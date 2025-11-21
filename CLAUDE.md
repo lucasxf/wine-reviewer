@@ -431,7 +431,7 @@ This project includes **9 custom agents** designed for specific development task
 8. **session-optimizer** - Token efficiency, session planning, workflow optimization
 9. **tech-writer** - Documentation (external + in-code), ADRs, Javadoc, OpenAPI
 
-**Agent Details:** See `.claude/agents/README.md` for comprehensive usage guide, workflows, and best practices.
+**Agent Details:** See `.claude/agents-readme.md` for comprehensive usage guide, workflows, and best practices.
 
 **Automation Metrics System (Added 2025-11-11):**
 - **`.claude/metrics/usage-stats.toml`** - Git-tracked automation usage metrics (TOML format)
@@ -1022,7 +1022,7 @@ Sessions are organized chronologically (newest-first) with subsections for Backe
 - **`C:\repo\ai\claude-code\tips\EFFICIENCY.md`** - Claude Code efficiency guide (token optimization, workflow strategies, file organization tips) - Optional reference for improving development performance
 
 **Automation & Productivity:**
-- **Custom Agents:** `.claude/agents/README.md` - 8 specialized agents (automation-sentinel, backend-code-reviewer, cross-project-architect, flutter-implementation-coach, frontend-ux-specialist, learning-tutor, session-optimizer, tech-writer)
+- **Custom Agents:** `.claude/agents-readme.md` - 8 specialized agents (automation-sentinel, backend-code-reviewer, cross-project-architect, flutter-implementation-coach, frontend-ux-specialist, learning-tutor, session-optimizer, tech-writer)
 - **Slash Commands:** `.claude/commands/` - Custom slash commands for common workflows
 - **Command Templates:** `C:\repo\claude-command-templates\` - Reusable slash commands for new projects
 
