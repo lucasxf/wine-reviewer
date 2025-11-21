@@ -560,7 +560,7 @@ git diff $BASE_BRANCH..HEAD --name-only
 7. **Document Reasoning** - Every recommendation must include clear rationale
 8. **Respect Conventions** - Follow project patterns from CLAUDE.md and CODING_STYLE files
 9. **Avoid Scope Creep** - Don't expand into non-automation domains (code, architecture, etc.)
-10. **All Metrics Analyzed** - Never skip agents or commands in analysis, always evaluate all 9+15 automations
+10. **All Metrics Analyzed** - Never skip agents or commands in analysis, always evaluate all 9+16 automations
 
 ---
 
