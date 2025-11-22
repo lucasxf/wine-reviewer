@@ -22,7 +22,7 @@ color: green
 
 **✅ DEFAULT BEHAVIOR (No user specification required):**
 - **Agent Usage Metrics** - Always collect invocations for all 9 agents
-- **Command Usage Metrics** - Always collect executions for all 15 slash commands
+- **Command Usage Metrics** - Always collect executions for all 16 slash commands
 - **Comprehensive Coverage** - Single invocation collects ALL automation data
 - **No Manual Flags** - No need to specify targets - always collects everything
 
