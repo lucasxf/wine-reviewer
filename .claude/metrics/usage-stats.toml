@@ -4,38 +4,41 @@
 # Model: Haiku (cost-optimized data collection)
 
 [metadata]
-timestamp = "2025-11-12T12:13:30-03:00"
-commit_sha = "98e308d931c3a94de88cbbc4537863acd17b3c2c"
-branch = "chore/metrics"
+timestamp = "2025-11-22T18:45:00-03:00"
+commit_sha = "165cc53173db8d3f82125a8d4de490a0d11421f4"
+branch = "docs/claude-md-reduction"
 schema_version = "1.0.0"
 updated_by = "pulse"
-mode = "full"
-description = "Full baseline metrics collected from entire git history (198 commits)"
+mode = "delta"
+description = "Delta update: 27 new commits analyzed since checkpoint 98e308d. Feature branch activity: Documentation quality improvements, metrics clarity updates, agent framework enhancements"
 
 [analysis]
-total_commits_analyzed = 198
-commits_with_automation_keywords = 87
+total_commits_analyzed = 225
+commits_with_automation_keywords = 94
 analysis_period_start = "2025-10-18T12:36:05-03:00"
-analysis_period_end = "2025-11-12T12:13:30-03:00"
-total_days_analyzed = 25
+analysis_period_end = "2025-11-22T18:45:00-03:00"
+total_days_analyzed = 35
+delta_commits_analyzed = 27
+delta_commits_with_keywords = 7
+last_checkpoint_sha = "98e308d931c3a94de88cbbc4537863acd17b3c2c"
 
 # Agent Invocation Counts
 # Based on explicit mentions + heuristic patterns + file modification analysis
 # Confidence levels: high (explicit mention), medium (strong patterns), low (inference)
 
 [agent_usage.tech_writer]
-invocations = 15
-last_used = "2025-11-12T12:13:30-03:00"
-file_modifications = 3
+invocations = 18
+last_used = "2025-11-22T18:45:00-03:00"
+file_modifications = 25
 confidence = "high"
-indicators = "explicit mention (2) + docs commits (27) + OpenAPI annotations"
+indicators = "explicit mention (5) + docs commits (27) + OpenAPI annotations + 22 documentation files modified in delta"
 
 [agent_usage.automation_sentinel]
-invocations = 23
-last_used = "2025-11-12T12:13:30-03:00"
-file_modifications = 4
+invocations = 26
+last_used = "2025-11-22T18:45:00-03:00"
+file_modifications = 7
 confidence = "high"
-indicators = "explicit mention (2) + .claude/ directory modifications + metrics collection framework"
+indicators = "explicit mention (5) + .claude/ directory modifications + metrics collection framework + 3 agent file updates in delta"
 
 [agent_usage.backend_code_reviewer]
 invocations = 12
@@ -80,28 +83,28 @@ confidence = "low"
 indicators = "agent created recently"
 
 [agent_usage.pulse]
-invocations = 5
-last_used = "2025-11-12T12:13:30-03:00"
-file_modifications = 1
+invocations = 8
+last_used = "2025-11-22T18:45:00-03:00"
+file_modifications = 4
 confidence = "high"
-indicators = "explicit mention (1) + metrics collection framework (this session)"
+indicators = "explicit mention (4) + metrics collection framework + 3 agent file updates in delta"
 
 # Command Invocation Counts
 # Based on commit message patterns, git log analysis, and explicit mentions
 
 [command_usage.create_pr]
-invocations = 10
-last_used = "2025-11-12T12:13:30-03:00"
-file_modifications = 7
+invocations = 13
+last_used = "2025-11-22T18:45:00-03:00"
+file_modifications = 10
 confidence = "high"
-indicators = "explicit mention (2) + most frequently modified command + PR workflow"
+indicators = "explicit mention (5) + most frequently modified command + PR workflow + 3 PR merges in delta"
 
 [command_usage.finish_session]
-invocations = 13
-last_used = "2025-11-12T12:13:30-03:00"
-file_modifications = 6
+invocations = 14
+last_used = "2025-11-22T18:45:00-03:00"
+file_modifications = 7
 confidence = "high"
-indicators = "explicit mention (1) + session completion pattern + heavily modified"
+indicators = "explicit mention (2) + session completion pattern + heavily modified + 1 session completion in delta"
 
 [command_usage.start_session]
 invocations = 7
@@ -118,11 +121,11 @@ confidence = "high"
 indicators = "explicit mention (1) + roadmap-related commits + regularly updated"
 
 [command_usage.directive]
-invocations = 8
-last_used = "2025-11-12T12:13:30-03:00"
-file_modifications = 3
+invocations = 15
+last_used = "2025-11-22T18:45:00-03:00"
+file_modifications = 6
 confidence = "high"
-indicators = "explicit mention (5) + CLAUDE.md modifications + coding guideline additions"
+indicators = "explicit mention (12) + CLAUDE.md modifications + coding guideline additions + 7 new directives in delta"
 
 [command_usage.resume_session]
 invocations = 6
@@ -211,19 +214,23 @@ total_commands_with_invocations = 16
 schema_errors = 0
 data_quality = "excellent"
 metrics_status = "healthy"
+last_delta_update = "2025-11-22T18:45:00-03:00"
+delta_verification = "27 commits scanned (98e308d..165cc53)"
 
 [summary]
-total_agent_invocations = 68
-total_command_invocations = 79
-combined_automation_invocations = 147
-documentation_commits = 27
+total_agent_invocations = 77
+total_command_invocations = 87
+combined_automation_invocations = 164
+documentation_commits = 34
 test_related_commits = 88
 feature_commits = 28
 refactor_commits = 7
-chore_commits = 6
+chore_commits = 13
 optimize_commits = 13
 improve_commits = 12
-fix_commits = 7
+fix_commits = 8
+delta_new_agent_invocations = 9
+delta_new_command_invocations = 11
 
 # Productivity Metrics - Lines of Code Analysis
 # Collected: 2025-11-12 (full baseline with LOCs data)
@@ -291,10 +298,13 @@ note_7 = "Code quality: 14.3% deletion ratio indicates low rework - efficient im
 note_8 = "Next phase: Use delta mode to track incremental productivity changes"
 
 [collection_notes]
-note_1 = "Full baseline established - scanned entire 198-commit history"
-note_2 = "High-confidence metrics based on explicit commit message mentions (11 found)"
+note_1 = "Full baseline established - scanned entire 198-commit history (2025-11-12)"
+note_2 = "High-confidence metrics based on explicit commit message mentions (11 found initially)"
 note_3 = "Medium/Low-confidence metrics inferred from commit patterns and file modifications"
 note_4 = "All 9 agents and 16 commands discovered and tracked"
 note_5 = "File modification counts show .claude/ directory evolution with 24 total command file changes"
-note_6 = "Next run will use delta mode from this checkpoint (commit 98e308d)"
+note_6 = "Delta update executed from checkpoint 98e308d (2025-11-22 update)"
 note_7 = "LOCs data now integrated - productivity metrics complete (NEW in 2025-11-12 update)"
+note_8 = "Delta analysis (2025-11-22): 27 commits scanned, 7 automation keywords found, 9 agent + 8 command increments"
+note_9 = "Branch activity: docs/claude-md-reduction - Documentation quality improvements and metrics clarity work"
+note_10 = "Top automation patterns in delta: directive (7x), automation-sentinel updates (3x), pulse updates (3x), create-pr (3x)"
