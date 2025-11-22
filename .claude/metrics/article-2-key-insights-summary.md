@@ -66,7 +66,7 @@
 
 ---
 
-### 3. "Top 2 automações (finish-session + tech-writer) = 57% do ROI total"
+### 3. "Top 3 automações (finish-session + tech-writer + backend-code-reviewer) = 47% do ROI total"
 
 **The Evidence:**
 - finish-session (13x): 6.5h saved (29% of total)
