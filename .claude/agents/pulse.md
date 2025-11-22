@@ -17,8 +17,14 @@ color: green
 
 ## 🎯 Core Responsibilities
 
-### 1. Usage Data Collection
-**Purpose:** Gather metrics on agent invocations and command executions
+### 1. Usage Data Collection (COMPREHENSIVE - ALWAYS ENABLED)
+**Purpose:** Automatically gather complete metrics on BOTH agent invocations AND command executions
+
+**✅ DEFAULT BEHAVIOR (No user specification required):**
+- **Agent Usage Metrics** - Always collect invocations for all 9 agents
+- **Command Usage Metrics** - Always collect executions for all 16 slash commands
+- **Comprehensive Coverage** - Single invocation collects ALL automation data
+- **No Manual Flags** - No need to specify targets - always collects everything
 
 **Data Sources:**
 
@@ -424,14 +430,16 @@ Future runs will use delta mode (incremental updates).
 
 ## ⚠️ Critical Rules
 
-1. **No Analysis Logic** - pulse only COLLECTS data, never analyzes/interprets
-2. **Incremental by Default** - Always use delta mode unless explicitly told `--mode=full`
-3. **Git-Aware Checkpoints** - Use commit SHA from metrics file as natural checkpoint
-4. **Consolidated Totals** - Always store LIFETIME totals (not just deltas)
-5. **TOML Format** - Human-readable, comment-friendly, git-diff-friendly
-6. **Atomic Writes** - Write metrics to temp file → rename (avoid corruption)
-7. **Graceful Degradation** - If metrics file missing/corrupted → fallback to full mode
-8. **No Schema Validation** - Leave validation to automation-sentinel (separation of concerns)
+1. **Comprehensive Collection (ALWAYS)** - ALWAYS collect BOTH agent AND command metrics in every run (no exceptions, no user specification needed)
+2. **No Analysis Logic** - pulse only COLLECTS data, never analyzes/interprets
+3. **Incremental by Default** - Always use delta mode unless explicitly told `--mode=full`
+4. **Git-Aware Checkpoints** - Use commit SHA from metrics file as natural checkpoint
+5. **Consolidated Totals** - Always store LIFETIME totals (not just deltas)
+6. **TOML Format** - Human-readable, comment-friendly, git-diff-friendly
+7. **Atomic Writes** - Write metrics to temp file → rename (avoid corruption)
+8. **Graceful Degradation** - If metrics file missing/corrupted → fallback to full mode
+9. **No Schema Validation** - Leave validation to automation-sentinel (separation of concerns)
+10. **All Agents + All Commands** - Never skip any agents or commands, always collect all 9+16 metrics
 
 ---
 
@@ -451,8 +459,8 @@ This agent is successful when:
 ## 📊 Agent Metadata
 
 **Created:** 2025-11-11
-**Last Updated:** 2025-11-11
-**Version:** 1.0.0
+**Last Updated:** 2025-11-17
+**Version:** 1.1.0 (Enhanced: Always collect both agents + commands)
 **Type:** Data Collection Agent (feeds automation-sentinel)
 **Model:** Haiku (simple data aggregation)
 **Triggers:** Automatic (before automation-sentinel) + Manual (user request)
