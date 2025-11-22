@@ -658,6 +658,49 @@ What's your task?
 
 ---
 
+## 🛠️ Agent Creation Standards
+
+**CRITICAL RULE: Front Matter Required for All Agents** *(Added 2025-10-31)*
+
+When creating new custom agents in `.claude/agents/`, **always include YAML front matter** for Claude Code's agent discovery system:
+
+### Required Front Matter Fields
+
+```yaml
+---
+name: agent-name
+description: Use this agent when [trigger conditions]. Examples - User: "[example 1]" → Use this agent. User: "[example 2]" → Use this agent.
+model: sonnet|haiku|opus
+color: purple|blue|cyan|yellow|etc
+---
+```
+
+### Pre-Commit Quality Checklist
+
+- [ ] Front matter exists with all required fields (`name`, `description`, `model`, `color`)
+- [ ] Description includes clear trigger conditions with examples
+- [ ] Agent body has required sections:
+  - [ ] Purpose statement
+  - [ ] Core Responsibilities
+  - [ ] When to Trigger (Automatic + Manual)
+  - [ ] Integration with other agents (if applicable)
+  - [ ] Usage examples (minimum 2)
+- [ ] Markdown syntax is valid (no broken links, proper headers)
+- [ ] Code blocks have language specifiers
+- [ ] Agent follows project conventions (CLAUDE.md, CODING_STYLE_GENERAL.md + stack-specific files)
+
+### Why This Matters
+
+- **Without front matter:** Agents can't be auto-triggered by Claude Code
+- **Missing sections:** Reduces agent effectiveness and discoverability
+- **Consistent structure:** Ensures maintainability across agent suite
+
+### Validation
+
+Before committing new agents, run `automation-sentinel` to validate schema and check for issues.
+
+---
+
 ## 📝 Notes
 
 **This agent suite was designed specifically for you:**
