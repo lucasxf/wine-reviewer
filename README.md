@@ -636,7 +636,7 @@ paths:
 
 ### Automation & Productivity
 
-- **[.claude/agents/README.md](.claude/agents/README.md)** - 9 specialized agents (automation-sentinel, backend-code-reviewer, cross-project-architect, flutter-implementation-coach, frontend-ux-specialist, learning-tutor, pulse, session-optimizer, tech-writer)
+- **[.claude/agents-readme.md](.claude/agents-readme.md)** - 9 specialized agents (automation-sentinel, backend-code-reviewer, cross-project-architect, flutter-implementation-coach, frontend-ux-specialist, learning-tutor, pulse, session-optimizer, tech-writer)
 - **[.claude/METRICS.md](.claude/METRICS.md)** - Automation metrics system (usage tracking, ROI analysis)
 - **[.claude/commands/](.claude/commands/)** - Custom slash commands for common workflows
 - **[Command Templates](C:\repo\claude-command-templates\)** - Reusable slash commands for new projects
