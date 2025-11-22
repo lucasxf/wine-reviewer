@@ -37,7 +37,7 @@ argument-hint: <optional: --stack=backend|frontend|infra|docs|full or context de
 @services/api/CODING_STYLE_BACKEND.md
 @ROADMAP.md
 @README.md
-@.claude/agents/README.md
+@.claude/agents-readme.md
 
 ### Frontend Session
 @CLAUDE.md
@@ -45,7 +45,7 @@ argument-hint: <optional: --stack=backend|frontend|infra|docs|full or context de
 @apps/mobile/CODING_STYLE_FRONTEND.md
 @ROADMAP.md
 @README.md
-@.claude/agents/README.md
+@.claude/agents-readme.md
 
 ### Infrastructure Session
 @CLAUDE.md
@@ -53,13 +53,13 @@ argument-hint: <optional: --stack=backend|frontend|infra|docs|full or context de
 @infra/CODING_STYLE_INFRASTRUCTURE.md
 @ROADMAP.md
 @README.md
-@.claude/agents/README.md
+@.claude/agents-readme.md
 
 ### Documentation Session
 @CLAUDE.md
 @ROADMAP.md
 @README.md
-@.claude/agents/README.md
+@.claude/agents-readme.md
 
 ### Full Context Session (Legacy)
 @CLAUDE.md
@@ -69,7 +69,7 @@ argument-hint: <optional: --stack=backend|frontend|infra|docs|full or context de
 @infra/CODING_STYLE_INFRASTRUCTURE.md
 @ROADMAP.md
 @README.md
-@.claude/agents/README.md
+@.claude/agents-readme.md
 
 **Session Context:** $ARGUMENTS
 
@@ -79,7 +79,7 @@ argument-hint: <optional: --stack=backend|frontend|infra|docs|full or context de
    - Current implementation status
    - What's in progress
    - Next priority tasks (Priority 1, 2, 3...)
-2. Review .claude/agents/README.md to understand:
+2. Review .claude/agents-readme.md to understand:
    - Available specialized agents
    - When to trigger each agent proactively
 3. Review recent commits with `git log --oneline -5` to understand latest changes

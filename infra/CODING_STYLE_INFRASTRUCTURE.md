@@ -141,6 +141,86 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 - Use environment variables for configuration
 - Document all services in README
 
+## 🔧 Bash Scripting Standards
+
+### Error Handling and Robustness
+
+**Find Command Error Handling:** *(Added 2025-11-18)*
+
+Always add error handling when using `find` with `wc -l` to count files. Use `2>/dev/null || echo '0'` to suppress errors and provide fallback.
+
+**Example:**
+```bash
+# ✅ CORRECT - With error handling
+find services/api/src/main/java -name '*.java' -exec wc -l {} + 2>/dev/null | tail -1 || echo '0'
+
+# ❌ INCORRECT - Without error handling (fails if directory doesn't exist)
+find services/api/src/main/java -name '*.java' -exec wc -l {} + | tail -1
+```
+
+**Why:**
+- Prevents script failures when directories don't exist
+- Handles permission denied errors gracefully
+- Provides sensible fallback (0) instead of empty output
+- Essential for automation scripts that may run in different environments
+
+**Git Numstat Binary File Filtering:** *(Added 2025-11-18)*
+
+When parsing `git log --numstat` output with `awk`, always filter out binary files which show `-` for insertions/deletions.
+
+**Example:**
+```bash
+# ✅ CORRECT - Filters binary files
+git log --numstat --pretty=format:"" | \
+  awk '$1 != "-" && $2 != "-" {added+=$1; deleted+=$2} END {
+    print "total_locs_added: " added
+    print "total_locs_deleted: " deleted
+    print "net_locs: " (added-deleted)
+  }'
+
+# ❌ INCORRECT - Binary files break arithmetic
+git log --numstat --pretty=format:"" | \
+  awk '{added+=$1; deleted+=$2} END {
+    print "total_locs_added: " added
+    print "total_locs_deleted: " deleted
+  }'
+```
+
+**Why:**
+- Binary files show `-` instead of numbers in git numstat output
+- Without filtering, awk treats `-` as a string, breaking arithmetic operations
+- Results in incorrect LOC counts (NaN or 0 instead of actual values)
+- Critical for accurate productivity metrics and code analysis
+
+**Git Shortstat Locale Dependencies:** *(Added 2025-11-18)*
+
+The `git log --shortstat` command produces locale-dependent output. For robust parsing, use `git log --numstat` instead.
+
+**Example:**
+```bash
+# ⚠️ LOCALE-DEPENDENT - Breaks on non-English systems
+git log --shortstat --oneline | \
+  grep -E "file.*changed" | \
+  awk '{inserted+=$4; deleted+=$6} END {print inserted, deleted}'
+# English: "3 files changed, 45 insertions(+), 12 deletions(-)"
+# French:  "3 fichiers modifiés, 45 insertions(+), 12 suppressions(-)"
+# Pattern match fails on French systems!
+
+# ✅ LOCALE-INDEPENDENT - Works on all systems
+git log --numstat --pretty=format:"" | \
+  awk '$1 != "-" && $2 != "-" {inserted+=$1; deleted+=$2} END {
+    print "insertions: " inserted
+    print "deletions: " deleted
+  }'
+# Output: "45  12  path/to/file.java" (always numeric, no text)
+```
+
+**Why:**
+- `--shortstat` uses localized strings ("files changed", "fichiers", "arquivos", etc.)
+- Regex patterns like `file.*changed` only work in English
+- `--numstat` produces numeric-only output (locale-independent)
+- When using `--shortstat` in documentation, always note the locale dependency
+
 ## 🚀 CI/CD Standards
 
 ### GitHub Actions Workflows
