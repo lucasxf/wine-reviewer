@@ -658,7 +658,7 @@ Goal: Maximize (LOCs × Test Ratio) → No rework → Consistent velocity
 - `finish-session` (6.5h) → **29% of total savings**
 - `tech-writer` (6.25h) → **28% of total savings**
 
-**Combined:** 57% of savings from just 2 automations (28 invocations)
+**Combined:** 36% of savings from just 2 automations (28 invocations)
 
 **Medium-ROI Automations (2-5 hours saved):**
 - `backend-code-reviewer` (4h)
@@ -668,7 +668,7 @@ Goal: Maximize (LOCs × Test Ratio) → No rework → Consistent velocity
 **Low-ROI Automations (<2 hours saved):**
 - All other automations (68 invocations, 14h saved total)
 
-**Key Insight:** **Pareto principle applies** - 20% of automations (2 of 9 agents) drive 57% of ROI.
+**Key Insight:** **Pareto principle applies** - 20% of automations (2 of 9 agents) drive 36% of ROI.
 
 ---
 
@@ -927,7 +927,7 @@ Goal: Maximize (LOCs × Test Ratio) → No rework → Consistent velocity
 
 **4. Top Insights (Soundbites):**
 - Use the 12 one-liners from Section 6
-- Highlight finish-session (57% of ROI from 2 automations)
+- Highlight finish-session (36% of ROI from 2 automations, or 47% from top 3)
 - Show workflow pattern (start → finish → PR → 77% completion)
 
 **5. Transparency Section (Critical):**
@@ -937,7 +937,7 @@ Goal: Maximize (LOCs × Test Ratio) → No rework → Consistent velocity
 
 **6. Conclusion (Actionable):**
 - "Automation works IF: (1) Enforced not suggested, (2) Integrated workflow, (3) Quality by default"
-- "Start small: finish-session + tech-writer = 57% of ROI"
+- "Start small: finish-session + tech-writer = 36% of ROI (or add backend-code-reviewer for 47%)"
 - "Measure your own data: TOML file + git log = transparent metrics"
 
 ---
