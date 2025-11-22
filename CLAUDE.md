@@ -183,7 +183,7 @@ Documentation must be updated **at the end of each development session** to refl
 8. **session-optimizer** - Token efficiency, session planning
 9. **tech-writer** - Documentation, ADRs, Javadoc, OpenAPI
 
-**For detailed agent guide:** See [.claude/agents/README.md](.claude/agents/README.md)
+**For detailed agent guide:** See [.claude/agents-readme.md](.claude/agents-readme.md)
 
 **Automation Metrics System:**
 - **`.claude/metrics/usage-stats.toml`** - Git-tracked metrics (TOML format)
