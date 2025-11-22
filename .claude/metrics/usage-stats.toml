@@ -250,7 +250,7 @@ total_test_locs = 3801
 #    - Calculation: 3,801 / 11,992 = 31.7%
 #    - Used in comprehensive-analysis.md for TDD discipline tracking
 
-test_ratio_percent = 24.1
+test_coverage_ratio_percent = 24.1  # Test Coverage Ratio: test_locs / (production_locs + test_locs) * 100
 
 [productivity.period_summary]
 # Period: 2025-10-18 to 2025-11-12 (25 days)
