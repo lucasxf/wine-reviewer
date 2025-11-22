@@ -17,8 +17,14 @@ color: green
 
 ## 🎯 Core Responsibilities
 
-### 1. Usage Data Collection
-**Purpose:** Gather metrics on agent invocations and command executions
+### 1. Usage Data Collection (COMPREHENSIVE - ALWAYS ENABLED)
+**Purpose:** Automatically gather complete metrics on BOTH agent invocations AND command executions
+
+**✅ DEFAULT BEHAVIOR (No user specification required):**
+- **Agent Usage Metrics** - Always collect invocations for all 9 agents
+- **Command Usage Metrics** - Always collect executions for all 16 slash commands
+- **Comprehensive Coverage** - Single invocation collects ALL automation data
+- **No Manual Flags** - No need to specify targets - always collects everything
 
 **Data Sources:**
 
@@ -70,6 +76,74 @@ done
 - **Medium confidence:** File pattern match (e.g., `*IT.java` modified → backend-code-reviewer)
 - **Low confidence:** Heuristic inference (multiple commits → session-optimizer)
 
+#### D. Lines of Code (LOCs) Metrics *(CRITICAL - Always Collect)*
+**Purpose:** Gather concrete productivity metrics based on code volume
+
+**Current Codebase LOCs:**
+```bash
+# Count current LOCs in production code
+find services/api/src/main/java -name "*.java" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
+find apps/mobile/lib -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
+
+# Count current LOCs in test code
+find services/api/src/test/java -name "*.java" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
+find apps/mobile/test -name "*.dart" -exec wc -l {} + 2>/dev/null | tail -1 || echo "0"
+
+# Calculate test ratio
+# test_ratio = (test_LOCs / production_LOCs) * 100
+```
+
+**Period LOCs Growth:**
+```bash
+# Get LOCs added/deleted in period
+# If delta mode: git log <LAST_COMMIT>..HEAD --numstat
+# If full mode: git log --since=<START_DATE> --numstat
+
+# Note: Filter out binary files (git log --numstat shows "-" for binary files)
+# This ensures LOC counts only include source code changes, not binary file modifications
+git log --numstat --pretty=format:"" | \
+  awk '$1 != "-" && $2 != "-" {added+=$1; deleted+=$2} END {
+    print "total_locs_added: " added
+    print "total_locs_deleted: " deleted
+    print "net_locs: " (added-deleted)
+  }'
+
+# Note: The filter '$1 != "-" && $2 != "-"' excludes binary files,
+# which show "-" for insertions/deletions in git numstat output
+```
+
+**LOCs per Commit:**
+```bash
+# Average LOCs per commit
+git log --shortstat --oneline | \
+  grep -E "file.*changed" | \
+  awk '{
+    match($0, /([0-9]+) files changed/, fc);
+    match($0, /([0-9]+) insertions?\(\+\)/, ins);
+    match($0, /([0-9]+) deletions?\(-\)/, del);
+    files += fc[1];
+    inserted += ins[1];
+    deleted += del[1];
+    commits++;
+  } END {
+    print "avg_locs_changed_per_commit: " int((inserted+deleted)/commits)
+    print "avg_locs_added_per_commit: " int(inserted/commits)
+    print "avg_locs_deleted_per_commit: " int(deleted/commits)
+  }'
+
+# Note: This pattern assumes English locale. Git shortstat output varies by locale
+# (e.g., "fichiers" in French). For locale-independent parsing, use --numstat instead.
+```
+
+**Why LOCs Matter:**
+- ✅ Concrete, measurable productivity proxy (engineers love hard numbers)
+- ✅ Test ratio shows code quality discipline
+- ✅ LOCs/commit shows feature size (50 LOCs = small fix, 400 LOCs = substantial feature)
+- ✅ LOCs/day and LOCs/session enable velocity comparison
+- ✅ Git-native metric (no external tools required)
+
+**CRITICAL:** Always collect LOCs data. Store in `[productivity]` section of TOML file.
+
 ---
 
 ### 2. Metrics Storage (TOML Format)
@@ -91,6 +165,27 @@ last_used = "2025-11-11T12:00:00Z"
 [command_usage.start-session]
 invocations = 45
 last_used = "2025-11-11T09:00:00Z"
+
+[productivity]
+# Current codebase snapshot
+current_total_locs = 15793
+current_production_locs = 11992
+current_test_locs = 3801
+test_ratio_percent = 31.7
+
+# Period metrics
+total_locs_added = 44847
+total_locs_deleted = 8352
+net_locs = 36495
+
+# Averages
+avg_locs_changed_per_commit = 418
+avg_locs_added_per_commit = 355
+avg_locs_deleted_per_commit = 63
+
+# Velocity (calculated by automation-sentinel)
+locs_per_day = 2127
+locs_per_session = 3546
 
 [health]
 schema_errors = 0
@@ -335,14 +430,16 @@ Future runs will use delta mode (incremental updates).
 
 ## ⚠️ Critical Rules
 
-1. **No Analysis Logic** - pulse only COLLECTS data, never analyzes/interprets
-2. **Incremental by Default** - Always use delta mode unless explicitly told `--mode=full`
-3. **Git-Aware Checkpoints** - Use commit SHA from metrics file as natural checkpoint
-4. **Consolidated Totals** - Always store LIFETIME totals (not just deltas)
-5. **TOML Format** - Human-readable, comment-friendly, git-diff-friendly
-6. **Atomic Writes** - Write metrics to temp file → rename (avoid corruption)
-7. **Graceful Degradation** - If metrics file missing/corrupted → fallback to full mode
-8. **No Schema Validation** - Leave validation to automation-sentinel (separation of concerns)
+1. **Comprehensive Collection (ALWAYS)** - ALWAYS collect BOTH agent AND command metrics in every run (no exceptions, no user specification needed)
+2. **No Analysis Logic** - pulse only COLLECTS data, never analyzes/interprets
+3. **Incremental by Default** - Always use delta mode unless explicitly told `--mode=full`
+4. **Git-Aware Checkpoints** - Use commit SHA from metrics file as natural checkpoint
+5. **Consolidated Totals** - Always store LIFETIME totals (not just deltas)
+6. **TOML Format** - Human-readable, comment-friendly, git-diff-friendly
+7. **Atomic Writes** - Write metrics to temp file → rename (avoid corruption)
+8. **Graceful Degradation** - If metrics file missing/corrupted → fallback to full mode
+9. **No Schema Validation** - Leave validation to automation-sentinel (separation of concerns)
+10. **All Agents + All Commands** - Never skip any agents or commands, always collect all 9+16 metrics
 
 ---
 
@@ -362,8 +459,8 @@ This agent is successful when:
 ## 📊 Agent Metadata
 
 **Created:** 2025-11-11
-**Last Updated:** 2025-11-11
-**Version:** 1.0.0
+**Last Updated:** 2025-11-17
+**Version:** 1.1.0 (Enhanced: Always collect both agents + commands)
 **Type:** Data Collection Agent (feeds automation-sentinel)
 **Model:** Haiku (simple data aggregation)
 **Triggers:** Automatic (before automation-sentinel) + Manual (user request)
