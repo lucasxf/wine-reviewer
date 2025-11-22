@@ -22,7 +22,7 @@ color: cyan
 
 **✅ DEFAULT BEHAVIOR (No user specification required):**
 - **Agent Usage Insights** - Always analyze all 9 agents (invocations, trends, ROI)
-- **Command Usage Insights** - Always analyze all 15 slash commands (effectiveness, patterns)
+- **Command Usage Insights** - Always analyze all 16 slash commands (effectiveness, patterns)
 - **Comprehensive Analysis** - Single invocation produces FULL insights report
 - **No Manual Flags** - Automatically generates usage analysis, effectiveness measurement, trend analysis, recommendations
 
