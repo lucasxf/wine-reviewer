@@ -611,6 +611,57 @@ paths:
 
 ---
 
+## 📚 Useful References
+
+### Core Documentation
+
+- **[CLAUDE.md](CLAUDE.md)** - AI guidance for Claude Code (project guidelines, architecture, conventions)
+- **[ROADMAP.md](ROADMAP.md)** - Current implementation status, next steps, backlog (updated each session)
+- **[LEARNINGS.md](LEARNINGS.md)** - Session logs, technical decisions, problems & solutions (chronological archive)
+- **[TESTING.md](TESTING.md)** - TDD/BDD strategy, testing conventions, examples
+- **[README.md](README.md)** - This file (project setup instructions and overview)
+
+### Coding Conventions
+
+- **[CODING_STYLE_GENERAL.md](CODING_STYLE_GENERAL.md)** - Universal cross-stack conventions
+- **[services/api/CODING_STYLE_BACKEND.md](services/api/CODING_STYLE_BACKEND.md)** - Java/Spring Boot conventions
+- **[apps/mobile/CODING_STYLE_FRONTEND.md](apps/mobile/CODING_STYLE_FRONTEND.md)** - Flutter/Dart conventions
+- **[infra/CODING_STYLE_INFRASTRUCTURE.md](infra/CODING_STYLE_INFRASTRUCTURE.md)** - Docker/CI/CD conventions
+
+### Command References
+
+- **[services/api/COMMANDS.md](services/api/COMMANDS.md)** - Backend API command reference
+- **[apps/mobile/COMMANDS.md](apps/mobile/COMMANDS.md)** - Mobile app command reference
+- **[infra/COMMANDS.md](infra/COMMANDS.md)** - Infrastructure command reference
+
+### Automation & Productivity
+
+- **[.claude/agents/README.md](.claude/agents/README.md)** - 9 specialized agents (automation-sentinel, backend-code-reviewer, cross-project-architect, flutter-implementation-coach, frontend-ux-specialist, learning-tutor, pulse, session-optimizer, tech-writer)
+- **[.claude/METRICS.md](.claude/METRICS.md)** - Automation metrics system (usage tracking, ROI analysis)
+- **[.claude/commands/](.claude/commands/)** - Custom slash commands for common workflows
+- **[Command Templates](C:\repo\claude-command-templates\)** - Reusable slash commands for new projects
+
+### Stack-Specific Docs
+
+- **[services/api/README.md](services/api/README.md)** - Backend architecture and setup
+- **[apps/mobile/README.md](apps/mobile/README.md)** - Frontend architecture and setup
+- **[infra/README.md](infra/README.md)** - Infrastructure setup and Docker configuration
+
+### API Documentation
+
+- **[OpenAPI/Swagger UI](http://localhost:8080/swagger-ui.html)** - Live API documentation (when backend running)
+- **[API Docs (JSON)](http://localhost:8080/v3/api-docs)** - OpenAPI schema
+
+### CI/CD
+
+- **[.github/workflows/](.github/workflows/)** - GitHub Actions pipelines with path filters
+
+### External Resources
+
+- **[Efficiency Guide](C:\repo\ai\claude-code\tips\EFFICIENCY.md)** - Claude Code efficiency guide (token optimization, workflow strategies)
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

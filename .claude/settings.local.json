@@ -55,7 +55,8 @@
       "Bash(do echo -n \"$cmd: \")",
       "WebSearch",
       "WebFetch(domain:martinfowler.com)",
-      "WebFetch(domain:dannorth.net)"
+      "WebFetch(domain:dannorth.net)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
