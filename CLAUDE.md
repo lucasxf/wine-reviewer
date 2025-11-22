@@ -426,7 +426,7 @@ src/test/java/com/winereviewer/api/integration/
 - **[ROADMAP.md](ROADMAP.md)** - Current status, next steps, backlog
 - **[TESTING.md](TESTING.md)** - TDD/BDD strategy, conventions, examples
 - **[.claude/METRICS.md](.claude/METRICS.md)** - Automation metrics system
-- **[.claude/agents/README.md](.claude/agents/README.md)** - Custom agents guide
+- **[.claude/agents-readme.md](.claude/agents-readme.md)** - Custom agents guide
 - **CODING_STYLE files** - Detailed conventions (GENERAL + BACKEND + FRONTEND + INFRASTRUCTURE)
 - **COMMANDS.md files** - Command references per stack (api, mobile, infra)
 - **[LEARNINGS.md](LEARNINGS.md)** - Session logs, technical decisions
