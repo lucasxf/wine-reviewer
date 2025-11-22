@@ -186,7 +186,7 @@ This ensures developers always have access to foundational rules.
 - **CLAUDE.md** - Comprehensive project guidelines for AI assistants
 - **ROADMAP.md** - Project status, next steps, backlog
 - **README.md** - Setup instructions, architecture overview
-- **.claude/agents/README.md** - 8 specialized agents for development workflows
+- **.claude/agents-readme.md** - 8 specialized agents for development workflows
 - **.claude/commands/** - Custom slash commands for common tasks
 
 ---

@@ -46,7 +46,25 @@ color: cyan
   - Seasonal patterns (certain automations used more at project phases)
   - Correlation analysis (which automations work well together)
 
-**Output:** Usage dashboard with metrics per automation
+- **Productivity Analysis (LOCs):** *(CRITICAL - Always Include)*
+  - **Current Snapshot:**
+    - Total codebase LOCs (production + tests)
+    - Test ratio percentage (test LOCs / production LOCs)
+    - Quality assessment based on test coverage
+  - **Period Metrics:**
+    - LOCs added, deleted, net change
+    - Average LOCs per commit (indicates feature size)
+    - LOCs per day and LOCs per session
+  - **Velocity Comparison:**
+    - Compare current vs baseline period LOCs/day
+    - Calculate productivity change percentage
+    - Correlate with automation adoption (did automation increase LOCs velocity?)
+  - **Quality vs Volume:**
+    - Test ratio trends (increasing = good, decreasing = technical debt)
+    - Documentation commits vs code commits ratio
+    - Balance between new features (high LOCs) and refactoring (low/negative LOCs)
+
+**Output:** Usage dashboard with automation metrics + LOCs productivity analysis
 
 **Note:** Metrics collection is now delegated to `pulse` agent (Haiku model) for cost efficiency.
 
