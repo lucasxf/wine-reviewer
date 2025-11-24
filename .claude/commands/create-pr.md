@@ -87,7 +87,57 @@ fi
 
 **Rationale:** Soft warning educates users about best practices (/finish-session workflow) while maintaining flexibility for alternative workflows (draft PRs, hotfixes, manual commits).
 
-## 4. Generate PR Title and Description
+## 4. Collect Automation Metrics (pulse agent)
+
+**CRITICAL:** Update metrics BEFORE creating PR to include metrics file in the PR commit.
+
+**Automatically trigger `pulse` agent** (Haiku - fast, cheap) to update automation metrics:
+
+**Mode:** `--mode=delta` (incremental update since last run)
+
+**What pulse does:**
+1. Checks `.claude/metrics/usage-stats.toml` for last metrics checkpoint
+2. Scans git commits since last checkpoint
+3. Counts new agent/command invocations
+4. Updates TOML file with consolidated totals (incremental)
+5. Completes in ~30 seconds, ~500-1000 tokens (Haiku)
+
+**Output:** Updated `.claude/metrics/usage-stats.toml`
+
+---
+
+## 5. Commit Metrics Changes
+
+**Check if metrics file was modified and commit it:**
+
+```bash
+# Check if metrics file was modified by pulse
+if git status --porcelain | grep -q '.claude/metrics/usage-stats.toml'; then
+  echo "📊 Metrics updated by pulse agent, committing changes..."
+
+  # Stage metrics file only
+  git add .claude/metrics/usage-stats.toml
+
+  # Commit with standard message
+  git commit -m "chore: Update automation metrics via pulse
+
+Updated by pulse agent before PR creation.
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+  echo "✅ Metrics committed to feature branch"
+else
+  echo "ℹ️ No metrics changes to commit"
+fi
+```
+
+**Rationale:** Committing metrics before PR creation ensures the PR includes all changes (code + metrics) and avoids manual intervention to add uncommitted metrics files later.
+
+---
+
+## 6. Generate PR Title and Description
 
 **Determine PR title:**
 - If `$ARGUMENTS` is provided → Use it as title
@@ -149,7 +199,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 If yes → Ask: "Enter new PR title:"
 
-## 5. Create Pull Request with GitHub CLI
+## 7. Create Pull Request with GitHub CLI
 
 ```bash
 # Create PR using gh CLI
@@ -175,32 +225,13 @@ PR_URL=$(gh pr view --json url --jq .url)
 echo "✅ Pull Request created: $PR_URL"
 ```
 
-## 6. Analyze Feature Development Workflow (Two-Step Process)
+## 8. Analyze Feature Development Workflow (automation-sentinel agent)
 
-**CRITICAL:** Invoke agents in correct order to ensure fresh metrics before analysis.
+**Automatically trigger `automation-sentinel` agent** (Sonnet - deep analysis):
 
-### Step 6A: Collect Metrics (pulse agent)
+**Mode:** `--mode=delta` (reads pre-collected metrics from TOML file that was committed in Step 5)
 
-**Automatically trigger `pulse` agent** (Haiku - fast, cheap) to update automation metrics:
-
-**Mode:** `--mode=delta` (incremental update since last run)
-
-**What pulse does:**
-1. Checks `.claude/metrics/usage-stats.toml` for last metrics checkpoint
-2. Scans git commits since last checkpoint
-3. Counts new agent/command invocations
-4. Updates TOML file with consolidated totals (incremental)
-5. Completes in ~30 seconds, ~500-1000 tokens (Haiku)
-
-**Output:** Updated `.claude/metrics/usage-stats.toml`
-
----
-
-### Step 6B: Analyze Workflow (automation-sentinel agent)
-
-**Automatically trigger `automation-sentinel` agent** (Sonnet - deep analysis) after pulse completes:
-
-**Mode:** `--mode=delta` (reads pre-collected metrics from TOML file)
+**IMPORTANT:** automation-sentinel runs in **read-only analysis mode** - it reads the metrics file but does NOT modify any files. Metrics were already collected and committed by pulse in Steps 4-5.
 
 **Provide context to automation-sentinel:**
 - **Feature branch:** `$CURRENT_BRANCH`
@@ -258,11 +289,11 @@ Generate a **Feature Development Report** with:
 - Consider automation improvements identified above
 ```
 
-**Rationale:** This automatic analysis captures real-world automation usage patterns at natural feature boundaries, providing actionable insights for continuous improvement.
+**Rationale:** This automatic analysis captures real-world automation usage patterns at natural feature boundaries, providing actionable insights for continuous improvement. Since metrics were collected and committed before PR creation (Steps 4-5), the PR already includes all changes and automation-sentinel simply provides read-only analysis.
 
 ---
 
-## 7. Final Summary
+## 9. Final Summary
 
 Provide comprehensive summary:
 ```
