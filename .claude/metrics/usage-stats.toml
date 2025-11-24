@@ -4,22 +4,22 @@
 # Model: Haiku (cost-optimized data collection)
 
 [metadata]
-timestamp = "2025-11-22T18:45:00-03:00"
-commit_sha = "165cc53173db8d3f82125a8d4de490a0d11421f4"
-branch = "docs/claude-md-reduction"
+timestamp = "2025-11-24T15:30:00-03:00"
+commit_sha = "01ee52e15ebe6f45e3b64dbe3c3d9e15673d20ea"
+branch = "develop"
 schema_version = "1.0.0"
 updated_by = "pulse"
 mode = "delta"
-description = "Delta update: 27 new commits analyzed since checkpoint 98e308d. Feature branch activity: Documentation quality improvements, metrics clarity updates, agent framework enhancements"
+description = "Delta update: 34 new commits analyzed since checkpoint 98e308d. Activity summary: Documentation restructuring (CLAUDE.md 58% reduction), workflow optimization (/create-pr ordering fix), directive framework enhancements (7 new directives), agent/command framework improvements"
 
 [analysis]
-total_commits_analyzed = 225
-commits_with_automation_keywords = 94
+total_commits_analyzed = 259
+commits_with_automation_keywords = 114
 analysis_period_start = "2025-10-18T12:36:05-03:00"
-analysis_period_end = "2025-11-22T18:45:00-03:00"
-total_days_analyzed = 35
-delta_commits_analyzed = 27
-delta_commits_with_keywords = 7
+analysis_period_end = "2025-11-24T15:30:00-03:00"
+total_days_analyzed = 37
+delta_commits_analyzed = 34
+delta_commits_with_keywords = 20
 last_checkpoint_sha = "98e308d931c3a94de88cbbc4537863acd17b3c2c"
 
 # Agent Invocation Counts
@@ -27,18 +27,18 @@ last_checkpoint_sha = "98e308d931c3a94de88cbbc4537863acd17b3c2c"
 # Confidence levels: high (explicit mention), medium (strong patterns), low (inference)
 
 [agent_usage.tech_writer]
-invocations = 18
-last_used = "2025-11-22T18:45:00-03:00"
-file_modifications = 25
+invocations = 20
+last_used = "2025-11-24T15:30:00-03:00"
+file_modifications = 51
 confidence = "high"
-indicators = "explicit mention (5) + docs commits (27) + OpenAPI annotations + 22 documentation files modified in delta"
+indicators = "explicit mention (5) + docs commits (27) + OpenAPI annotations + 26 documentation files modified in delta + CLAUDE.md restructuring (58% reduction)"
 
 [agent_usage.automation_sentinel]
-invocations = 26
-last_used = "2025-11-22T18:45:00-03:00"
-file_modifications = 7
+invocations = 29
+last_used = "2025-11-24T15:30:00-03:00"
+file_modifications = 19
 confidence = "high"
-indicators = "explicit mention (5) + .claude/ directory modifications + metrics collection framework + 3 agent file updates in delta"
+indicators = "explicit mention (5) + .claude/ directory modifications + metrics collection framework + 9 agent/metrics files updated in delta + workflow optimization"
 
 [agent_usage.backend_code_reviewer]
 invocations = 12
@@ -83,21 +83,21 @@ confidence = "low"
 indicators = "agent created recently"
 
 [agent_usage.pulse]
-invocations = 8
-last_used = "2025-11-22T18:45:00-03:00"
-file_modifications = 4
+invocations = 17
+last_used = "2025-11-24T15:30:00-03:00"
+file_modifications = 12
 confidence = "high"
-indicators = "explicit mention (4) + metrics collection framework + 3 agent file updates in delta"
+indicators = "explicit mention (9) + metrics collection framework + 8 metrics/agent files updated in delta + LOC filtering improvements + delta mode activation"
 
 # Command Invocation Counts
 # Based on commit message patterns, git log analysis, and explicit mentions
 
 [command_usage.create_pr]
-invocations = 13
-last_used = "2025-11-22T18:45:00-03:00"
-file_modifications = 10
+invocations = 15
+last_used = "2025-11-24T15:30:00-03:00"
+file_modifications = 12
 confidence = "high"
-indicators = "explicit mention (5) + most frequently modified command + PR workflow + 3 PR merges in delta"
+indicators = "explicit mention (5) + most frequently modified command + PR workflow + 3 PR merges in delta + workflow optimization (step reordering)"
 
 [command_usage.finish_session]
 invocations = 14

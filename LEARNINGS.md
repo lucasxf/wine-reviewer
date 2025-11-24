@@ -6,6 +6,85 @@ This file archives session logs, technical decisions, problems encountered, and 
 
 ---
 
+## 2025-11-24: /create-pr Workflow Fix - Metrics Before PR
+
+**Session Type:** Workflow automation improvement
+**Branch:** `fix/create-pr-metrics-timing`
+**Status:** Completed
+**Impact:** Eliminates manual intervention in PR creation workflow
+
+---
+
+### 🤖 Automation / Workflow
+
+#### Problem: Uncommitted Metrics After PR Creation
+
+**Symptom:** After running `/create-pr`, the PR was created but `.claude/metrics/usage-stats.toml` had uncommitted changes that required manual `git add` and `git commit` to be added to the PR.
+
+**Root Cause Analysis:**
+
+The `/create-pr` command had incorrect step ordering:
+1. **Step 5:** Create PR with `gh pr create` ⚠️
+2. **Step 6A:** Run `pulse` agent → modifies `.claude/metrics/usage-stats.toml`
+3. **Step 6B:** Run `automation-sentinel` agent → reads metrics
+
+Result: Metrics file was modified **after** PR creation, leaving uncommitted changes.
+
+**Key Insight - Agent Responsibilities:**
+
+Understanding which agents modify files was critical:
+
+| Agent | Role | File Modifications |
+|-------|------|-------------------|
+| **pulse** | Data collector | ✅ WRITES `.claude/metrics/usage-stats.toml` |
+| **automation-sentinel** | Analyst | ❌ READ-ONLY (only analyzes, never writes) |
+
+**Solution: Reorder Steps**
+
+Corrected workflow in `.claude/commands/create-pr.md`:
+
+```
+Old Order:
+  Step 5: Create PR ⚠️ (too early)
+  Step 6A: pulse writes metrics
+  Step 6B: automation-sentinel analyzes
+
+New Order:
+  Step 4: pulse writes metrics ✅ (moved earlier)
+  Step 5: Auto-commit metrics changes ✅ (NEW STEP)
+  Step 6: Generate PR title/description
+  Step 7: Create PR ✅ (now includes metrics)
+  Step 8: automation-sentinel analyzes (read-only)
+```
+
+**New Step 5: Auto-Commit Metrics**
+
+```bash
+# Check if metrics file was modified by pulse
+if git status --porcelain | grep -q '.claude/metrics/usage-stats.toml'; then
+  git add .claude/metrics/usage-stats.toml
+  git commit -m "chore: Update automation metrics via pulse"
+fi
+```
+
+**Benefits:**
+- ✅ PR is complete when created (includes all changes)
+- ✅ No manual intervention required
+- ✅ Clean git history (metrics committed as part of feature)
+- ✅ Fully automated workflow
+
+**Lessons Learned:**
+
+1. **Workflow Step Ordering Matters:** File-writing operations must complete before git operations that depend on them
+2. **Understand Agent Contracts:** Know which agents modify files vs read-only analysis
+3. **Automation Should Be Truly Automatic:** Manual steps after automation indicate incorrect workflow design
+4. **Git Operations Should Be Idempotent:** Check before committing (handle case where no metrics changed)
+
+**Files Modified:**
+- `.claude/commands/create-pr.md` - Reordered steps, added auto-commit logic
+
+---
+
 ## 2025-11-18: Documentation Quality Review & Metrics Clarity
 
 **Session Type:** Documentation quality review (GitHub Copilot feedback)
