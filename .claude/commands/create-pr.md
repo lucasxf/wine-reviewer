@@ -119,7 +119,7 @@ if git status --porcelain | grep -q '.claude/metrics/usage-stats.toml'; then
   git add .claude/metrics/usage-stats.toml
 
   # Commit with standard message
-  git commit -m "chore: Update automation metrics via pulse
+  git commit --only -m "chore: Update automation metrics via pulse
 
 Updated by pulse agent before PR creation.
 
