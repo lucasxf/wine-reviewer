@@ -18,12 +18,16 @@
     },
     "write": {
       "autoApprove": [
-        "prompts/responses/*.md"
+        "prompts/responses/*.md",
+        ".claude/metrics/*.toml",
+        ".claude/metrics/*.md"
       ]
     },
     "edit": {
       "autoApprove": [
-        "prompts/responses/*.md"
+        "prompts/responses/*.md",
+        ".claude/metrics/*.toml",
+        ".claude/metrics/*.md"
       ]
     }
   },
