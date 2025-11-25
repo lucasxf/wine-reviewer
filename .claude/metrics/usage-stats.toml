@@ -4,41 +4,41 @@
 # Model: Haiku (cost-optimized data collection)
 
 [metadata]
-timestamp = "2025-11-24T15:30:00-03:00"
-commit_sha = "01ee52e15ebe6f45e3b64dbe3c3d9e15673d20ea"
-branch = "develop"
+timestamp = "2025-11-25T06:11:27-03:00"
+commit_sha = "1d948a28cd3810793b4215b7b82ca45a2d03d377"
+branch = "docs/documentation-update"
 schema_version = "1.0.0"
 updated_by = "pulse"
 mode = "delta"
-description = "Delta update: 34 new commits analyzed since checkpoint 98e308d. Activity summary: Documentation restructuring (CLAUDE.md 58% reduction), workflow optimization (/create-pr ordering fix), directive framework enhancements (7 new directives), agent/command framework improvements"
+description = "Delta update: 5 new commits analyzed since checkpoint 01ee52e. Activity summary: Documentation fixes (148 LOCs in docs-review-findings.md), create-pr command improvements (2 commits), metrics file updates (pulse), settings.json auto-approval rules"
 
 [analysis]
-total_commits_analyzed = 259
-commits_with_automation_keywords = 114
+total_commits_analyzed = 264
+commits_with_automation_keywords = 119
 analysis_period_start = "2025-10-18T12:36:05-03:00"
-analysis_period_end = "2025-11-24T15:30:00-03:00"
-total_days_analyzed = 37
-delta_commits_analyzed = 34
-delta_commits_with_keywords = 20
-last_checkpoint_sha = "98e308d931c3a94de88cbbc4537863acd17b3c2c"
+analysis_period_end = "2025-11-25T06:11:27-03:00"
+total_days_analyzed = 38
+delta_commits_analyzed = 5
+delta_commits_with_keywords = 5
+last_checkpoint_sha = "01ee52e15ebe6f45e3b64dbe3c3d9e15673d20ea"
 
 # Agent Invocation Counts
 # Based on explicit mentions + heuristic patterns + file modification analysis
 # Confidence levels: high (explicit mention), medium (strong patterns), low (inference)
 
 [agent_usage.tech_writer]
-invocations = 20
-last_used = "2025-11-24T15:30:00-03:00"
-file_modifications = 51
+invocations = 21
+last_used = "2025-11-25T06:11:27-03:00"
+file_modifications = 56
 confidence = "high"
-indicators = "explicit mention (5) + docs commits (27) + OpenAPI annotations + 26 documentation files modified in delta + CLAUDE.md restructuring (58% reduction)"
+indicators = "explicit mention (5) + docs commits (28) + OpenAPI annotations + 26 documentation files modified + docs-review-findings.md (148 LOCs added)"
 
 [agent_usage.automation_sentinel]
-invocations = 29
-last_used = "2025-11-24T15:30:00-03:00"
-file_modifications = 19
+invocations = 31
+last_used = "2025-11-25T06:11:27-03:00"
+file_modifications = 22
 confidence = "high"
-indicators = "explicit mention (5) + .claude/ directory modifications + metrics collection framework + 9 agent/metrics files updated in delta + workflow optimization"
+indicators = "explicit mention (5) + .claude/ directory modifications + metrics collection framework + 11 agent/metrics files updated + PR merge + settings.json auto-approval rules"
 
 [agent_usage.backend_code_reviewer]
 invocations = 12
@@ -83,21 +83,21 @@ confidence = "low"
 indicators = "agent created recently"
 
 [agent_usage.pulse]
-invocations = 17
-last_used = "2025-11-24T15:30:00-03:00"
-file_modifications = 12
+invocations = 18
+last_used = "2025-11-25T06:11:27-03:00"
+file_modifications = 14
 confidence = "high"
-indicators = "explicit mention (9) + metrics collection framework + 8 metrics/agent files updated in delta + LOC filtering improvements + delta mode activation"
+indicators = "explicit mention (9) + metrics collection framework + 10 metrics/agent files updated + LOC filtering improvements + delta mode for 2 consecutive updates"
 
 # Command Invocation Counts
 # Based on commit message patterns, git log analysis, and explicit mentions
 
 [command_usage.create_pr]
-invocations = 15
-last_used = "2025-11-24T15:30:00-03:00"
-file_modifications = 12
+invocations = 17
+last_used = "2025-11-25T06:11:27-03:00"
+file_modifications = 14
 confidence = "high"
-indicators = "explicit mention (5) + most frequently modified command + PR workflow + 3 PR merges in delta + workflow optimization (step reordering)"
+indicators = "explicit mention (5) + most frequently modified command + PR workflow + 4 PR merges total + workflow optimization (commit command fixes)"
 
 [command_usage.finish_session]
 invocations = 14
@@ -214,23 +214,23 @@ total_commands_with_invocations = 16
 schema_errors = 0
 data_quality = "excellent"
 metrics_status = "healthy"
-last_delta_update = "2025-11-22T18:45:00-03:00"
-delta_verification = "27 commits scanned (98e308d..165cc53)"
+last_delta_update = "2025-11-25T06:11:27-03:00"
+delta_verification = "5 commits scanned (01ee52e..1d948a2)"
 
 [summary]
-total_agent_invocations = 91
-total_command_invocations = 83
-combined_automation_invocations = 174
-documentation_commits = 34
+total_agent_invocations = 95
+total_command_invocations = 85
+combined_automation_invocations = 180
+documentation_commits = 35
 test_related_commits = 88
 feature_commits = 28
 refactor_commits = 7
-chore_commits = 13
+chore_commits = 14
 optimize_commits = 13
 improve_commits = 12
-fix_commits = 8
-delta_new_agent_invocations = 9
-delta_new_command_invocations = 11
+fix_commits = 9
+delta_new_agent_invocations = 4
+delta_new_command_invocations = 2
 
 # Productivity Metrics - Lines of Code Analysis
 # Collected: 2025-11-12 (full baseline with LOCs data)
@@ -302,9 +302,11 @@ note_1 = "Full baseline established - scanned entire 198-commit history (2025-11
 note_2 = "High-confidence metrics based on explicit commit message mentions (11 found initially)"
 note_3 = "Medium/Low-confidence metrics inferred from commit patterns and file modifications"
 note_4 = "All 9 agents and 16 commands discovered and tracked"
-note_5 = "File modification counts show .claude/ directory evolution with 24 total command file changes"
-note_6 = "Delta update executed from checkpoint 98e308d (2025-11-22 update)"
+note_5 = "File modification counts show .claude/ directory evolution with 28 total command file changes"
+note_6 = "Delta update executed from checkpoint 01ee52e (2025-11-25 update)"
 note_7 = "LOCs data now integrated - productivity metrics complete (NEW in 2025-11-12 update)"
-note_8 = "Delta analysis (2025-11-22): 27 commits scanned, 7 automation keywords found, 9 agent + 8 command increments"
-note_9 = "Branch activity: docs/claude-md-reduction - Documentation quality improvements and metrics clarity work"
-note_10 = "Top automation patterns in delta: directive (7x), automation-sentinel updates (3x), pulse updates (3x), create-pr (3x)"
+note_8 = "Delta analysis (2025-11-25): 5 commits scanned, 5 automation keywords found, 4 agent + 2 command increments"
+note_9 = "Branch activity: docs/documentation-update - Comprehensive documentation fixes and create-pr improvements"
+note_10 = "Top recent patterns: docs commits (1x), create-pr improvements (2x), metrics updates (2x), auto-approval rules (1x)"
+note_11 = "Documentation focus: Added docs-review-findings.md (148 LOCs), fixed README.md inconsistencies"
+note_12 = "Command improvements: Fixed commit command ordering in create-pr, added metrics auto-approval rules"
