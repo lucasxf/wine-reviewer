@@ -218,9 +218,9 @@ last_delta_update = "2025-11-22T18:45:00-03:00"
 delta_verification = "27 commits scanned (98e308d..165cc53)"
 
 [summary]
-total_agent_invocations = 77
-total_command_invocations = 87
-combined_automation_invocations = 164
+total_agent_invocations = 91
+total_command_invocations = 83
+combined_automation_invocations = 174
 documentation_commits = 34
 test_related_commits = 88
 feature_commits = 28
