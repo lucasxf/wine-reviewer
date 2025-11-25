@@ -584,7 +584,7 @@ paths:
 
 ---
 
-# 💪🏾 Contributing
+# 🤝🏾 Contributing
 
 ## Development Phases
 
