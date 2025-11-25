@@ -1,6 +1,6 @@
 # Documentation Review Findings - 2025-11-25
 
-> **NOTE:** This document records issues discovered during the 2025-11-25 documentation review. The issues documented here have been **fixed** in PR #[number]. This serves as a historical record of the review findings and the improvements made.
+> **NOTE:** This document records issues discovered during the 2025-11-25 documentation review. The issues documented here have been **fixed** in this PR. This serves as a historical record of the review findings and the improvements made.
 ## Executive Summary
 
 Comprehensive review of Wine Reviewer project documentation found **30+ issues** across multiple files.
@@ -9,7 +9,15 @@ Comprehensive review of Wine Reviewer project documentation found **30+ issues**
 - README.md (24 issues)
 - CLAUDE.md (minor issues)
 - ROADMAP.md (test count discrepancy)
-- usage-stats.toml (2 math errors)
+- usage-stats.toml (metrics math errors: PR description stated
+    - total_agent_invocations: 77 → 91
+    - total_command_invocations: 87 → 83
+    - combined_automation_invocations: 164 → 174
+  but actual committed values were:
+    - total_agent_invocations: 95
+    - total_command_invocations: 85
+    - combined_automation_invocations: 180
+  The PR description should be updated to match the actual fixes applied, or the discrepancy should be explained.)
 
 ---
 
@@ -61,11 +69,11 @@ Comprehensive review of Wine Reviewer project documentation found **30+ issues**
 ### 7. usage-stats.toml - Incorrect Command Invocation Total
 **Location:** After line 198
 **Problem:**
-- Sum of individual commands: 15 + 14 + 7 + 5 + 15 + 6 + 6 + 3 + 2 + 2 + 1 + 2 + 1 + 2 + 1 = **82**
+- Sum of individual commands: 15 + 14 + 7 + 5 + 15 + 6 + 6 + 3 + 2 + 2 + 1 + 2 + 1 + 2 + 1 = **83**
 - File shows: `total_command_invocations = 87`
-- **Difference: +5**
+- **Difference: +4**
 
-**Fix:** Update total to 82 or explain discrepancy
+**Fix:** Update total to 83 or explain discrepancy
 
 ---
 

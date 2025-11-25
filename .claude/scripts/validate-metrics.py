@@ -72,6 +72,7 @@ def parse_toml_simple(content: str) -> dict:
                     try:
                         data['summary'][key] = int(value)
                     except ValueError:
+                        # If summary value is not an integer, skip it; validation will catch missing/invalid values.
                         pass
 
     return data
