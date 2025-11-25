@@ -1,5 +1,6 @@
 # Documentation Review Findings - 2025-11-25
 
+> **NOTE:** This document records issues discovered during the 2025-11-25 documentation review. The issues documented here have been **fixed** in PR #[number]. This serves as a historical record of the review findings and the improvements made.
 ## Executive Summary
 
 Comprehensive review of Wine Reviewer project documentation found **30+ issues** across multiple files.
