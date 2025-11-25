@@ -279,19 +279,19 @@ cd services/api
 - `DELETE /api/reviews/{id}` - Delete review (204 No Content, 404 Not Found, 403 Forbidden)
 
 ### Comments
-- `POST /api/comments` - Create comment (201 Created, 400 Bad Request, 403 Forbidden, 404 Not Found)
+- `POST /comments` - Create comment (201 Created, 400 Bad Request, 403 Forbidden, 404 Not Found)
   - Request: `{ "reviewId": "...", "text": "..." }`
   - Response: `{ "id": "...", "text": "...", "author": {...}, "createdAt": "...", "updatedAt": "..." }`
-- `PUT /api/comments` - Update comment (200 OK, 400 Bad Request, 403 Forbidden, 404 Not Found)
+- `PUT /comments` - Update comment (200 OK, 400 Bad Request, 403 Forbidden, 404 Not Found)
   - Request: `{ "commentId": "...", "text": "..." }`
   - Response: `{ "id": "...", "text": "...", "author": {...}, "createdAt": "...", "updatedAt": "..." }`
-- `GET /api/comments` - List comments by authenticated user (200 OK, 403 Forbidden, 404 Not Found)
+- `GET /comments` - List comments by authenticated user (200 OK, 403 Forbidden, 404 Not Found)
   - Query params: `page`, `size`, `sort` (default: createdAt DESC)
   - Response: Paginated list of comments
-- `GET /api/comments/{reviewId}` - List comments by review (200 OK, 403 Forbidden, 404 Not Found)
+- `GET /comments/{reviewId}` - List comments by review (200 OK, 403 Forbidden, 404 Not Found)
   - Query params: `page`, `size`, `sort` (default: createdAt ASC)
   - Response: Paginated list of comments
-- `DELETE /api/comments/{commentId}` - Delete comment (204 No Content, 401 Unauthorized, 403 Forbidden, 404 Not Found)
+- `DELETE /comments/{commentId}` - Delete comment (204 No Content, 401 Unauthorized, 403 Forbidden, 404 Not Found)
   - Ownership check: Only the comment author can delete their own comment
   - Response: No content (empty body)
 
