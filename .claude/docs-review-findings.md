@@ -63,7 +63,7 @@ Comprehensive review of Wine Reviewer project documentation found **30+ issues**
 **Problem:**
 - Sum of individual commands: 15 + 14 + 7 + 5 + 15 + 6 + 6 + 3 + 2 + 2 + 1 + 2 + 1 + 2 + 1 = **82**
 - File shows: `total_command_invocations = 87`
-- **Difference: -5**
+- **Difference: +5**
 
 **Fix:** Update total to 82 or explain discrepancy
 
