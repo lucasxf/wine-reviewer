@@ -15,7 +15,6 @@ Exit codes:
     1 - Validation errors found
 """
 
-import re
 import sys
 from pathlib import Path
 from typing import Tuple, List
