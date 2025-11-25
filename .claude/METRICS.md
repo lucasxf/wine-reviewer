@@ -395,6 +395,7 @@ The validator checks three critical equations:
 - Command invocations: Stated 87, actual sum = 82 (difference: +5)
 - Combined total: Stated 164, actual = 174 (difference: -10)
 
+> **Note:** These values reflect the state of `usage-stats.toml` at the time of the documentation review. Subsequent updates (e.g., by the pulse agent in delta mode) may have changed the actual values in the file. The discrepancies listed above were those discovered and fixed during the review, but the current metrics may differ.
 **Impact:** Incorrect metrics undermine analysis, reports, and published content.
 
 **Solution:** Automated validation prevents these errors at commit time.
