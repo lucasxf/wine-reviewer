@@ -372,6 +372,183 @@ git log --oneline | grep <sha>
 
 ---
 
+## Metrics Validation System
+
+*(Added 2025-11-25)*
+
+### Overview
+
+A pre-commit hook validates mathematical consistency of `usage-stats.toml` to prevent calculation errors from being committed.
+
+### Validation Rules
+
+The validator checks three critical equations:
+
+1. **Agent total:** `total_agent_invocations` = sum of all `agent_usage.*.invocations`
+2. **Command total:** `total_command_invocations` = sum of all `command_usage.*.invocations`
+3. **Combined total:** `combined_automation_invocations` = `total_agent_invocations` + `total_command_invocations`
+
+### Why Validation Matters
+
+**Problem:** During the 2025-11-25 documentation review, we discovered 3 math errors in `usage-stats.toml`:
+- Agent invocations: Stated 77, actual sum = 91 (difference: -14)
+- Command invocations: Stated 87, actual sum = 83 (difference: +4)
+- Combined total: Stated 164, actual = 174 (difference: -10)
+
+**Impact:** Incorrect metrics undermine analysis, reports, and published content.
+
+**Solution:** Automated validation prevents these errors at commit time.
+
+### Installation
+
+**Setup pre-commit hook (one-time):**
+
+```bash
+# Linux/macOS
+ln -sf ../../.claude/hooks/pre-commit-metrics-validation .git/hooks/pre-commit
+
+# Windows (Git Bash)
+cd .git/hooks
+ln -sf ../../.claude/hooks/pre-commit-metrics-validation pre-commit
+
+# Or copy the file
+cp .claude/hooks/pre-commit-metrics-validation .git/hooks/pre-commit
+chmod +x .git/hooks/pre-commit
+```
+
+**Requirements:**
+- Python 3.x (no external dependencies needed)
+- Git bash environment
+
+### Usage
+
+**Automatic validation:**
+
+The hook runs automatically when you commit changes to `.claude/metrics/usage-stats.toml`:
+
+```bash
+git add .claude/metrics/usage-stats.toml
+git commit -m "chore: Update automation metrics"
+
+# Output:
+# [INFO] Metrics file modified - running validation...
+# Validating metrics file: C:\repo\wine-reviewer\.claude\metrics\usage-stats.toml
+# ------------------------------------------------------------
+# [OK] All validations PASSED
+#    - Agent invocations total matches sum
+#    - Command invocations total matches sum
+#    - Combined total matches agent + command sum
+# [OK] Metrics validation passed
+```
+
+**Manual validation:**
+
+```bash
+python .claude/scripts/validate-metrics.py
+
+# Example output (validation passed):
+# Validating metrics file: .claude/metrics/usage-stats.toml
+# ------------------------------------------------------------
+# [OK] All validations PASSED
+#    - Agent invocations total matches sum
+#    - Command invocations total matches sum
+#    - Combined total matches agent + command sum
+
+# Example output (validation failed):
+# [FAILED] Validation FAILED
+#
+# ERROR: Agent invocations mismatch
+#   Stated: total_agent_invocations = 77
+#   Actual: sum of all agent_usage.*.invocations = 91
+#   Difference: -14
+#
+# ERROR: Combined invocations mismatch
+#   Stated: combined_automation_invocations = 164
+#   Actual: 91 + 83 = 174
+#   Difference: -10
+#
+# Please fix the metrics file before committing.
+```
+
+**Bypass validation (NOT recommended):**
+
+```bash
+# Only use if you have a legitimate reason
+git commit --no-verify
+```
+
+### Implementation Details
+
+**Validator script:** `.claude/scripts/validate-metrics.py`
+- Pure Python 3 (no external dependencies)
+- Simple TOML parser (extracts only `invocations` fields)
+- Zero-dependency design for portability
+- Exit code 0 = pass, 1 = fail
+
+**Pre-commit hook:** `.claude/hooks/pre-commit-metrics-validation`
+- Bash script compatible with Git Bash (Windows) and Unix shells
+- Only runs when `.claude/metrics/usage-stats.toml` is staged
+- Gracefully skips validation if Python not found
+- Clear error messages with suggested fixes
+
+**Integration with workflow:**
+
+The validation system integrates with the existing metrics workflow:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  1. pulse agent updates usage-stats.toml                     │
+│     - Scans git log for automation invocations              │
+│     - Calculates sums and updates totals                    │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  2. Developer commits metrics file                           │
+│     git add .claude/metrics/usage-stats.toml                │
+│     git commit -m "chore: Update metrics"                   │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  3. Pre-commit hook triggers validation                      │
+│     - Validates: total_agent_invocations = sum(agents)      │
+│     - Validates: total_command_invocations = sum(commands)  │
+│     - Validates: combined = agents + commands               │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                    ┌───────┴───────┐
+                    │               │
+                    ▼               ▼
+        ┌───────────────┐   ┌───────────────┐
+        │   PASS        │   │   FAIL        │
+        │  Commit OK    │   │  Commit       │
+        │               │   │  blocked      │
+        └───────────────┘   └───────────────┘
+```
+
+### Best Practices
+
+1. **Always run pulse in delta mode** to minimize token usage
+2. **Let validation catch errors** instead of manual verification
+3. **Don't bypass validation** unless absolutely necessary
+4. **Review validation errors carefully** - they indicate real math issues
+5. **Fix root cause** if validation fails (update pulse agent if needed)
+
+### Future Enhancements
+
+Potential improvements to the validation system:
+
+1. **CI/CD integration** - Run validation in GitHub Actions
+2. **Additional checks:**
+   - Verify timestamps are monotonically increasing
+   - Check for negative invocation counts
+   - Validate checkpoint SHA exists in git history
+3. **Auto-fix mode** - Automatically recalculate and fix totals
+4. **Detailed diff output** - Show which specific agents/commands are off
+
+---
+
 ## Related Documentation
 
 - **`.claude/agents-readme.md`** - Custom agents guide (includes pulse and automation-sentinel)
