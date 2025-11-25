@@ -2,8 +2,8 @@
 
 > A mobile-first wine rating application with Google authentication, photo uploads, and community reviews.
 
-[![API CI/CD](https://github.com/username/wine-reviewer/actions/workflows/ci-api.yml/badge.svg)](https://github.com/username/wine-reviewer/actions/workflows/ci-api.yml)
-[![Mobile CI/CD](https://github.com/username/wine-reviewer/actions/workflows/ci-app.yml/badge.svg)](https://github.com/username/wine-reviewer/actions/workflows/ci-app.yml)
+[![API CI/CD](https://github.com/lucasxf/wine-reviewer/actions/workflows/ci-api.yml/badge.svg)](https://github.com/lucasxf/wine-reviewer/actions/workflows/ci-api.yml)
+[![Mobile CI/CD](https://github.com/lucasxf/wine-reviewer/actions/workflows/ci-app.yml/badge.svg)](https://github.com/lucasxf/wine-reviewer/actions/workflows/ci-app.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
@@ -27,7 +27,7 @@
 
 ## ✨ Features
 
-### Current (v0.1.0 - Updated 2025-11-01)
+### Current (v0.1.0 - Updated 2025-11-25)
 **Backend API:**
 - ✅ Complete Review CRUD API endpoints
 - ✅ **Complete Comment System** (POST, PUT, GET, DELETE endpoints with full CRUD operations)
@@ -82,7 +82,7 @@
 ## 🛠 Tech Stack Overview
 
 ### Mobile App (`apps/mobile/`)
-- **Framework:** Flutter 3.x
+- **Framework:** Flutter 3.35.6
 - **State Management:** Riverpod
 - **Navigation:** go_router
 - **HTTP Client:** dio
@@ -90,7 +90,7 @@
 - **Storage:** flutter_secure_storage
 
 ### Backend API (`services/api/`)
-- **Framework:** Spring Boot 3
+- **Framework:** Spring Boot 3.3.11
 - **Language:** Java 21
 - **Database:** PostgreSQL 16
 - **Migrations:** Flyway
@@ -145,7 +145,7 @@ wine-reviewer/
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/username/wine-reviewer.git
+   git clone https://github.com/lucasxf/wine-reviewer.git
    cd wine-reviewer
    ```
 
@@ -214,12 +214,16 @@ GitHub Actions workflows with path-based triggers:
 
 ## 📚 Documentation
 
-- **`CLAUDE.md`** - Comprehensive project guide for AI assistants (organized by General/Backend/Frontend)
-- **`CODING_STYLE.md`** - Coding standards and conventions (organized by General/Backend/Frontend)
-- **`prompts/PACK.md`** - AI prompt pack and agent schemas
+- **`CLAUDE.md`** - Comprehensive project guide for AI assistants (4-part structure: General/Backend/Frontend/Infrastructure)
+- **CODING_STYLE files** - Coding standards and conventions (split by stack):
+  - `CODING_STYLE_GENERAL.md` - Universal conventions
+  - `services/api/CODING_STYLE_BACKEND.md` - Java/Spring Boot
+  - `apps/mobile/CODING_STYLE_FRONTEND.md` - Flutter/Dart
+  - `infra/CODING_STYLE_INFRASTRUCTURE.md` - Docker/CI/CD
+- **`.claude/METRICS.md`** - Automation metrics system (usage tracking, ROI analysis, delta updates)
 - **`services/api/README.md`** - Backend setup and API details
 - **`apps/mobile/README.md`** - Mobile app setup and architecture
-- **`ADRs/`** - Architecture decision records (future)
+- **`ADRs/`** - Architecture Decision Records (1 ADR: automation-sentinel meta-agent)
 
 ---
 
@@ -339,6 +343,8 @@ cd services/api
 
 ### Current Test Coverage
 
+For comprehensive TDD/BDD guidelines, see [TESTING.md](TESTING.md).
+
 - **135 tests, 100% passing** (71 unit + 64 integration)
 - **Unit Tests (71 tests):**
   - `ReviewControllerTest` - 4 tests (REST endpoint validation)
@@ -365,7 +371,7 @@ cd services/api
 - Include `@author` and `@date` in Javadoc
 - Always add OpenAPI/Swagger annotations to REST endpoints
 
-See `CODING_STYLE.md` → **PART 2: BACKEND STANDARDS** for detailed conventions.
+See `services/api/CODING_STYLE_BACKEND.md` for detailed backend conventions.
 
 ---
 
@@ -446,7 +452,7 @@ flutter test --coverage
 - Widget tests for all screens
 - Use `const` constructors for performance
 
-See `CODING_STYLE.md` → **PART 3: FRONTEND STANDARDS** for detailed conventions.
+See `apps/mobile/CODING_STYLE_FRONTEND.md` for detailed frontend conventions.
 
 ---
 
@@ -506,7 +512,9 @@ cd services/api
 **Key Files:**
 - `src/test/java/com/winereviewer/api/integration/AbstractIntegrationTest.java`
 - `src/test/java/com/winereviewer/api/integration/ReviewControllerIT.java`
+- `src/test/java/com/winereviewer/api/integration/CommentControllerIT.java`
 - `src/test/java/com/winereviewer/api/integration/AuthControllerIT.java`
+- `src/test/java/com/winereviewer/api/integration/FileUploadControllerIT.java`
 - `src/test/resources/application-integration.yml`
 
 ## Docker Setup
@@ -639,7 +647,6 @@ paths:
 - **[.claude/agents-readme.md](.claude/agents-readme.md)** - 9 specialized agents (automation-sentinel, backend-code-reviewer, cross-project-architect, flutter-implementation-coach, frontend-ux-specialist, learning-tutor, pulse, session-optimizer, tech-writer)
 - **[.claude/METRICS.md](.claude/METRICS.md)** - Automation metrics system (usage tracking, ROI analysis)
 - **[.claude/commands/](.claude/commands/)** - Custom slash commands for common workflows
-- **[Command Templates](C:\repo\claude-command-templates\)** - Reusable slash commands for new projects
 
 ### Stack-Specific Docs
 
@@ -658,7 +665,7 @@ paths:
 
 ### External Resources
 
-- **[Efficiency Guide](C:\repo\ai\claude-code\tips\EFFICIENCY.md)** - Claude Code efficiency guide (token optimization, workflow strategies)
+- **[Claude Code Documentation](https://docs.anthropic.com/claude/docs)** - Official Claude Code documentation and best practices
 
 ---
 

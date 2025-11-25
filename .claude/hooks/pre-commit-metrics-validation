@@ -1,0 +1,61 @@
+#!/bin/bash
+# Pre-commit hook: Validate metrics file mathematical consistency
+#
+# This hook prevents commits that contain metrics files with incorrect totals.
+# It validates that:
+# - total_agent_invocations = sum of all agent invocations
+# - total_command_invocations = sum of all command invocations
+# - combined_automation_invocations = agent + command totals
+#
+# Installation:
+#   ln -sf ../../.claude/hooks/pre-commit-metrics-validation .git/hooks/pre-commit
+#
+# Or on Windows (Git Bash):
+#   cd .git/hooks && ln -sf ../../.claude/hooks/pre-commit-metrics-validation pre-commit
+
+METRICS_FILE=".claude/metrics/usage-stats.toml"
+VALIDATOR_SCRIPT=".claude/scripts/validate-metrics.py"
+
+# Check if metrics file is being committed
+if git diff --cached --name-only | grep -q "^${METRICS_FILE}$"; then
+    echo "[INFO] Metrics file modified - running validation..."
+
+    # Check if Python is available (try python3 first, then python)
+    PYTHON_CMD=""
+    if command -v python3 &> /dev/null; then
+        PYTHON_CMD="python3"
+    elif command -v python &> /dev/null; then
+        PYTHON_CMD="python"
+    else
+        echo "[WARNING] Python not found - skipping metrics validation"
+        echo "   Install Python 3 to enable pre-commit metrics validation"
+        exit 0
+    fi
+
+    # Check if validator script exists
+    if [ ! -f "$VALIDATOR_SCRIPT" ]; then
+        echo "[WARNING] Validator script not found: $VALIDATOR_SCRIPT"
+        echo "   Skipping metrics validation"
+        exit 0
+    fi
+
+    # Run validation
+    $PYTHON_CMD "$VALIDATOR_SCRIPT"
+    VALIDATION_RESULT=$?
+
+    if [ $VALIDATION_RESULT -ne 0 ]; then
+        echo ""
+        echo "[BLOCKED] COMMIT BLOCKED: Metrics validation failed"
+        echo ""
+        echo "The metrics file contains mathematical inconsistencies."
+        echo "Please fix the totals before committing."
+        echo ""
+        echo "To bypass this check (NOT recommended):"
+        echo "  git commit --no-verify"
+        exit 1
+    fi
+
+    echo "[OK] Metrics validation passed"
+fi
+
+exit 0
