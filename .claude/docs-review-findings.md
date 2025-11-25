@@ -116,8 +116,8 @@ Comprehensive review of Wine Reviewer project documentation found **30+ issues**
 ## 🟢 LOW Priority Issues
 
 ### 16. README.md - Flutter Version Inconsistency
-**Location:** Lines 53 vs 85
-**Problem:** "3.35.6" vs "3.x"
+**Location:** Line 140 (vs other locations)
+**Problem:** Line 140 shows "Flutter 3.x" while other locations use "3.35.6"
 **Fix:** Standardize to "3.35.6"
 
 ### 17. README.md - Missing TESTING.md Cross-Reference
