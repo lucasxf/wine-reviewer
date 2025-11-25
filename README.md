@@ -584,7 +584,7 @@ paths:
 
 ---
 
-# 🤝 Contributing
+# 💪🏾 Contributing
 
 ## Development Phases
 
@@ -673,7 +673,7 @@ paths:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## 🙏🏾 Acknowledgments
 
 - Icons and images from OpenMoji and Undraw (free licenses)
 - Built with Spring Boot, Flutter, and PostgreSQL
