@@ -392,7 +392,7 @@ The validator checks three critical equations:
 
 **Problem:** During the 2025-11-25 documentation review, we discovered 3 math errors in `usage-stats.toml`:
 - Agent invocations: Stated 77, actual sum = 91 (difference: -14)
-- Command invocations: Stated 87, actual sum = 83 (difference: +4)
+- Command invocations: Stated 87, actual sum = 82 (difference: +5)
 - Combined total: Stated 164, actual = 174 (difference: -10)
 
 **Impact:** Incorrect metrics undermine analysis, reports, and published content.
