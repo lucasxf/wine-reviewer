@@ -24,6 +24,101 @@ This project includes **9 custom agents** designed to address specific needs (al
 
 ---
 
+## 🚨 Auto-Trigger Protocols (CRITICAL)
+
+> **Purpose:** Centralized registry of when Claude MUST automatically invoke specific agents instead of manual approach.
+> **Added:** 2025-12-08 (imported from project AI PR #10)
+
+**Why Auto-Trigger Protocols Matter:**
+During a backend code review session in project AI, Claude forgot to invoke the backend-code-reviewer agent and performed manual review instead. This revealed that without explicit, emphatic protocols, agents may be skipped even when they provide superior systematic analysis. These protocols prevent that failure mode.
+
+---
+
+### 1. Backend Code Reviewer Auto-Trigger Protocol
+
+**CRITICAL:** ALWAYS invoke this agent (never manual review) when user:
+- Says **"review"** + backend file path (e.g., "review ReviewService.java")
+- Says **"check/validate/analyze"** + Java/Spring Boot code
+- Says **"I just finished implementing [Service|Controller|Repository|...]"**
+- Says **"before committing..."** or **"I'm about to commit..."**
+- Provides code with request for feedback
+
+**Why:** Agent's 10-dimension systematic review (architecture, security, performance, testing, OpenAPI docs, etc.) is ALWAYS superior to ad-hoc manual review. Manual reviews miss critical dimensions.
+
+**Exception:** Only skip agent if user explicitly says **"quick check"** or **"sanity check"**.
+
+**Cross-Agent Collaboration:**
+- If OpenAPI documentation missing → Automatically invoke **tech-writer** agent
+- If test coverage insufficient → Recommend test improvements with examples
+
+**See:** [backend-code-reviewer.md](agents/backend-code-reviewer.md)
+
+---
+
+### 2. Learning Tutor Auto-Trigger Protocol
+
+**CRITICAL:** ALWAYS invoke this agent when user:
+- Says **"teach me"** + topic
+- Says **"explain"** + concept (not implementation-specific)
+- Says **"I want to understand"** + topic
+- Says **"how does [concept] work?"** (conceptual, not "how do I implement")
+- Says **"what's the difference between X and Y?"**
+- Asks conceptual questions (not implementation tasks)
+
+**Why:** Agent provides structured lessons with exercises, backend parallels, and spaced repetition—not just explanations. Builds deep understanding vs surface knowledge.
+
+**Exception:** Skip for simple factual questions (e.g., "What's the Dart syntax for list comprehension?"). Use direct answer instead.
+
+**Teaching Approach:**
+- Uses Feynman Technique (explain simply)
+- Provides backend parallels (Java/Spring Boot → Flutter/Dart)
+- Includes exercises and assessments
+- Tracks learning progress across sessions
+
+**See:** [learning-tutor.md](agents/learning-tutor.md)
+
+---
+
+### 3. Tech Writer Auto-Trigger Protocol
+
+**CRITICAL:** ALWAYS invoke this agent when user:
+- Says **"add OpenAPI annotations"** + controller/endpoint name
+- Says **"create ADR for"** + decision/topic
+- Says **"add Javadoc to"** + class name
+- Says **"update LEARNINGS.md"** or **"update ROADMAP.md"**
+- Says **"document this endpoint/class/method"**
+- **After creating/modifying any REST endpoint** (automatic)
+
+**Why:** Agent enforces complete documentation standards (all HTTP status codes, @author tags, business rules, etc.). Manual documentation frequently misses critical elements like error responses or edge cases.
+
+**Exception:** None for OpenAPI documentation—ALWAYS required for REST endpoints per project conventions.
+
+**Cross-Agent Collaboration:**
+- **backend-code-reviewer** may invoke this agent if documentation gaps found
+- **/finish-session** command invokes this agent to update ROADMAP.md
+
+**Documentation Standards:**
+- OpenAPI: ALL HTTP status codes documented (200, 201, 204, 400, 401, 403, 404, 422, 500, 501)
+- Javadoc: @author, @date, business rules, examples
+- ADRs: Follow template (Context, Decision, Rationale, Consequences, Alternatives)
+
+**See:** [tech-writer.md](agents/tech-writer.md)
+
+---
+
+### Protocol Compliance Checklist
+
+When invoking agents, verify:
+- [ ] Used agent instead of manual approach for systematic tasks
+- [ ] Followed phrase-based trigger patterns
+- [ ] Invoked cross-agent collaborations when needed
+- [ ] Applied exceptions appropriately (don't over-invoke)
+- [ ] Documented when new auto-trigger patterns emerge
+
+**Monitoring:** automation-sentinel tracks agent invocation patterns and identifies missed opportunities.
+
+---
+
 ## 🎯 Quick Start
 
 ### How Agents Work
