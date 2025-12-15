@@ -242,6 +242,38 @@ com.winereviewer.api/
 - Method ordering: public → private (invocation flow)
 - OpenAPI/Swagger annotations required for all REST endpoints
 
+### Critical Directive: Backend Code Reviews (Added 2025-12-08)
+
+**Context:** During a backend code review session in project AI, Claude forgot to invoke the backend-code-reviewer agent and performed manual review instead, resulting in less comprehensive analysis.
+
+**Rule:** For **ALL** backend code reviews, ALWAYS invoke the backend-code-reviewer agent (NEVER perform manual ad-hoc review).
+
+**Trigger Patterns:**
+1. User says **"review"** + backend file path (e.g., "review ReviewService.java")
+2. User says **"check/validate/analyze"** + Java/Spring Boot code
+3. User says **"I just finished implementing [Service|Controller|Repository|...]"**
+4. User says **"before committing..."** or **"I'm about to commit..."**
+5. User provides code with request for feedback
+
+**Why backend-code-reviewer agent is mandatory:**
+- **10-Dimension Systematic Analysis** - Architecture, Spring Boot best practices, Java 21+ features, code quality, testing, security, performance, observability, API design/OpenAPI, Maven dependencies
+- **Comprehensive Coverage** - Manual reviews miss critical dimensions (especially security and OpenAPI documentation)
+- **Structured Output** - Quality rating, strengths, critical issues with severity/location/solution, improvements, best practices, checklist, prioritized action items
+- **Learning Component** - Teaches best practices systematically, not just validates
+- **Cross-Agent Collaboration** - Automatically invokes tech-writer if documentation gaps found
+
+**Exception:** Only skip agent if user explicitly says **"quick check"** or **"sanity check"** (fast validation, not comprehensive review).
+
+**Workflow:**
+```
+User: "I just finished ReviewService implementation"
+→ backend-code-reviewer agent (10-dimension analysis)
+→ May invoke tech-writer agent (if OpenAPI/Javadoc missing)
+→ Structured output with action items
+```
+
+**Never perform manual backend code review, even for "simple" changes. Always invoke backend-code-reviewer agent.**
+
 ### Exception Handling
 - Custom domain exceptions extending `DomainException`
 - GlobalExceptionHandler with `@ControllerAdvice`

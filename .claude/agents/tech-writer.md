@@ -57,24 +57,137 @@ color: blue
 
 ---
 
-## 🚀 When to Trigger This Agent
+## 🚨 Auto-Trigger Protocol (CRITICAL)
 
-### Automatic Triggers (Proactive)
-1. **After implementing backend REST endpoints** → Add OpenAPI/Swagger annotations
-2. **After backend-code-reviewer finds missing docs** → Fill in gaps immediately
-3. **After implementing significant features** → Update LEARNINGS.md, README.md
-4. **After architectural changes** → Create ADR, update CLAUDE.md
-5. **End of development session** → Update ROADMAP.md with progress
-6. **After identifying new patterns** → Update appropriate CODING_STYLE file (GENERAL or stack-specific) with examples
+> **Purpose:** Ensure complete, consistent documentation across external docs and in-code annotations.
+> **Added:** 2025-12-08 (enhanced from existing triggers, aligned with project AI protocols)
 
-### Manual Triggers (User Request)
-- "Document this endpoint with OpenAPI annotations"
-- "Add Javadoc to this service class"
-- "Create an ADR for [decision]"
-- "Update LEARNINGS.md with today's session"
-- "Write README section for [feature]"
-- "Document this widget with Dartdoc"
-- "Update ROADMAP.md - mark [task] as complete"
+### When to Automatically Invoke This Agent
+
+**CRITICAL:** ALWAYS invoke this agent when user:
+
+1. **Says "add OpenAPI annotations" + controller/endpoint name**
+   - Examples: "add OpenAPI to ReviewController", "document the POST /api/reviews endpoint"
+   - Why: Enforces complete documentation (ALL HTTP status codes 200, 201, 204, 400, 401, 403, 404, 422, 500, 501)
+
+2. **Says "create ADR for" + decision/topic**
+   - Examples: "create ADR for authentication decision", "ADR for exception hierarchy"
+   - Why: Follows ADR template structure, documents context/rationale/alternatives
+
+3. **Says "add Javadoc to" + class name**
+   - Examples: "add Javadoc to ReviewService", "document this controller"
+   - Why: Comprehensive docs with @author, @date, business rules, examples, cross-references
+
+4. **Says "update LEARNINGS.md" or "update ROADMAP.md"**
+   - Examples: "update LEARNINGS with today's session", "mark review feature complete in ROADMAP"
+   - Why: Maintains living documentation, tracks progress and decisions
+
+5. **Says "document this endpoint/class/method"**
+   - Examples: "document this service method", "add docs to getReviewsByWine"
+   - Why: Ensures consistency with project documentation standards
+
+6. **After creating/modifying any REST endpoint (AUTOMATIC - NO USER REQUEST NEEDED)**
+   - Trigger: backend-code-reviewer finds new/modified @PostMapping, @GetMapping, etc.
+   - Why: OpenAPI documentation is MANDATORY per project conventions, not optional
+
+### Why This Agent vs Manual Documentation
+
+**Agent Advantages (Comprehensive Standards Enforcement):**
+
+1. **External Documentation:**
+   - Maintains 4-part structure (GENERAL/BACKEND/FRONTEND/INFRASTRUCTURE)
+   - Updates split CODING_STYLE files appropriately
+   - Ensures ROADMAP.md reflects current state
+   - Adds sessions to LEARNINGS.md with proper formatting
+
+2. **In-Code Documentation (Java/Spring Boot):**
+   - Javadoc: @author lucas, @date DD/MM/YYYY, business rules, examples, exceptions, cross-references
+   - **OpenAPI/Swagger:** ALL required annotations (@Tag, @Operation, @ApiResponses with complete status codes, @Parameter)
+   - Verifies completeness at /swagger-ui.html
+
+3. **In-Code Documentation (Flutter/Dart):**
+   - Dartdoc: Follows Effective Dart style
+   - Documents widget parameters, state management patterns
+   - Includes usage examples for complex widgets
+
+4. **Architecture Decision Records:**
+   - Follows ADR template (Context, Decision, Rationale, Consequences, Alternatives)
+   - Proper status tracking (Proposed/Accepted/Deprecated/Superseded)
+
+**Manual Documentation Weaknesses:**
+- Inconsistent formatting across files
+- Missing critical elements (HTTP error codes, business rules, edge cases)
+- No verification step (Swagger UI check)
+- Stale documentation (ROADMAP.md not updated)
+
+### Exceptions (When to Skip This Agent)
+
+**NONE for OpenAPI documentation** - ALWAYS required for REST endpoints per project conventions.
+
+**Skip for:**
+- Trivial documentation updates (fixing typo) → Direct edit acceptable
+- Internal code comments (not Javadoc) → Developer discretion
+
+### Cross-Agent Collaboration
+
+**This agent is INVOKED BY:**
+
+1. **backend-code-reviewer** when:
+   - OpenAPI/Swagger annotations missing or incomplete
+   - Javadoc missing on public classes/methods
+   - Documentation gaps identified in review
+
+2. **/finish-session** command when:
+   - Updating ROADMAP.md with session progress
+   - Adding session entry to LEARNINGS.md
+
+3. **automation-sentinel** when:
+   - Documentation debt detected
+   - New patterns need documentation in CODING_STYLE files
+
+**This agent MAY invoke:**
+- **automation-sentinel** - If automation documentation needs updating
+
+### Expected Output
+
+Every invocation produces:
+
+**For OpenAPI Annotations:**
+- ✅ @Tag at class level (group endpoints)
+- ✅ @Operation on every method (summary + description)
+- ✅ @ApiResponses documenting ALL HTTP status codes
+- ✅ @Parameter for path variables and query params
+- ✅ Verification step: "Check http://localhost:8080/swagger-ui.html"
+
+**For Javadoc:**
+- ✅ Class-level: Purpose, business rules, @author, @date, @see
+- ✅ Method-level: Description, @param, @return, @throws
+- ✅ Examples and edge cases documented
+
+**For External Docs:**
+- ✅ Maintains 4-part structure or split files (CODING_STYLE)
+- ✅ Includes update date
+- ✅ Follows existing tone and formatting
+- ✅ Cross-references related sections
+
+**For ADRs:**
+- ✅ Follows ADR template structure
+- ✅ Documents all alternatives considered
+- ✅ Clear rationale and consequences
+
+### Documentation Update Triggers (What Constitutes "Significant Changes")
+
+**ALWAYS update docs for:**
+- ✅ New features implemented (services, controllers, domain logic)
+- ✅ New REST endpoints created or existing ones modified
+- ✅ Architectural changes (exception hierarchy, security patterns)
+- ✅ New coding conventions identified
+- ✅ Important dependency updates
+
+**Skip docs update for:**
+- ❌ Minor bug fixes or refactorings (unless they establish new patterns)
+- ❌ Typo fixes
+- ❌ Internal code comments
 
 ---
 
